@@ -90,7 +90,7 @@
         
         .storage-item { display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:12px; margin-bottom:8px; flex-wrap: wrap; gap: 10px; }
         
-        /* 🚀 WRAP GRIDS - NO SCROLLBARS */
+        /* WRAP GRIDS - NO SCROLLBARS */
         .gl-grid { display:flex; flex-wrap: wrap; gap:15px; margin-top:20px; }
         .gl-card { border:1px solid #e2e8f0; padding:20px; border-radius:16px; background:#f8fafc; text-align:center; flex: 1 1 250px; display: flex; flex-direction: column; justify-content: space-between; }
 
@@ -177,7 +177,7 @@
             <span class="modal-close" onclick="document.getElementById('genericModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
             <h2 id="genTitle" style="margin-top:0; font-weight:800;">ACTION</h2>
             <label style="font-size:12px; font-weight:700;">Select Target PC</label>
-            <select id="genPcSelector" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1;"></select>
+            <select id="genPcSelector" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1widget;"></select>
             <div id="renameBox" style="display:none; margin-bottom:15px;">
                 <label style="font-size:12px; font-weight:700;">New Computer Name</label>
                 <input type="text" id="genNewName" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1;" placeholder="e.g. MGH-PC01">
@@ -299,7 +299,10 @@
         function setPcFilter(pcName) { currentFilter = pcName; renderUI(); }
 
         window.sendFirebaseCommand = function(branch, pc, appTarget, commandStr) {
-            db.ref(`Branches/${branch}/${pc}/Inbox/${appTarget}`).set({
+            // 🚀 SECURITY UPDATE: Linisin ang key para iwas crash dahil bawal ang tuldok (.) sa Firebase key paths
+            const safeTarget = appTarget.replace(/[\.\#\$\[\]\/]/g, '_');
+            
+            db.ref(`Branches/${branch}/${pc}/Inbox/${safeTarget}`).set({
                 command: commandStr,
                 timestamp: new Date().toISOString(),
                 status: "Pending"
@@ -314,7 +317,6 @@
             });
         }
 
-        // 🚀 SMART DROPDOWN DISABLER FOR MAIN BRANCH SELECTOR
         function updateBranchDropdown() {
             if (!globalSnapshot) return;
             const branches = Object.keys(globalSnapshot);
@@ -334,7 +336,6 @@
 
                 sel.innerHTML += `<option value="${b}" ${disabledAttr}>${b}${lockText}</option>`;
                 
-                // Suggetion blocker sa datalist para sa account creation
                 if (!isDisabled) {
                     accDatalist.innerHTML += `<option value="${b}">`;
                 }
@@ -348,7 +349,6 @@
             }
         }
 
-        // 🚀 AUTOMATIC DISABLER PARA SA LAHAT NG UTILITY SELECT DROPDOWNS (FREE STORAGE, RENAME, ETC.)
         function populateDropdown(id) {
             let sel = document.getElementById(id);
             let currentVal = sel.value;
@@ -371,7 +371,6 @@
                 idx++;
             });
 
-            // Kung disabled o walang naka-select, piliting tumalon sa unang pwede nilang i-select
             if (currentVal && sel.querySelector(`option[value="${currentVal}"]:not([disabled])`)) {
                 sel.value = currentVal;
             } else if (firstEnabledIdx !== -1) {
@@ -451,7 +450,6 @@
 
                         let actionBtn = `<button class='btn-update btn-updated' disabled>✓ Updated</button>`;
                         if (isUpdateReq) {
-                            // 🚀 BACKUP SECURITY: Pag sa main branch at hindi owner, naka-lock ang hilera
                             let isCoreShop = (branch.toUpperCase() === "MGH-CONCEPCION" || branch.toUpperCase() === "MGH-PARANG");
                             if (isCoreShop && !isOwner) {
                                 actionBtn = `<button class='btn-update btn-busy' disabled style='cursor:not-allowed; background:#94a3b8; color:white;'>🔒 Locked</button>`;
@@ -714,7 +712,6 @@
             
             if(!b || !inv || !name || !role) return alert("Paki-fill up lahat!");
 
-            // 🚀 PROTECTION BLOCK: Kapag pinilit i-type ang main branch ng manager/tech, haharangin sila
             if (currentUserRole !== "OWNER" && (b.toUpperCase() === "MGH-CONCEPCION" || b.toUpperCase() === "MGH-PARANG")) {
                 return alert("🔒 Restricted: Hindi pwedeng gumawa ng access role para sa MGH-Concepcion o MGH-Parang!");
             }
