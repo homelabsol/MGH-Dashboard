@@ -386,17 +386,18 @@ async function sendToAI() {
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Pinagsama na ang rules at tanong para hindi ma-reject ng Google
+                // Pinagsama at nilinis ang format para iwas-reject
                 const systemPrompt = "Ikaw ay si MGH Support Bot, ang official A.I. tech support assistant ng MGH-Parang at MGH-Concepcion. Ang trabaho mo lamang ay sumagot sa mga tanong na may kinalaman sa computer troubleshooting, network issues, diskless setup, server maintenance, pag-update ng games (tulad ng Valorant, Roblox, Crossfire), rclone automation, at martec spoofing. Gumamit ng simpleng Tagalog para madaling maintindihan ng mga matatanda. Kapag nagtanong ang user ng tungkol sa math, history, assignment, coding, tsismis, o kahit anong labas sa negosyo ng computer shop, tanggihan mo nang magalang at sabihing ikaw ay isang Tech Support lamang.\n\nTanong ng User: ";
                 
                 const aiPrompt = {
                     "contents": [{
+                        "role": "user",
                         "parts": [{ "text": systemPrompt + userMsg }]
                     }]
                 };
 
-                // Pinalitan ng "gemini-1.5-flash-latest" para iwas 404 Error
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
+                // Binalik natin sa pinaka-stable na Gemini 1.5 Flash API link
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(aiPrompt)
@@ -409,23 +410,21 @@ async function sendToAI() {
                     const aiReply = data.candidates[0].content.parts[0].text;
                     chatBox.innerHTML += `<div class="msg-bubble msg-bot">${aiReply.replace(/\n/g, '<br>')}</div>`;
                     
-                    // Tatawagin ang boses
-                    speakMessage(aiReply);
+                    speakMessage(aiReply); // 🗣️ Aandar ang boses kapag successful
 
+                } else if (data.error) {
+                    // 🚨 DITO NATIN MAKIKITA KUNG ANONG EXACT REKLAMO NI GOOGLE!
+                    let exactError = data.error.message;
+                    chatBox.innerHTML += `<div class="msg-bubble msg-bot" style="background:#fef2f2; color:#ef4444; font-size:12px; border: 1px solid #fecaca;">⚠️ <b>SABI NI GOOGLE:</b><br>${exactError}</div>`;
                 } else {
-                    console.error("Gemini API Data Error:", data); 
-                    let errorMsg = "Pasensya na, nagka-error sa Google Server. Subukan muli.";
-                    chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ ${errorMsg}</div>`;
-                    speakMessage(errorMsg);
+                    chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ Pasensya na, Unknown Error. Walang data na bumalik.</div>`;
                 }
                 chatBox.scrollTop = chatBox.scrollHeight;
 
             } catch (error) {
-                console.error("Fetch API Error:", error);
+                console.error("Network Error:", error);
                 if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-                let dropMsg = "Nawalan ng koneksyon. Siguraduhing ikaw ay nasa live website (GitHub Pages) at hindi sa local file.";
-                chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ ${dropMsg}</div>`;
-                speakMessage(dropMsg);
+                chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ Nawalan ng koneksyon sa API server.</div>`;
             }
         }
 
