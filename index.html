@@ -396,8 +396,8 @@ async function sendToAI() {
                     }]
                 };
 
-                // Binalik natin sa pinaka-stable na Gemini 1.5 Flash API link
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                // 🚀 DITO YUNG NA-FIX: Ginawa nating "gemini-1.5-flash-latest" ang link!
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(aiPrompt)
@@ -413,7 +413,6 @@ async function sendToAI() {
                     speakMessage(aiReply); // 🗣️ Aandar ang boses kapag successful
 
                 } else if (data.error) {
-                    // 🚨 DITO NATIN MAKIKITA KUNG ANONG EXACT REKLAMO NI GOOGLE!
                     let exactError = data.error.message;
                     chatBox.innerHTML += `<div class="msg-bubble msg-bot" style="background:#fef2f2; color:#ef4444; font-size:12px; border: 1px solid #fecaca;">⚠️ <b>SABI NI GOOGLE:</b><br>${exactError}</div>`;
                 } else {
