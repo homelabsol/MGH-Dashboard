@@ -97,6 +97,27 @@
         .progress-wrapper { width: 100%; background-color: #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 15px; position: relative; height: 10px; }
         .progress-bar { position: absolute; height: 100%; background-color: #f59e0b; width: 30%; border-radius: 8px; animation: loadingSlide 1.2s infinite ease-in-out alternate; }
         @keyframes loadingSlide { 0% { left: -30%; } 100% { left: 100%; } }
+
+        /* 🤖 A.I. CHAT WIDGET STYLES */
+        #ai-btn { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; border: none; border-radius: 50%; width: 65px; height: 65px; font-size: 30px; cursor: pointer; box-shadow: 0 10px 25px rgba(37,99,235,0.4); z-index: 10001; transition: 0.3s; display: none; align-items: center; justify-content: center; }
+        #ai-btn:hover { transform: scale(1.1); background: #1d4ed8; }
+        
+        #ai-chat-window { position: fixed; bottom: 110px; right: 30px; width: 350px; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 10002; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; }
+        #ai-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 15px 20px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        #ai-close { cursor: pointer; font-size: 20px; color: #94a3b8; transition: 0.2s; }
+        #ai-close:hover { color: white; }
+        #ai-messages { height: 300px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; font-size: 14px; }
+        
+        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; line-height: 1.4; word-wrap: break-word; }
+        .msg-user { background: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg-bot { background: #e2e8f0; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-loading { color: #94a3b8; font-style: italic; align-self: flex-start; font-size: 12px; }
+        
+        #ai-input-area { display: flex; border-top: 1px solid #e2e8f0; padding: 10px; background: white; }
+        #ai-input { flex-grow: 1; border: 1px solid #cbd5e1; border-radius: 20px; padding: 10px 15px; outline: none; font-family: 'Inter', sans-serif; font-size: 14px; }
+        #ai-input:focus { border-color: #2563eb; }
+        #ai-send { background: #2563eb; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        #ai-send:hover { background: #1d4ed8; }
     </style>
 </head>
 <body>
@@ -147,6 +168,21 @@
                     <tbody id="tableBody"><tr><td colspan="7" style="text-align:center;">Waiting for Firebase connection...</td></tr></tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <button id="ai-btn" onclick="toggleAIChat()">🤖</button>
+    <div id="ai-chat-window">
+        <div id="ai-header">
+            <div>⚡ MGH Support Bot</div>
+            <div id="ai-close" onclick="toggleAIChat()">✖</div>
+        </div>
+        <div id="ai-messages">
+            <div class="msg-bubble msg-bot">Hello! Ako ang MGH Support A.I. Ano ang maitutulong ko sa mga PC, games, o server mo ngayon?</div>
+        </div>
+        <div id="ai-input-area">
+            <input type="text" id="ai-input" placeholder="Magtanong dito..." onkeypress="handleAIEnter(event)">
+            <button id="ai-send" onclick="sendToAI()">➤</button>
         </div>
     </div>
 
@@ -246,7 +282,9 @@
         </div>
     </div>
 
-    <script>
+<script>
+        const GEMINI_API_KEY = "AIzaSyDOvywwbsvzKm7FacwAhjOWSzZiMY7reMg";
+
         const firebaseConfig = {
             apiKey: "AIzaSyAT9do8IPqxCIl83B3dpR0d8Rq9sP7XpaY",
             authDomain: "mgh-network.firebaseapp.com",
@@ -284,6 +322,9 @@
                     document.getElementById('loginPage').style.display = "none";
                     document.getElementById('dashboardContent').style.display = "block"; 
                     document.getElementById('userRoleDisplay').innerText = `👤 ${data.client.toUpperCase()} | ROLE: ${currentUserRole}`;
+                    
+                    document.getElementById('ai-btn').style.display = "flex";
+                    
                     startFirebaseListener();
                 } else {
                     alert("ACCESS DENIED: " + data.message);
@@ -295,13 +336,108 @@
             }
         }
 
+        // =====================================
+        // 🗣️ TEXT-TO-SPEECH FUNCTION
+        // =====================================
+        function speakMessage(text) {
+            if ('speechSynthesis' in window) {
+                // Tanggalin ang mga HTML tags at emojis para malinis ang pagbasa
+                let cleanText = text.replace(/<[^>]*>?/gm, '');
+                cleanText = cleanText.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+                
+                // I-stop ang kasalukuyang nagsasalita para hindi mag-patong-patong
+                window.speechSynthesis.cancel();
+                
+                let utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'tl-PH'; // Philippine accent / Tagalog
+                utterance.rate = 1.0;     // Normal na bilis
+                utterance.pitch = 1.0;    // Normal na boses
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // =====================================
+        // 🤖 GOOGLE GEMINI A.I. SUPPORT LOGIC
+        // =====================================
+        function toggleAIChat() {
+            const chatWindow = document.getElementById('ai-chat-window');
+            chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function handleAIEnter(e) {
+            if (e.key === 'Enter') sendToAI();
+        }
+
+
+
+async function sendToAI() {
+            const inputField = document.getElementById('ai-input');
+            const userMsg = inputField.value.trim();
+            if (!userMsg) return;
+
+            const chatBox = document.getElementById('ai-messages');
+            chatBox.innerHTML += `<div class="msg-bubble msg-user">${userMsg}</div>`;
+            inputField.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const loadingId = "load-" + Date.now();
+            chatBox.innerHTML += `<div id="${loadingId}" class="msg-loading">Nagta-type ang A.I...</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // Pinagsama na ang rules at tanong para hindi ma-reject ng Google
+                const systemPrompt = "Ikaw ay si MGH Support Bot, ang official A.I. tech support assistant ng MGH-Parang at MGH-Concepcion. Ang trabaho mo lamang ay sumagot sa mga tanong na may kinalaman sa computer troubleshooting, network issues, diskless setup, server maintenance, pag-update ng games (tulad ng Valorant, Roblox, Crossfire), rclone automation, at martec spoofing. Gumamit ng simpleng Tagalog para madaling maintindihan ng mga matatanda. Kapag nagtanong ang user ng tungkol sa math, history, assignment, coding, tsismis, o kahit anong labas sa negosyo ng computer shop, tanggihan mo nang magalang at sabihing ikaw ay isang Tech Support lamang.\n\nTanong ng User: ";
+                
+                const aiPrompt = {
+                    "contents": [{
+                        "parts": [{ "text": systemPrompt + userMsg }]
+                    }]
+                };
+
+                // Pinalitan ng "gemini-1.5-flash-latest" para iwas 404 Error
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(aiPrompt)
+                });
+
+                const data = await res.json();
+                if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+
+                if (data.candidates && data.candidates.length > 0) {
+                    const aiReply = data.candidates[0].content.parts[0].text;
+                    chatBox.innerHTML += `<div class="msg-bubble msg-bot">${aiReply.replace(/\n/g, '<br>')}</div>`;
+                    
+                    // Tatawagin ang boses
+                    speakMessage(aiReply);
+
+                } else {
+                    console.error("Gemini API Data Error:", data); 
+                    let errorMsg = "Pasensya na, nagka-error sa Google Server. Subukan muli.";
+                    chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ ${errorMsg}</div>`;
+                    speakMessage(errorMsg);
+                }
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (error) {
+                console.error("Fetch API Error:", error);
+                if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+                let dropMsg = "Nawalan ng koneksyon. Siguraduhing ikaw ay nasa live website (GitHub Pages) at hindi sa local file.";
+                chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ ${dropMsg}</div>`;
+                speakMessage(dropMsg);
+            }
+        }
+
+
+
+
+
         function changeGlobalBranch(val) { activeBranch = val; currentFilter = "ALL"; renderUI(); }
         function setPcFilter(pcName) { currentFilter = pcName; renderUI(); }
 
         window.sendFirebaseCommand = function(branch, pc, appTarget, commandStr) {
-            // 🚀 SECURITY UPDATE: Linisin ang key para iwas crash dahil bawal ang tuldok (.) sa Firebase key paths
             const safeTarget = appTarget.replace(/[\.\#\$\[\]\/]/g, '_');
-            
             db.ref(`Branches/${branch}/${pc}/Inbox/${safeTarget}`).set({
                 command: commandStr,
                 timestamp: new Date().toISOString(),
@@ -728,6 +864,8 @@
                 alert("Failed to send request.");
             }
         }
-    </script>
+    </script>    
+
+
 </body>
 </html>
