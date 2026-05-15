@@ -391,13 +391,12 @@ async function sendToAI() {
                 
                 const aiPrompt = {
                     "contents": [{
-                        "role": "user",
                         "parts": [{ "text": systemPrompt + userMsg }]
                     }]
                 };
 
-                // 🚀 DITO YUNG NA-FIX: Ginamit natin ang universal na "gemini-pro"
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+                // 🚀 BINALIK NATIN SA PINAKATAMANG MODEL: gemini-1.5-flash
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(aiPrompt)
@@ -426,6 +425,7 @@ async function sendToAI() {
                 chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ Nawalan ng koneksyon sa API server.</div>`;
             }
         }
+
 
 
 
