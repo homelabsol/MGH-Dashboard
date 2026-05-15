@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Master | MGH Ultimate Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f1f5f9;
+            --card-bg: #ffffff; --text-main: #1e293b; --text-muted: #64748b;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --border: #e2e8f0; --purple: #8b5cf6;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: var(--text-main); margin: 0; padding: 0; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; overflow-y: auto; }
+        .container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 20px; }
+
+        #loginPage { background: #1e293b; padding: 50px 40px; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; color: white; position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; }
+        .logo-sub-login { font-size: 11px; font-weight: 800; letter-spacing: 4px; color: #fbbf24; text-transform: uppercase; margin-bottom: 15px; }
+        .login-input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 2px solid #334155; background: #0f172a; color: white; font-size: 16px; font-weight: 600; text-align: center; box-sizing: border-box; outline: none; }
+        .btn-authenticate { width: 100%; padding: 16px; border-radius: 12px; border: none; background: #2563eb; color: white; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-authenticate:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37,99,235,0.3); }
+
+        #dashboardContent { display: none; background-color: var(--bg-color); min-height: 100vh; width: 100%; padding: 30px 20px; box-sizing: border-box; color: var(--text-main); align-items: flex-start; }
+        
+        .header-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 30px 40px; border-radius: 16px; display: flex; justify-content: space-between; align-items: stretch; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 25px; gap: 20px; flex-wrap: wrap; }
+        .brand-subtitle { font-size: 12px; font-weight: 800; letter-spacing: 3px; color: #fbbf24; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;}
+        .app-title { font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+        
+        select.branch-selector { margin-top:8px; padding:8px 12px; border-radius:8px; border:2px solid #2563eb; background:#eff6ff; color:#1d4ed8; font-weight:800; outline:none; font-size:14px; cursor:pointer; box-shadow:0 4px 10px rgba(37,99,235,0.2); }
+        
+        .pc-filters-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+        .pc-filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .pc-filter-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+        .pc-filter-btn.active { background: var(--primary); color: white; border-color: var(--primary-hover); box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
+
+        .admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
+        .grid-btn { background: #f8fafc; color: #1e293b; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 5px; text-align: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); height: 95px; }
+        .grid-btn span { font-size: 26px !important; line-height: 1; margin-bottom: 2px; }
+        .grid-btn:hover { background: #f1f5f9; transform: translateY(-2px); border-color: #cbd5e1; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .grid-btn.warning-btn { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+        .grid-btn.action-btn { color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff; }
+        .grid-btn.driver-btn { color: #047857; border-color: #a7f3d0; background: #ecfdf5; }
+
+        .stats-container { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+        .stat-box { background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center; backdrop-filter: blur(10px); min-width: 100px; }
+        .stat-box.success { border-bottom: 3px solid var(--success); }
+        .stat-box.danger { border-bottom: 3px solid var(--danger); }
+        .stat-value { font-size: 24px; font-weight: 800; margin-bottom: 2px;}
+        .stat-label { font-size: 11px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;}
+
+        .table-container { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow-x: auto; }
+        .sync-status { text-align: right; font-size: 12px; color: var(--text-muted); margin-bottom: 20px; font-weight: 600; display: flex; justify-content: flex-end; align-items: center; gap: 6px;}
+        .sync-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { padding: 16px 20px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border); letter-spacing: 0.5px; }
+        td { padding: 18px 20px; font-size: 14px; font-weight: 500; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background 0.2s; }
+        tr:hover td { background-color: #f8fafc; }
+        
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+        .badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
+        .needs-update { background-color: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+        .needs-update::before { background-color: var(--danger); }
+        .is-updated { background-color: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
+        .is-updated::before { background-color: var(--success); }
+        .is-busy { background-color: #fffbeb; color: var(--warning); border: 1px solid #fde68a; }
+
+        .branch-tag { background-color: #f8fafc; color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); white-space: nowrap; display: inline-block; }
+        .pc-name { font-weight: 700; color: var(--text-main); }
+        .game-name { font-weight: 600; color: var(--text-main); }
+        .last-sync { color: var(--text-muted); font-size: 12px; }
+
+        .btn-update { border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); width: 140px; text-align: center; cursor: pointer; }
+        .btn-active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-active:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-busy { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+        .btn-updated { background: transparent; color: var(--success); border: 1px solid var(--success); cursor: default; }
+
+        /* Modals */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.95); z-index:9990; overflow-y:auto; padding: 40px 20px; align-items: flex-start; justify-content: center; }
+        .modal-card { background:white; padding:35px; border-radius:24px; width:100%; max-width:480px; position:relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5); color: #1e293b; box-sizing: border-box; margin: auto; }
+        .modal-card.large { max-width: 900px; }
+        .modal-close { position:absolute; right:25px; top:20px; font-size:32px; cursor:pointer; color:#64748b; line-height: 1; }
+        
+        .storage-item { display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:12px; margin-bottom:8px; flex-wrap: wrap; gap: 10px; }
+        
+        /* 🚀 WRAP GRIDS - NO SCROLLBARS */
+        .gl-grid { display:flex; flex-wrap: wrap; gap:15px; margin-top:20px; }
+        .gl-card { border:1px solid #e2e8f0; padding:20px; border-radius:16px; background:#f8fafc; text-align:center; flex: 1 1 250px; display: flex; flex-direction: column; justify-content: space-between; }
+
+        .progress-wrapper { width: 100%; background-color: #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 15px; position: relative; height: 10px; }
+        .progress-bar { position: absolute; height: 100%; background-color: #f59e0b; width: 30%; border-radius: 8px; animation: loadingSlide 1.2s infinite ease-in-out alternate; }
+        @keyframes loadingSlide { 0% { left: -30%; } 100% { left: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div id="loginPage">
+        <div style="width: 100%; max-width: 450px; text-align: center;">
+            <div class="logo-sub-login">⚡ MGH SECURE CONSOLE</div>
+            <h1 style="margin: 0; letter-spacing: -1px;">SHOP MASTER</h1>
+            <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">Firebase Live Access</p>
+            <input type="text" id="loginUser" class="login-input" placeholder="Invoice Number" style="margin-bottom: 10px;">
+            <input type="password" id="loginPass" class="login-input" placeholder="Client Name" style="margin-top: 0;">
+            <button class="btn-authenticate" id="btnLogin" onclick="verifyAccess()">AUTHENTICATE ACCESS</button>
+        </div>
+    </div>
+
+    <div id="dashboardContent">
+        <div class="container">
+            <div class="header-card">
+                <div style="flex: 1 1 300px;">
+                    <div class="brand-subtitle">⚡ POWERED BY MARVS (FIREBASE)</div>
+                    <h1 class="app-title">SHOP MASTER CONSOLE</h1>
+                    <select id="globalBranchSelect" class="branch-selector" onchange="changeGlobalBranch(this.value)"></select>
+                    <div id="userRoleDisplay" style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 5px;"></div>
+                    <div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
+                        <button onclick="document.getElementById('adminModal').style.display='flex'" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">⚙️ Admin Tools</button>
+                        <button onclick="location.reload()" style="background:#ef4444; border:none; color:white; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:700;">LOGOUT</button>
+                    </div>
+                    <div id="pcFilterContainer" class="pc-filters-container"></div>
+                </div>
+
+                <div style="flex: 2 1 400px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="font-size: 10px; color: #64748b; font-weight: 800; margin-bottom: 12px; letter-spacing: 1.5px;">💾 SERVER STORAGE CLUSTER</div>
+                    <div id="serverHealth" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+
+                <div class="stats-container" style="flex: 0 1 150px;">
+                    <div class="stat-box success"><div class="stat-value" id="countUp">0</div><div class="stat-label">Updated</div></div>
+                    <div class="stat-box danger"><div class="stat-value" id="countDown">0</div><div class="stat-label">Pending</div></div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="sync-status">
+                    <div class="sync-dot"></div><span id="status">LIVE FIREBASE SYNC ACTIVE</span>
+                </div>
+                <table>
+                    <thead><tr><th>Branch</th><th>Workstation</th><th>Game Title</th><th>App Status</th><th>Update Status</th><th>Last Sync</th><th>Action</th></tr></thead>
+                    <tbody id="tableBody"><tr><td colspan="7" style="text-align:center;">Waiting for Firebase connection...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal-overlay">
+        <div class="modal-card">
+            <span class="modal-close" onclick="document.getElementById('adminModal').style.display='none'">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="margin:0; font-weight:800; color:#1e293b; font-size: 24px;">⚙️ ADMIN TOOLS</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #64748b; font-weight: 500;">Select an action to perform.</p>
+            </div>
+            <div class="admin-grid">
+                <button class="grid-btn action-btn" onclick="openCreateAccModal()"><span>👥</span> Create Account</button>
+                <button class="grid-btn action-btn" onclick="openMartecModal()"><span>🔑</span> Martec License</button>
+                <button class="grid-btn" onclick="openGameLib('OFFLINE')"><span>🕹️</span> Offline Games</button>
+                <button class="grid-btn" onclick="openGameLib('ONLINE')"><span>🌐</span> Online Games</button>
+                <button class="grid-btn warning-btn" onclick="openStorageModal()"><span>🧹</span> Free Storage</button>
+                <button class="grid-btn driver-btn" onclick="openGenericModal('SYSTEM_UPDATE', 'AUTO_UPDATE_DRIVERS', '🛠️ AUTO DRIVERS')"><span>🛠️</span> Auto Drivers</button>
+                <button class="grid-btn action-btn" onclick="openGenericModal('SYSTEM_RENAME', 'RENAME_PC|NEW_NAME', '🏷️ RENAME PC')"><span>🏷️</span> Rename PC</button>
+                <button class="grid-btn action-btn" onclick="openGenericModal('SYSTEM_BACKUP', 'BACKUP_ICAFE', '💾 ICAFE BACKUP')"><span>💾</span> ICafe Backup</button>
+                <button class="grid-btn driver-btn" onclick="openGenericModal('SYSTEM_UPDATE', 'ACTIVATE_OS', '🪟 OS/OFFICE ACT.')"><span>🪟</span> OS/Office Act.</button>
+                <button class="grid-btn" onclick="alert('In development...')"><span>🔄</span> ICafe Restore</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="genericModal" class="modal-overlay">
+        <div class="modal-card">
+            <span class="modal-close" onclick="document.getElementById('genericModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <h2 id="genTitle" style="margin-top:0; font-weight:800;">ACTION</h2>
+            <label style="font-size:12px; font-weight:700;">Select Target PC</label>
+            <select id="genPcSelector" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1;"></select>
+            <div id="renameBox" style="display:none; margin-bottom:15px;">
+                <label style="font-size:12px; font-weight:700;">New Computer Name</label>
+                <input type="text" id="genNewName" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1;" placeholder="e.g. MGH-PC01">
+            </div>
+            <button id="btnGenExec" class="btn-authenticate" onclick="executeGenericAction()">SEND COMMAND</button>
+        </div>
+    </div>
+
+    <div id="storageModal" class="modal-overlay">
+        <div class="modal-card large">
+            <span class="modal-close" onclick="document.getElementById('storageModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <h2 style="margin-top:0; font-weight:800;">🧹 SMART STORAGE CLEANER</h2>
+            <div style="background:#fffbeb; border: 1px solid #fde68a; padding:15px; border-radius:12px; margin-bottom:20px; display:flex; align-items:center; gap:15px; flex-wrap: wrap;">
+                <span style="font-size:14px; font-weight:700; color:#b45309;">Select PC to Scan:</span>
+                <select id="storagePcSelector" class="branch-selector" style="flex-grow:1; background:white; min-width: 200px;"></select>
+                <button onclick="triggerStorageScan()" class="btn-authenticate" style="width:auto; padding:10px 20px; background:#f59e0b;">🔍 SCAN PC</button>
+            </div>
+            <div id="storageStatus" style="font-size:13px; font-weight:bold; color:#1d4ed8; margin-bottom:15px; padding: 10px; background: #eff6ff; border-radius: 8px;">Ready. Select a PC and click Scan.</div>
+            <div id="storageFlexGrid" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+    </div>
+
+    <div id="gameLibModal" class="modal-overlay">
+        <div class="modal-card large">
+            <span class="modal-close" onclick="document.getElementById('gameLibModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <h2 id="glTitle" style="margin-top:0; font-weight:800;">GAMES</h2>
+            <select id="glPcSelector" class="branch-selector" style="width:100%; margin-bottom:20px;"></select>
+            <div id="glGrid" class="gl-grid"></div>
+        </div>
+    </div>
+
+    <div id="martecModal" class="modal-overlay">
+        <div class="modal-card">
+            <span class="modal-close" onclick="document.getElementById('martecModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <h2 id="martecTitle" style="margin-top:0; font-weight:800;">🔑 MARTEC REACTIVATION</h2>
+            <div id="martecInputs">
+                <select id="martecPcSelector" class="branch-selector" style="width:100%; margin-bottom:15px;"></select>
+                <button class="btn-authenticate" style="margin-bottom:10px; background:#2563eb;" onclick="triggerMartec(1)">TYPE 1 (Timer)</button>
+                <button class="btn-authenticate" style="margin-bottom:10px; background:#f59e0b;" onclick="triggerMartec(2)">TYPE 2 (No Timer)</button>
+                <button class="btn-authenticate" style="background:#8b5cf6;" onclick="triggerMartec(3)">TYPE 3 (Centralized)</button>
+            </div>
+            <div id="martecResult" style="display:none; text-align:center;">
+                <p style="font-weight:bold;">License Key:</p>
+                <input type="text" id="martecKey" class="login-input" readonly onclick="this.select()" style="background:#eff6ff; color:#1d4ed8; font-size:20px; font-weight:bold;">
+                <button onclick="document.getElementById('martecModal').style.display='none'; document.getElementById('adminModal').style.display='flex';" class="btn-authenticate" style="background:#64748b; margin-top:15px;">DONE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="createAccModal" class="modal-overlay">
+        <div class="modal-card">
+            <span class="modal-close" onclick="document.getElementById('createAccModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <h2 style="margin-top:0; font-weight:800;">👥 CREATE ACCOUNT</h2>
+            
+            <label style="font-size:12px; font-weight:700;">Branch / Shop Name</label>
+            <input type="text" id="newAccBranch" list="newAccBranchList" class="login-input" placeholder="Type or Select Branch..." style="background:white; color:#1e293b; border-color:#cbd5e1;">
+            <datalist id="newAccBranchList"></datalist>
+            
+            <input type="text" id="newAccInv" class="login-input" placeholder="Invoice Number" style="background:white; color:#1e293b; border-color:#cbd5e1; margin-top:0;">
+            <input type="text" id="newAccName" class="login-input" placeholder="Client Name" style="background:white; color:#1e293b; border-color:#cbd5e1; margin-top:0;">
+            <select id="newAccRole" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1; margin-top:0;">
+                <option value="Shop Owner">Shop Owner</option>
+                <option value="Technician">Technician</option>
+            </select>
+            <button class="btn-authenticate" onclick="submitNewAccount()" style="margin-top:10px;">REGISTER ACCOUNT</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAT9do8IPqxCIl83B3dpR0d8Rq9sP7XpaY",
+            authDomain: "mgh-network.firebaseapp.com",
+            databaseURL: "https://mgh-network-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mgh-network",
+            storageBucket: "mgh-network.firebasestorage.app",
+            messagingSenderId: "661605116283",
+            appId: "1:661605116283:web:69ec0e8cbf974f969335de"
+        };
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxaE5fmMUD8YpCVbLgqwNwAmImxJZDWtyjY-JaqhoGf5ZkP5_A8px3e7WHNaAmG2TOUfw/exec";
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let activeBranch = "ALL";
+        let currentFilter = "ALL";
+        let globalSnapshot = null;
+        let pcListCache = []; 
+        let currentUserRole = "OWNER"; 
+
+        async function verifyAccess() {
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            if(!u || !p) return alert("Paki-fill up lahat ng login details!");
+
+            const btn = document.getElementById('btnLogin');
+            btn.innerText = "VERIFYING DATABASE...";
+            
+            try {
+                const res = await fetch(`${GAS_URL}?action=LOGIN&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUserRole = data.role.toUpperCase(); 
+                    document.getElementById('loginPage').style.display = "none";
+                    document.getElementById('dashboardContent').style.display = "block"; 
+                    document.getElementById('userRoleDisplay').innerText = `👤 ${data.client.toUpperCase()} | ROLE: ${currentUserRole}`;
+                    startFirebaseListener();
+                } else {
+                    alert("ACCESS DENIED: " + data.message);
+                    btn.innerText = "AUTHENTICATE ACCESS";
+                }
+            } catch (e) {
+                alert("Hindi maka-konekta sa Database. I-check ang GAS_URL mo kung updated ba ang deployment.");
+                btn.innerText = "AUTHENTICATE ACCESS";
+            }
+        }
+
+        function changeGlobalBranch(val) { activeBranch = val; currentFilter = "ALL"; renderUI(); }
+        function setPcFilter(pcName) { currentFilter = pcName; renderUI(); }
+
+        window.sendFirebaseCommand = function(branch, pc, appTarget, commandStr) {
+            db.ref(`Branches/${branch}/${pc}/Inbox/${appTarget}`).set({
+                command: commandStr,
+                timestamp: new Date().toISOString(),
+                status: "Pending"
+            }).catch(e => alert("Firebase Error: " + e.message));
+        }
+
+        function startFirebaseListener() {
+            db.ref('Branches').on('value', (snapshot) => {
+                globalSnapshot = snapshot.val();
+                updateBranchDropdown();
+                renderUI();
+            });
+        }
+
+        // 🚀 SMART DROPDOWN DISABLER FOR MAIN BRANCH SELECTOR
+        function updateBranchDropdown() {
+            if (!globalSnapshot) return;
+            const branches = Object.keys(globalSnapshot);
+            let sel = document.getElementById('globalBranchSelect');
+            let accDatalist = document.getElementById('newAccBranchList'); 
+            let currentVal = sel.value || "ALL";
+            let isOwner = (currentUserRole === "OWNER");
+            
+            sel.innerHTML = '<option value="ALL">🌐 VIEW ALL BRANCHES</option>';
+            accDatalist.innerHTML = "";
+
+            branches.forEach(b => {
+                let isCoreShop = (b.toUpperCase() === "MGH-CONCEPCION" || b.toUpperCase() === "MGH-PARANG");
+                let isDisabled = (isCoreShop && !isOwner);
+                let disabledAttr = isDisabled ? "disabled" : "";
+                let lockText = isDisabled ? " 🔒 (Owner Only)" : "";
+
+                sel.innerHTML += `<option value="${b}" ${disabledAttr}>${b}${lockText}</option>`;
+                
+                // Suggetion blocker sa datalist para sa account creation
+                if (!isDisabled) {
+                    accDatalist.innerHTML += `<option value="${b}">`;
+                }
+            });
+            
+            if (currentVal && sel.querySelector(`option[value="${currentVal}"]:not([disabled])`)) {
+                sel.value = currentVal;
+            } else {
+                sel.value = "ALL";
+                activeBranch = "ALL";
+            }
+        }
+
+        // 🚀 AUTOMATIC DISABLER PARA SA LAHAT NG UTILITY SELECT DROPDOWNS (FREE STORAGE, RENAME, ETC.)
+        function populateDropdown(id) {
+            let sel = document.getElementById(id);
+            let currentVal = sel.value;
+            sel.innerHTML = "";
+            let isOwner = (currentUserRole === "OWNER");
+            let firstEnabledIdx = -1;
+            let idx = 0;
+
+            pcListCache.forEach(item => {
+                let isCoreShop = (item.branch.toUpperCase() === "MGH-CONCEPCION" || item.branch.toUpperCase() === "MGH-PARANG");
+                let isDisabled = (isCoreShop && !isOwner);
+                let disabledAttr = isDisabled ? "disabled" : "";
+                let lockIcon = isDisabled ? " 🔒 (Owner Only)" : "";
+                
+                sel.innerHTML += `<option value="${item.branch}|||${item.pc}" ${disabledAttr}>${item.pc} (${item.branch})${lockIcon}</option>`;
+                
+                if (!isDisabled && firstEnabledIdx === -1) {
+                    firstEnabledIdx = idx;
+                }
+                idx++;
+            });
+
+            // Kung disabled o walang naka-select, piliting tumalon sa unang pwede nilang i-select
+            if (currentVal && sel.querySelector(`option[value="${currentVal}"]:not([disabled])`)) {
+                sel.value = currentVal;
+            } else if (firstEnabledIdx !== -1) {
+                sel.selectedIndex = firstEnabledIdx;
+            }
+        }
+
+        function renderUI() {
+            if(!globalSnapshot) return;
+
+            let tableHtml = "";
+            let storageHtml = "";
+            let filtersHtml = `<button class='pc-filter-btn ${currentFilter === "ALL" ? "active" : ""}' onclick='setPcFilter("ALL")'>ALL UNITS</button>`;
+            
+            let upCount = 0; let pndCount = 0;
+            let uniquePCs = new Set();
+            pcListCache = []; 
+
+            const hiddenTasks = ["UNIVERSAL_CHECK", "STORAGE_CLEANER", "MARTEC", "SYSTEM_UPDATE", "SYSTEM_BACKUP", "SYSTEM_RENAME"];
+            let isOwner = (currentUserRole === "OWNER");
+
+            for (let branch in globalSnapshot) {
+                if (activeBranch !== "ALL" && branch !== activeBranch) continue;
+
+                for (let pc in globalSnapshot[branch]) {
+                    uniquePCs.add(pc);
+                    pcListCache.push({ branch: branch, pc: pc });
+
+                    const games = globalSnapshot[branch][pc].Games || {};
+                    
+                    for (let gameName in games) {
+                        const info = games[gameName];
+                        const cleanGame = gameName.replace(/_/g, ".").replace(/Â/g, "");
+                        const isWarn = info.Status.includes("Warning") || info.Status.includes("Pending");
+                        const isCrit = info.Status.includes("Critical") || info.Status.includes("Failed");
+                        const color = isCrit ? "#ef4444" : (isWarn ? "#f59e0b" : "#10b981");
+
+                        if (cleanGame.includes("DISK:")) {
+                            const driveLetter = cleanGame.replace("DISK: ", "");
+                            
+                            storageHtml += `
+                                <div style='display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid ${color}40; padding: 5px 12px; border-radius: 6px; flex-grow: 1; min-width: 110px;'>
+                                    <span style='font-size: 11px; font-weight: 800; color: #94a3b8;'>${pc} ${driveLetter}</span>
+                                    <span style='font-size: 11px; font-weight: 700; color: ${color};'>${info.UpdateInfo || info.Status}</span>
+                                </div>`;
+                            continue;
+                        }
+
+                        if (hiddenTasks.includes(gameName)) {
+                            if (gameName === "STORAGE_CLEANER" && document.getElementById('storageModal').style.display === 'flex') {
+                                let selVal = document.getElementById('storagePcSelector').value;
+                                if (selVal === `${branch}|||${pc}`) {
+                                     let statBox = document.getElementById('storageStatus');
+                                     if (info.Status.includes("SUCCESS") && info.LaunchCmd && info.LaunchCmd.startsWith("STORAGE_DATA|")) {
+                                         statBox.innerHTML = "✅ <span style='color:#10b981;'>Scan Complete!</span> Top 10 items found.";
+                                         renderStorageData(info.LaunchCmd.split("STORAGE_DATA|")[1], branch, pc);
+                                     } else if (info.Status.includes("SUCCESS") && info.UpdateInfo && info.UpdateInfo.includes("deleted")) {
+                                         statBox.innerHTML = `🗑️ <span style='color:#ef4444;'>${info.UpdateInfo}</span> (Scan again to refresh)`;
+                                     } else {
+                                         statBox.innerText = `⏳ Status: ${info.UpdateInfo || info.Status}`;
+                                     }
+                                }
+                            }
+                            continue; 
+                        }
+
+                        if (currentFilter !== "ALL" && currentFilter !== pc) continue;
+
+                        const isUpdateReq = info.Status === "Pending" || info.Status.includes("Force Update") || info.UpdateInfo === "Click Force Update";
+                        const isBusy = info.Status.includes("Updating") || info.Status.includes("Running") || (info.UpdateInfo && info.UpdateInfo.includes("Downloading"));
+                        
+                        let badgeClass = "is-updated";
+                        if (isUpdateReq) badgeClass = "needs-update";
+                        if (isBusy) badgeClass = "is-busy";
+
+                        if (isUpdateReq) pndCount++; else upCount++;
+
+                        let actionBtn = `<button class='btn-update btn-updated' disabled>✓ Updated</button>`;
+                        if (isUpdateReq) {
+                            // 🚀 BACKUP SECURITY: Pag sa main branch at hindi owner, naka-lock ang hilera
+                            let isCoreShop = (branch.toUpperCase() === "MGH-CONCEPCION" || branch.toUpperCase() === "MGH-PARANG");
+                            if (isCoreShop && !isOwner) {
+                                actionBtn = `<button class='btn-update btn-busy' disabled style='cursor:not-allowed; background:#94a3b8; color:white;'>🔒 Locked</button>`;
+                            } else {
+                                actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE')">⚡ Force Update</button>`;
+                            }
+                        } else if (isBusy) {
+                            actionBtn = `<button class='btn-update btn-busy' disabled>Busy...</button>`;
+                        }
+
+                        tableHtml += `
+                            <tr>
+                                <td><span class='branch-tag'>${branch}</span></td>
+                                <td><span class='pc-name'>${pc}</span></td>
+                                <td><span class='game-name'>${cleanGame}</span></td>
+                                <td>${info.Status}</td>
+                                <td><span class='badge ${badgeClass}'>${info.UpdateInfo || info.Status}</span></td>
+                                <td><span class='last-sync'>${info.LastSync || "Just now"}</span></td>
+                                <td>${actionBtn}</td>
+                            </tr>
+                        `;
+                    }
+                }
+            }
+
+            Array.from(uniquePCs).forEach(pc => { filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("${pc}")'>${pc}</button>`; });
+
+            document.getElementById("tableBody").innerHTML = tableHtml || "<tr><td colspan='7' style='text-align:center; padding:30px; font-weight:bold; color:#64748b;'>Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.</td></tr>";
+            document.getElementById("serverHealth").innerHTML = storageHtml || "<div style='color:#64748b; font-size:12px; width:100%;'>No Disk Data</div>";
+            document.getElementById("pcFilterContainer").innerHTML = filtersHtml;
+            document.getElementById("countUp").innerText = upCount;
+            document.getElementById("countDown").innerText = pndCount;
+        }
+
+        function formatBytes(bytes) {
+            if(bytes === "FOLDER" || !bytes || isNaN(bytes)) return bytes || "";
+            if(bytes == 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function isRestricted(branch) {
+            return (currentUserRole !== "OWNER" && (branch.toUpperCase() === "MGH-CONCEPCION" || branch.toUpperCase() === "MGH-PARANG"));
+        }
+
+        let genTarget = ""; let genCmd = "";
+
+        window.openGenericModal = function(appTarget, cmdStr, title) {
+            document.getElementById('adminModal').style.display='none';
+            document.getElementById('genericModal').style.display='flex';
+            document.getElementById('genTitle').innerText = title;
+            genTarget = appTarget; genCmd = cmdStr;
+            populateDropdown('genPcSelector');
+            document.getElementById('renameBox').style.display = appTarget === "SYSTEM_RENAME" ? "block" : "none";
+        }
+
+        window.executeGenericAction = function() {
+            let sel = document.getElementById('genPcSelector');
+            if(!sel.value) return alert("Walang napiling PC!");
+            
+            const branch = sel.value.split("|||")[0];
+            const pc = sel.value.split("|||")[1];
+            
+            if (isRestricted(branch)) return alert("🔒 Restricted: Owner accounts lamang ang pwedeng mag-execute nito sa branch na ito!");
+
+            let finalCmd = genCmd;
+            if(genTarget === "SYSTEM_RENAME") {
+                const newName = document.getElementById('genNewName').value.trim().toUpperCase();
+                if(!newName) return alert("Enter new PC name!");
+                finalCmd = `RENAME_PC|${newName}`;
+            }
+            
+            document.getElementById('btnGenExec').innerText = "SENDING...";
+
+            db.ref(`Branches/${branch}/${pc}/Inbox/${genTarget}`).set({
+                command: finalCmd, timestamp: new Date().toISOString(), status: "Pending"
+            }).then(() => {
+                document.getElementById('btnGenExec').innerText = "SEND COMMAND";
+                alert(`✅ SUCCESS! Command sent to ${pc}!`);
+                document.getElementById('genericModal').style.display='none';
+                document.getElementById('adminModal').style.display='flex';
+            }).catch((error) => {
+                document.getElementById('btnGenExec').innerText = "SEND COMMAND";
+                alert(`❌ Firebase Error: ${error.message}`);
+            });
+        };
+
+        window.openStorageModal = function() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('storageModal').style.display = 'flex';
+            document.getElementById('storageFlexGrid').innerHTML = "";
+            document.getElementById('storageStatus').innerText = "Ready. Select a PC and click Scan.";
+            populateDropdown('storagePcSelector');
+        }
+
+        window.triggerStorageScan = function() {
+            let sel = document.getElementById('storagePcSelector');
+            if(!sel.value) return;
+            const branch = sel.value.split("|||")[0];
+            const pc = sel.value.split("|||")[1];
+            
+            if (isRestricted(branch)) {
+                document.getElementById('storageStatus').innerText = "🔒 Restricted: Owner Access Only.";
+                document.getElementById('storageFlexGrid').innerHTML = "<div style='text-align:center; padding:30px; font-weight:bold; color:#ef4444;'>🔒 Exclusive feature for Owner accounts on this branch.</div>";
+                return;
+            }
+
+            document.getElementById('storageStatus').innerHTML = `⏳ Sending scan command to ${pc}...`;
+            document.getElementById('storageFlexGrid').innerHTML = `
+                <div style="padding: 40px 20px; text-align: center; width: 100%;">
+                    <div style="font-size: 16px; font-weight: 800; color: #b45309;">🔎 SCANNING DRIVES...</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 5px;">Paghahanap ng mga junk files. Please wait up to 15 seconds.</div>
+                    <div class="progress-wrapper"><div class="progress-bar"></div></div>
+                </div>
+            `;
+            
+            sendFirebaseCommand(branch, pc, "STORAGE_CLEANER", "SCAN_STORAGE");
+        }
+
+        window.renderStorageData = function(jsonString, branch, pc) {
+            try {
+                var files = JSON.parse(jsonString);
+                var html = "";
+                if(!files || files.length === 0) {
+                    html = "<div style='padding:20px; text-align:center; color:#10b981; font-weight:bold;'>No large safe-to-delete files found!</div>";
+                } else {
+                    for(var i=0; i<files.length; i++) {
+                        var f = files[i]; 
+                        var encodedPath = encodeURIComponent(f.FilePath);
+                        
+                        let deleteBtn = `<button onclick="triggerDeleteFile('${encodedPath}', '${branch}', '${pc}')" style='background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer; transition:0.2s;'>DELETE</button>`;
+                        if (isRestricted(branch)) {
+                            deleteBtn = `<button style='background:#94a3b8; color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:700; cursor:not-allowed;' disabled>🔒 Locked</button>`;
+                        }
+
+                        html += `
+                        <div class="storage-item">
+                            <div style='overflow:hidden; padding-right:15px; flex: 1 1 200px;'>
+                                <div style='font-weight:800; font-size:14px; color:#1e293b; margin-bottom:4px; word-break:break-all;'>${f.FileName}</div>
+                                <div style='font-size:11px; color:#64748b; word-break:break-all;'>${f.FilePath}</div>
+                            </div>
+                            <div style='display:flex; align-items:center; gap:15px; flex-shrink:0;'>
+                                <div style='background:#fef3c7; color:#b45309; padding:6px 12px; border-radius:6px; font-weight:800; font-size:13px;'>${f.SizeGB} GB</div>
+                                ${deleteBtn}
+                            </div>
+                        </div>`;
+                    }
+                }
+                document.getElementById('storageFlexGrid').innerHTML = html;
+            } catch(e) { 
+                document.getElementById('storageFlexGrid').innerHTML = "<div style='color:red; font-weight:bold;'>Error parsing JSON data. Please scan again.</div>"; 
+            }
+        }
+
+        window.triggerDeleteFile = function(encodedPath, branch, pc) {
+            var filePath = decodeURIComponent(encodedPath);
+            if (isRestricted(branch)) return alert("🔒 Restricted.");
+            if(!confirm("⚠️ Babala! Sigurado ka bang gusto mong burahin ang file na ito?\n\n" + filePath)) return;
+
+            document.getElementById('storageStatus').innerText = "⏳ Deleting file on " + pc + "...";
+            sendFirebaseCommand(branch, pc, "STORAGE_CLEANER", "DELETE_FILE|" + filePath);
+        }
+
+        window.openGameLib = async function(type) {
+            document.getElementById('adminModal').style.display='none';
+            document.getElementById('gameLibModal').style.display='flex';
+            document.getElementById('glTitle').innerText = `${type} GAMES`;
+            populateDropdown('glPcSelector');
+            document.getElementById('glGrid').innerHTML = "<p style='text-align:center; padding:20px; font-weight:bold; width: 100%;'>Fetching from Google Drive...</p>";
+            
+            try {
+                const res = await fetch(`${GAS_URL}?action=FETCH_LIBRARY&type=${type}`);
+                const data = await res.json(); 
+                let h = "";
+                if(data.library && data.library.length > 0) {
+                    data.library.forEach(g => {
+                        let sizeHTML = g.Size ? `<div style="font-size:12px; color:#64748b; font-weight:600; margin-bottom:10px;">💾 ${formatBytes(g.Size)}</div>` : "";
+                        
+                        h += `<div class="gl-card">
+                                <div style='font-weight:800; font-size:16px; color:#1e293b; margin-bottom:5px;'>${g.GameName}</div>
+                                ${sizeHTML}
+                                <button class="btn-authenticate" style="font-size:13px; padding:10px; margin-top: auto;" onclick="sendCmdFromGL('${g.GameName}')">DOWNLOAD TO PC</button>
+                              </div>`;
+                    });
+                } else {
+                    h = "<p style='text-align:center; padding:20px; color:#ef4444; width: 100%;'>No games found in the library for this category.</p>";
+                }
+                document.getElementById('glGrid').innerHTML = h;
+            } catch(e) { 
+                document.getElementById('glGrid').innerHTML = "<p style='text-align:center; padding:20px; color:#64748b; width: 100%;'>Library API is pending integration in code.gs.</p>"; 
+            }
+        }
+        
+        window.sendCmdFromGL = function(gName) {
+            let sel = document.getElementById('glPcSelector');
+            if(!sel.value) return alert("Pumili muna ng PC!");
+            const branch = sel.value.split("|||")[0];
+            const pc = sel.value.split("|||")[1];
+            
+            if (isRestricted(branch)) return alert("🔒 Restricted: Owner Access Only para sa branch na ito.");
+
+            if(confirm(`⚠️ Isend ang download command para sa ${gName} papunta sa ${pc}?`)) {
+                sendFirebaseCommand(branch, pc, gName, `DOWNLOAD|${gName}`);
+            }
+        }
+
+        window.openMartecModal = function() {
+            document.getElementById('adminModal').style.display='none';
+            document.getElementById('martecModal').style.display='flex';
+            populateDropdown('martecPcSelector');
+            document.getElementById('martecInputs').style.display='block';
+            document.getElementById('martecResult').style.display='none';
+            document.getElementById('martecTitle').innerText = "🔑 MARTEC REACTIVATION";
+        }
+
+        window.triggerMartec = async function(type) {
+            let sel = document.getElementById('martecPcSelector');
+            if(!sel.value) return alert("Pumili muna ng PC!");
+            const br = sel.value.split("|||")[0];
+            const pc = sel.value.split("|||")[1];
+            
+            if (isRestricted(br)) return alert("🔒 Restricted: Owner Access Only para sa branch na ito.");
+
+            document.getElementById('martecTitle').innerText = "⏳ Fetching key from Sheets...";
+            
+            try {
+                const res = await fetch(`${GAS_URL}?action=GET_MARTEC&type=${type}`);
+                const data = await res.json();
+                if(data.success) {
+                    sendFirebaseCommand(br, pc, "MARTEC", `REACTIVATE|${type}|${data.mac}|${data.serial}`);
+                    document.getElementById('martecKey').value = data.serial;
+                    document.getElementById('martecInputs').style.display='none';
+                    document.getElementById('martecResult').style.display='block';
+                    document.getElementById('martecTitle').innerText = "✅ KEY ASSIGNED";
+                } else { 
+                    alert(data.message); 
+                    document.getElementById('martecTitle').innerText = "🔑 MARTEC REACTIVATION";
+                }
+            } catch(e) { 
+                alert("Martec API is pending integration in code.gs."); 
+                document.getElementById('martecTitle').innerText = "🔑 MARTEC REACTIVATION";
+            }
+        }
+
+        window.openCreateAccModal = function() {
+            document.getElementById('adminModal').style.display='none';
+            document.getElementById('createAccModal').style.display='flex';
+            document.getElementById('newAccBranch').value = "";
+            document.getElementById('newAccInv').value = "";
+            document.getElementById('newAccName').value = "";
+        }
+
+        window.submitNewAccount = async function() {
+            const b = document.getElementById('newAccBranch').value.trim();
+            const inv = document.getElementById('newAccInv').value.trim();
+            const name = document.getElementById('newAccName').value.trim();
+            const role = document.getElementById('newAccRole').value;
+            
+            if(!b || !inv || !name || !role) return alert("Paki-fill up lahat!");
+
+            // 🚀 PROTECTION BLOCK: Kapag pinilit i-type ang main branch ng manager/tech, haharangin sila
+            if (currentUserRole !== "OWNER" && (b.toUpperCase() === "MGH-CONCEPCION" || b.toUpperCase() === "MGH-PARANG")) {
+                return alert("🔒 Restricted: Hindi pwedeng gumawa ng access role para sa MGH-Concepcion o MGH-Parang!");
+            }
+
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    body: JSON.stringify({ action: 'CREATE_ACCOUNT', branch: b, inv: inv, client: name, role: role })
+                });
+                alert("Account request sent to Google Sheets!");
+                document.getElementById('createAccModal').style.display='none';
+                document.getElementById('adminModal').style.display='flex';
+            } catch(e) {
+                alert("Failed to send request.");
+            }
+        }
+    </script>
+</body>
+</html>
