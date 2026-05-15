@@ -178,10 +178,10 @@
             <div id="ai-close" onclick="toggleAIChat()">✖</div>
         </div>
         <div id="ai-messages">
-            <div class="msg-bubble msg-bot">Hello! Ako ang MGH Support A.I. Ano ang maitutulong ko sa mga PC, games, o server mo ngayon?</div>
+            <div class="msg-bubble msg-bot">Hello! I'm Marvs Technical Bot support! How may I help you?</div>
         </div>
         <div id="ai-input-area">
-            <input type="text" id="ai-input" placeholder="Magtanong dito..." onkeypress="handleAIEnter(event)">
+            <input type="text" id="ai-input" placeholder="Type your question here..." onkeypress="handleAIEnter(event)">
             <button id="ai-send" onclick="sendToAI()">➤</button>
         </div>
     </div>
@@ -283,15 +283,12 @@
     </div>
 
 <script>
-        
+        // 🚀 OBFUSCATED API KEY PARA IWAS GOOGLE BOT FLAG
 
-// 🚀 OBFUSCATED API KEY PARA IWAS GOOGLE BOT FLAG
         const gemP1 = "AIzaSyCJ_dJ";
         const gemP2 = "g9fEIwuMprwp5_Vz";
         const gemP3 = "Sqsu9uWUFsYw";
         const GEMINI_API_KEY = gemP1 + gemP2 + gemP3;
-
-
 
         const firebaseConfig = {
             apiKey: "AIzaSyAT9do8IPqxCIl83B3dpR0d8Rq9sP7XpaY",
@@ -345,7 +342,7 @@
         }
 
         // =====================================
-        // 🗣️ TEXT-TO-SPEECH FUNCTION
+        // 🗣️ TEXT-TO-SPEECH FUNCTION (ENGLISH)
         // =====================================
         function speakMessage(text) {
             if ('speechSynthesis' in window) {
@@ -357,9 +354,9 @@
                 window.speechSynthesis.cancel();
                 
                 let utterance = new SpeechSynthesisUtterance(cleanText);
-                utterance.lang = 'tl-PH'; // Philippine accent / Tagalog
-                utterance.rate = 1.0;     // Normal na bilis
-                utterance.pitch = 1.0;    // Normal na boses
+                utterance.lang = 'en-US'; // 🚀 Binalik natin sa English ang accent!
+                utterance.rate = 1.0;     
+                utterance.pitch = 1.0;    
                 
                 window.speechSynthesis.speak(utterance);
             }
@@ -388,11 +385,12 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             const loadingId = "load-" + Date.now();
-            chatBox.innerHTML += `<div id="${loadingId}" class="msg-loading">Nagta-type ang A.I...</div>`;
+            chatBox.innerHTML += `<div id="${loadingId}" class="msg-loading">A.I. is typing...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                const systemPrompt = "Ikaw ay si MGH Support Bot, ang official A.I. tech support assistant ng MGH-Parang at MGH-Concepcion. Ang trabaho mo lamang ay sumagot sa mga tanong na may kinalaman sa computer troubleshooting, network issues, diskless setup, server maintenance, pag-update ng games (tulad ng Valorant, Roblox, Crossfire), rclone automation, at martec spoofing. Gumamit ng simpleng Tagalog para madaling maintindihan ng mga matatanda. Kapag nagtanong ang user ng tungkol sa math, history, assignment, coding, tsismis, o kahit anong labas sa negosyo ng computer shop, tanggihan mo nang magalang at sabihing ikaw ay isang Tech Support lamang.\n\nTanong ng User: ";
+                // 🚀 ENGLISH PROMPT PARA KAY MGH SUPPORT BOT
+                const systemPrompt = "You are Marvs Technical Bot support, the official A.I. tech support assistant for MGH-Parang and MGH-Concepcion. Your job is to answer questions related to computer troubleshooting, network issues, diskless setup, server maintenance, game updates, rclone automation, and martec spoofing. Speak in clear, professional, and helpful English. If the user asks about anything outside the computer shop business, politely decline and state that you are strictly a Tech Support assistant.\n\nUser Question: ";
                 
                 const aiPrompt = {
                     "contents": [{
@@ -400,7 +398,6 @@
                     }]
                 };
 
-                // 🚀 BINALIK SA FRONTEND PERO GAMIT ANG TAMANG MODEL NA gemini-2.5-flash
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
