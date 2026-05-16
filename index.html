@@ -95,7 +95,6 @@
         
         .storage-item { display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:12px; margin-bottom:8px; flex-wrap: wrap; gap: 10px; }
         
-        /* WRAP GRIDS - NO SCROLLBARS */
         .gl-grid { display:flex; flex-wrap: wrap; gap:15px; margin-top:20px; }
         .gl-card { border:1px solid #e2e8f0; padding:20px; border-radius:16px; background:#f8fafc; text-align:center; flex: 1 1 250px; display: flex; flex-direction: column; justify-content: space-between; }
 
@@ -242,8 +241,9 @@
                 <button onclick="runDiagCommand('FETCH_LOGS')" class="btn-authenticate" style="background:#f59e0b; font-size: 12px; padding: 12px;">📄 Fetch Crash Logs</button>
                 <button onclick="runDiagCommand('REPAIR_OS')" class="btn-authenticate" style="background:#f59e0b; font-size: 12px; padding: 12px;">🛠️ Repair OS (SFC)</button>
                 <button onclick="runDiagCommand('CHECK_DISK')" class="btn-authenticate" style="background:#f59e0b; font-size: 12px; padding: 12px;">💾 Check Disk Health</button>
-                
                 <button onclick="runDiagCommand('SET_STATIC_IP')" class="btn-authenticate" style="background:#ef4444; font-size: 12px; padding: 12px;">🔌 Assign Static IP</button>
+                
+                <button onclick="runDiagCommand('BACKUP_TO_USB')" class="btn-authenticate" style="background:#10b981; font-size: 12px; padding: 12px; grid-column: span 2;">💾 Backup OS to USB</button>
             </div>
 
             <div id="diagStatus" style="margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 12px; color: #475569; font-family: monospace; text-align: left; min-height: 60px;">
@@ -700,7 +700,7 @@ Customer Question: `;
                 }
             }
 
-            Array.from(uniquePCs).forEach(pc => { filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("${pc}")'>${pc}</button>`; });
+            Array.from(uniquePCs).forEach(pc => { filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("ALL")'>${pc}</button>`; });
 
             document.getElementById("tableBody").innerHTML = tableHtml || "<tr><td colspan='7' style='text-align:center; padding:30px; font-weight:bold; color:#64748b;'>Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.</td></tr>";
             document.getElementById("serverHealth").innerHTML = storageHtml || "<div style='color:#64748b; font-size:12px; width:100%;'>No Disk Data</div>";
@@ -796,6 +796,29 @@ Customer Question: `;
                 if(!gateway) return;
                 
                 cmdStr = `DIAG_CMD|SET_STATIC_IP|${ip}|${subnet}|${gateway}`;
+            }
+
+            if(diagType === 'BACKUP_TO_USB') {
+                let pcData = globalSnapshot[branch][pc].Games || {};
+                let driveList = [];
+                
+                for (let key in pcData) {
+                    if (key.startsWith("DISK: ")) {
+                        let letter = key.replace("DISK: ", "");
+                        let freeSpace = pcData[key].UpdateInfo || "Unknown space";
+                        driveList.push("👉 Drive " + letter + " (Free: " + freeSpace + ")");
+                    }
+                }
+                
+                let detectedMsg = driveList.length > 0 ? driveList.join("\n") : "Walang na-detect na drive info.";
+                let driveLetter = prompt("MGA NAKA-SALPAK NA DRIVES SA " + pc + ":\n" + detectedMsg + "\n\nAnong Drive Letter ang paglalagyan ng OS Backup? (Halimbawa: D, E, F):");
+                
+                if(!driveLetter) return;
+                
+                let cleanDrive = driveLetter.replace(/[^a-zA-Z]/g, '').charAt(0).toUpperCase();
+                if(!cleanDrive) return alert("Maling input ng Drive Letter!");
+                
+                cmdStr = `DIAG_CMD|BACKUP_TO_USB|${cleanDrive}`;
             }
 
             document.getElementById('diagStatus').innerHTML = `⏳ <b>Sending command:</b> ${diagType} to ${pc}... Please wait for response.`;
