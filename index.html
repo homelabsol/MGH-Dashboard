@@ -118,6 +118,66 @@
         #ai-input:focus { border-color: #2563eb; }
         #ai-send { background: #2563eb; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         #ai-send:hover { background: #1d4ed8; }
+
+        /* 🖼️ NEW IMAGE GALLERY & CARD STYLES */
+        .image-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
+            margin-top: 15px;
+        }
+
+        .image-card {
+            background: rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 12px;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            transition: 0.2s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-3px);
+            border-color: #2563eb; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 120px; 
+            object-fit: cover; 
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-start;
+        }
+
+        .card-title {
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* 📱 MOBILE RESPONSIVE CSS AUTO-ADJUST */
+        @media screen and (max-width: 768px) {
+            .header-card {
+                flex-direction: column;
+            }
+            .image-gallery-grid {
+                grid-template-columns: 1fr; 
+                gap: 10px;
+            }
+            .card-img {
+                height: 150px; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -151,6 +211,39 @@
                 <div style="flex: 2 1 400px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05);">
                     <div style="font-size: 10px; color: #64748b; font-weight: 800; margin-bottom: 12px; letter-spacing: 1.5px;">💾 SERVER STORAGE CLUSTER</div>
                     <div id="serverHealth" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                    
+                    <div style="font-size: 10px; color: #64748b; font-weight: 800; margin-top: 25px; margin-bottom: 5px; letter-spacing: 1.5px;">🖼️ DISKLESS/PISONET IMAGES</div>
+                    <div class="image-gallery-grid">
+                        
+                        <div class="image-card">
+                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&q=80" alt="Diskless Server" class="card-img">
+                            <div class="card-info">
+                                <div class="card-title">Diskless Server System</div>
+                            </div>
+                        </div>
+
+                        <div class="image-card">
+                            <img src="https://images.unsplash.com/photo-1616181518177-3e8111e0e8e4?w=500&q=80" alt="Diskless Client" class="card-img">
+                            <div class="card-info">
+                                <div class="card-title">Diskless Client System</div>
+                            </div>
+                        </div>
+
+                        <div class="image-card">
+                            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&q=80" alt="Client Games" class="card-img">
+                            <div class="card-info">
+                                <div class="card-title">Diskless Client Games</div>
+                            </div>
+                        </div>
+
+                        <div class="image-card">
+                            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&q=80" alt="Pisonet No Timer" class="card-img">
+                            <div class="card-info">
+                                <div class="card-title">Pisonet No Timer System</div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
                 <div class="stats-container" style="flex: 0 1 150px;">
@@ -283,7 +376,7 @@
     </div>
 
 <script>
-            // 🚀 OBFUSCATED API KEY PARA IWAS GOOGLE BOT FLAG
+        // 🚀 OBFUSCATED API KEY PARA IWAS GOOGLE BOT FLAG
         const gemP1 = "AIzaSyCJ_dJ";
         const gemP2 = "g9fEIwuMprwp5_Vz";
         const gemP3 = "Sqsu9uWUFsYw";
@@ -373,9 +466,7 @@
             if (e.key === 'Enter') sendToAI();
         }
 
-        
-
-async function sendToAI() {
+        async function sendToAI() {
             const inputField = document.getElementById('ai-input');
             const userMsg = inputField.value.trim();
             if (!userMsg) return;
@@ -485,15 +576,6 @@ Customer Question: `;
                 chatBox.innerHTML += `<div class="msg-bubble msg-bot">⚠️ Nawalan ng koneksyon sa API server.</div>`;
             }
         }
-
-
-
-
-
-
-
-
-
 
         function changeGlobalBranch(val) { activeBranch = val; currentFilter = "ALL"; renderUI(); }
         function setPcFilter(pcName) { currentFilter = pcName; renderUI(); }
