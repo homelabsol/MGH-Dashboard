@@ -99,6 +99,10 @@
         .gl-grid { display:flex; flex-wrap: wrap; gap:15px; margin-top:20px; }
         .gl-card { border:1px solid #e2e8f0; padding:20px; border-radius:16px; background:#f8fafc; text-align:center; flex: 1 1 250px; display: flex; flex-direction: column; justify-content: space-between; }
 
+        .progress-wrapper { width: 100%; background-color: #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 15px; position: relative; height: 10px; }
+        .progress-bar { position: absolute; height: 100%; background-color: #f59e0b; width: 30%; border-radius: 8px; animation: loadingSlide 1.2s infinite ease-in-out alternate; }
+        @keyframes loadingSlide { 0% { left: -30%; } 100% { left: 100%; } }
+
         /* 🤖 A.I. CHAT WIDGET STYLES */
         #ai-btn { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; border: none; border-radius: 50%; width: 65px; height: 65px; font-size: 30px; cursor: pointer; box-shadow: 0 10px 25px rgba(37,99,235,0.4); z-index: 10001; transition: 0.3s; display: none; align-items: center; justify-content: center; }
         #ai-btn:hover { transform: scale(1.1); background: #1d4ed8; }
@@ -120,53 +124,10 @@
         #ai-send { background: #2563eb; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         #ai-send:hover { background: #1d4ed8; }
 
-        /* 🖼️ NEW IMAGE GALLERY & CARD STYLES */
-        .image-gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; 
-            margin-top: 15px;
-        }
-        .image-card {
-            background: rgba(0,0,0,0.2); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            border-radius: 12px;
-            overflow: hidden; 
-            display: flex;
-            flex-direction: column;
-            transition: 0.2s;
-        }
-        .image-card:hover {
-            transform: translateY(-3px);
-            border-color: #2563eb; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
-        .card-img {
-            width: 100%;
-            height: 120px; 
-            object-fit: cover; 
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .card-info {
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            align-items: flex-start;
-        }
-        .card-title {
-            color: white;
-            font-size: 13px;
-            font-weight: 700;
-            margin: 0;
-        }
-
         @media screen and (max-width: 768px) {
             .header-card { flex-direction: column; }
             .login-right { display: none; }
             .login-left { max-width: 100%; border-right: none; }
-            .image-gallery-grid { grid-template-columns: 1fr; gap: 10px; }
-            .card-img { height: 150px; }
             .diag-actions { grid-template-columns: 1fr !important; }
         }
     </style>
@@ -205,26 +166,6 @@
                 <div style="flex: 2 1 400px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05);">
                     <div style="font-size: 10px; color: #64748b; font-weight: 800; margin-bottom: 12px; letter-spacing: 1.5px;">💾 SERVER STORAGE CLUSTER</div>
                     <div id="serverHealth" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                    
-                    <div style="font-size: 10px; color: #64748b; font-weight: 800; margin-top: 25px; margin-bottom: 5px; letter-spacing: 1.5px;">🖼️ DISKLESS/PISONET IMAGES</div>
-                    <div class="image-gallery-grid">
-                        <div class="image-card">
-                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&q=80" alt="Diskless Server" class="card-img">
-                            <div class="card-info"><div class="card-title">Diskless Server System</div></div>
-                        </div>
-                        <div class="image-card">
-                            <img src="https://images.unsplash.com/photo-1616181518177-3e8111e0e8e4?w=500&q=80" alt="Diskless Client" class="card-img">
-                            <div class="card-info"><div class="card-title">Diskless Client System</div></div>
-                        </div>
-                        <div class="image-card">
-                            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&q=80" alt="Client Games" class="card-img">
-                            <div class="card-info"><div class="card-title">Diskless Client Games</div></div>
-                        </div>
-                        <div class="image-card">
-                            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&q=80" alt="Pisonet No Timer" class="card-img">
-                            <div class="card-info"><div class="card-title">Pisonet No Timer System</div></div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="stats-container" style="flex: 0 1 150px;">
@@ -386,7 +327,6 @@
     </div>
 
 <script>
-        // 🚀 OBFUSCATED API KEY PARA IWAS GOOGLE BOT FLAG
         const gemP1 = "AIzaSyCJ_dJ";
         const gemP2 = "g9fEIwuMprwp5_Vz";
         const gemP3 = "Sqsu9uWUFsYw";
@@ -443,9 +383,6 @@
             }
         }
 
-        // =====================================
-        // 🗣️ TEXT-TO-SPEECH FUNCTION
-        // =====================================
         function speakMessage(text) {
             if ('speechSynthesis' in window) {
                 let cleanText = text.replace(/<[^>]*>?/gm, '');
@@ -459,9 +396,6 @@
             }
         }
 
-        // =====================================
-        // 🤖 GOOGLE GEMINI A.I. SUPPORT LOGIC
-        // =====================================
         function toggleAIChat() {
             const chatWindow = document.getElementById('ai-chat-window');
             chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
@@ -681,7 +615,6 @@ Customer Question: `;
 
                     const games = globalSnapshot[branch][pc].Games || {};
                     
-                    // 👉 AUTO-UPDATE PARA SA WINDOWS DIAG HUB
                     const sysInfo = games["SYSTEM_UPDATE"] || {};
                     if (document.getElementById('diagModal').style.display === 'flex') {
                         let selVal = document.getElementById('diagPcSelector').value;
@@ -831,7 +764,6 @@ Customer Question: `;
             });
         };
 
-        // 🧰 MGA BAGONG FUNCTION PARA SA WINDOWS DIAGNOSTICS HUB
         window.openDiagModal = function() {
             document.getElementById('adminModal').style.display = 'none';
             document.getElementById('diagModal').style.display = 'flex';
