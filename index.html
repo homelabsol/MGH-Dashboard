@@ -391,7 +391,7 @@
                 let utterance = new SpeechSynthesisUtterance(cleanText);
                 utterance.lang = 'en-US'; 
                 utterance.rate = 1.0;     
-                utterance.pitch = 1.0;    
+                utterance.pitch = 1.0;  
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -411,6 +411,63 @@
             if (!userMsg) return;
 
             const chatBox = document.getElementById('ai-messages');
+
+  // 🚨 INTERCEPTOR PARA SA TOPIC 24 (TELEGRAM SOS TICKET)
+            if (userMsg === "24") {
+                
+                // 🛑 BAGONG DAGDAG: FILTER / CONFIRMATION BAGO MAG-TICKET
+                let isSure = confirm("⚠️ WAIT LANG PO!\n\nSigurado po ba kayo na WALA sa Number 1 hanggang 23 ang kailangan niyong support?\n\n👉 Click 'OK' (Yes, Wala po) para tumawag ng Technician.\n👉 Click 'Cancel' (No, Meron po) para hanapin muli sa listahan.");
+                
+                // KUNG NAG-CANCEL (Nahiya o na-realize na meron pala sa listahan)
+                if (!isSure) {
+                    chatBox.innerHTML += `<div class="msg-bubble msg-user">24</div>`;
+                    chatBox.innerHTML += `<div class="msg-bubble msg-bot">Sige po, paki-basa po munang mabuti ang listahan natin (1 to 23). Baka nandiyan na po ang sagot para hindi na kayo mag-antay nang matagal sa Technician! 😊</div>`;
+                    inputField.value = "";
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    return; // Haharangin niya dito ang ticket
+                }
+
+                // KUNG NAG-OK SILA (Tuloy sa normal na form)
+                let custName = prompt("🚨 [MGH TICKET] Ilagay ang Customer/Owner Name:");
+                if (!custName) return;
+                
+                let datePurchased = prompt("📅 Date of Purchase (Kailan binili - MM/DD/YYYY):");
+                if (!datePurchased) return;
+                
+                let invoiceNum = prompt("🧾 Invoice Number / Reference No:");
+                if (!invoiceNum) return;
+                
+                let mobileNum = prompt("📱 Mobile Number ng Kontak:");
+                if (!mobileNum) return;
+                
+                let issue = prompt("⚠️ Issue Encountered (Anong problema ng PC/Shop?):");
+                if (!issue) return;
+
+                chatBox.innerHTML += `<div class="msg-bubble msg-user">Pinindot ang No. 24: Nag-submit ng Support Ticket</div>`;
+                chatBox.innerHTML += `<div class="msg-bubble msg-bot">⏳ Copy, Boss! Ipinapadala na ang Urgent Support Ticket sa Telegram Group ng mga Tech Team natin...</div>`;
+                inputField.value = "";
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: JSON.stringify({
+                        action: 'TELEGRAM_SOS',
+                        branch: activeBranch,
+                        customer: custName,
+                        date: datePurchased,
+                        invoice: invoiceNum,
+                        mobile: mobileNum,
+                        issueEncountered: issue
+                    })
+                });
+                return; 
+            }
+
+            // Kapag hindi 24 ang tinype, dadaan sa normal na AI Chatbot
             chatBox.innerHTML += `<div class="msg-bubble msg-user">${userMsg}</div>`;
             inputField.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -446,6 +503,7 @@ IF THE CUSTOMER SAYS "HELLO", "HI", OR "HELP", greet them and provide this exact
 21. Paano mag Install ng Drivers
 22. Paano mag rename ng workstation
 23. Paano mag activate ng Windows or Office
+24. 🚨 EMERGENCY: Direct Connect sa Technician (SOS Alert)
 
 IF THEY ASK ABOUT A SPECIFIC TOPIC ABOVE, GIVE THEM THE EXACT ANSWER BELOW. For video links (Items 1-16), YOU MUST RETURN IT AS A CLICKABLE HTML LINK FORMATTED LIKE THIS: <br><br><a href="URL_HERE" target="_blank" style="color:#2563eb; font-weight:800; text-decoration:underline;">▶️ CLICK HERE TO WATCH THE VIDEO</a>
 
@@ -473,6 +531,7 @@ IF THEY ASK ABOUT A SPECIFIC TOPIC ABOVE, GIVE THEM THE EXACT ANSWER BELOW. For 
 21. Install Drivers: Pumunta sa Admin tools, pindutin ang Auto Drivers button, piliin ang workstation kung saan mo i-install ang drivers.
 22. Rename workstation: Pumunta sa Admin tools, pindutin ang Rename PC then piliin ang target pc at ibigay ang pangalan ng computer.
 23. Activate Windows or Office: Pumunta sa Admin tools, pindutin ang OS/Office Activation button at antayin ang step by step pop up. Sundan lamang ito.
+24. EMERGENCY ALERT: Para tumawag ng Technician, i-type lang ang number 24 at sagutan ang form.
 
 Customer Question: `;
                 
@@ -977,7 +1036,7 @@ Customer Question: `;
                     document.getElementById('martecTitle').innerText = "🔑 MARTEC REACTIVATION";
                 }
             } catch(e) { 
-                alert("Martec API is pending integration in code.gs."); 
+                alert("Martec API is pending integration in code.gs."); f
                 document.getElementById('martecTitle').innerText = "🔑 MARTEC REACTIVATION";
             }
         }
