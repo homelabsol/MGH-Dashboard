@@ -141,6 +141,21 @@
             td { padding: 12px 10px; font-size: 12px; }
             .btn-update { font-size: 11px; padding: 8px; min-width: 90px; }
         }
+
+/* 🌟 UI POLISH: STICKY HEADER & TABLE SCROLL */
+        .table-container { max-height: 65vh; overflow-y: auto; overflow-x: auto; }
+        th { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        /* 🌟 UI POLISH: SMOOTH MODAL ANIMATIONS */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-overlay { animation: fadeIn 0.25s ease-out forwards; }
+        .modal-card { animation: slideUp 0.3s ease-out forwards; }
+
+        /* 🌟 UI POLISH: INTERACTIVE LOADING BUTTONS */
+        @keyframes pulse-bg { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        .btn-busy { animation: pulse-bg 1.5s infinite ease-in-out; border: 1px dashed #94a3b8; }
+
     </style>
 </head>
 <body>
@@ -1027,9 +1042,7 @@ Customer Question: `;
 
 
 
-
-
-        function renderUI() {
+function renderUI() {
             if(!globalSnapshot) return;
 
             let tableHtml = "";
@@ -1052,6 +1065,8 @@ Customer Question: `;
                 document.getElementById("countDown").innerText = 0;
                 return;
             }
+
+            let tableRows = []; // 🟢 LISTAHAN PARA SA AUTO-SORT
 
             for (let branch in globalSnapshot) {
                 if (isRestricted(branch)) continue; // 🛑 STRICT HARANG SA IBANG BRANCH
@@ -1093,6 +1108,7 @@ Customer Question: `;
                         }
 
                         if (hiddenTasks.includes(gameName)) {
+                            // Logic para sa Storage Cleaner Modal
                             if (gameName === "STORAGE_CLEANER" && document.getElementById('storageModal').style.display === 'flex') {
                                 let selVal = document.getElementById('storagePcSelector').value;
                                 if (selVal === `${branch}|||${pc}`) {
@@ -1125,10 +1141,16 @@ Customer Question: `;
                         if (isUpdateReq) {
                             actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE')">⚡ Force Update</button>`;
                         } else if (isBusy) {
-                            actionBtn = `<button class='btn-update btn-busy' disabled>Busy...</button>`;
+                            actionBtn = `<button class='btn-update btn-busy' disabled>⏳ Busy...</button>`;
                         }
 
-                        tableHtml += `
+                        // 🟢 PRIORITY SCORING PARA LAGING NASA TAAS ANG MAY PROBLEMA
+                        let priorityScore = 3; 
+                        if (isCrit) priorityScore = 0;        // 1st Priority (Errors/Critical)
+                        else if (isUpdateReq) priorityScore = 1; // 2nd Priority (Needs Update)
+                        else if (isBusy) priorityScore = 2;   // 3rd Priority (Currently Downloading)
+
+                        let rowHtml = `
                             <tr>
                                 <td><span class='branch-tag'>${branch}</span></td>
                                 <td><span class='pc-name'>${pc}</span></td>
@@ -1139,11 +1161,24 @@ Customer Question: `;
                                 <td>${actionBtn}</td>
                             </tr>
                         `;
+
+                        tableRows.push({ html: rowHtml, priority: priorityScore, title: cleanGame });
                     }
                 }
             }
 
-            Array.from(uniquePCs).forEach(pc => { filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("ALL")'>${pc}</button>`; });
+            // 🟢 I-SORT ANG ARRAY BASE SA PRIORITY BAGO I-RENDER SA TABLE
+            tableRows.sort((a, b) => {
+                if (a.priority !== b.priority) return a.priority - b.priority;
+                return a.title.localeCompare(b.title); // Alphabetical kapag parehas ng priority
+            });
+
+            tableRows.forEach(row => { tableHtml += row.html; });
+
+            // 🟢 FIXED BUG: Inayos ko na rin ang pag-filter ng PC per button
+            Array.from(uniquePCs).forEach(pc => { 
+                filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("${pc}")'>${pc}</button>`; 
+            });
 
             document.getElementById("tableBody").innerHTML = tableHtml || "<tr><td colspan='7' style='text-align:center; padding:30px; font-weight:bold; color:#64748b;'>Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.</td></tr>";
             document.getElementById("serverHealth").innerHTML = storageHtml || "<div style='color:#64748b; font-size:12px; width:100%;'>No Disk Data</div>";
@@ -1151,6 +1186,13 @@ Customer Question: `;
             document.getElementById("countUp").innerText = upCount;
             document.getElementById("countDown").innerText = pndCount;
         }
+
+       
+
+
+
+
+
 
         function formatBytes(bytes) {
             if(bytes === "FOLDER" || !bytes || isNaN(bytes)) return bytes || "";
