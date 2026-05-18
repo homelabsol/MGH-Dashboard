@@ -239,10 +239,12 @@
             
             <div class="table-container" style="padding: 0; box-shadow: none; border: 1px solid #e2e8f0;">
                 <table style="width: 100%;">
-                    <thead style="background: #f8fafc;">
+                   
+
+                   <thead style="background: #f8fafc;">
                         <tr>
                             <th>Ticket ID</th>
-                            <th>Branch</th>
+                            <th>Mobile #</th>
                             <th>Customer Name</th>
                             <th>Issue Encountered</th>
                             <th>Date / Time</th>
@@ -250,6 +252,8 @@
                             <th>Action</th>
                         </tr>
                     </thead>
+
+
                     <tbody id="ticketTableBody">
                         <tr><td colspan="7" style="text-align:center; padding: 20px;">Loading tickets from Firebase...</td></tr>
                     </tbody>
@@ -503,7 +507,9 @@
         let currentTicketFilter = "ALL"; 
         let currentUserBranch = "";
 
-        async function verifyAccess() {
+
+
+async function verifyAccess() {
             const u = document.getElementById('loginUser').value.trim();
             const p = document.getElementById('loginPass').value.trim();
             if(!u || !p) return alert("Paki-fill up lahat ng login details!");
@@ -518,7 +524,16 @@
                 if (data.success) {
                     currentUserRole = data.role.toUpperCase(); 
                     currentClientName = data.client.toUpperCase(); 
-                    currentUserBranch = data.branch ? data.branch.toUpperCase() : ""; // Kukunin ang Branch galing DB
+                    
+                    const branchMapping = {
+                        "MARKRYAN": "MGH-CONCEPCION",
+                        "MGHPARANG": "MGH-PARANG"
+                    };
+                    
+                    let cleanName = currentClientName.replace(/[^A-Z0-9]/g, '');
+                    let dbBranch = data.branch ? data.branch.toUpperCase() : "";
+                    
+                    currentUserBranch = dbBranch !== "" ? dbBranch : (branchMapping[cleanName] || currentClientName); 
                     
                     document.getElementById('loginPage').style.display = "none";
                     document.getElementById('dashboardContent').style.display = "block"; 
@@ -526,18 +541,42 @@
                     
                     document.getElementById('ai-btn').style.display = "flex";
                     
-                    // 🛑 RESTRICTION SA SUPPORT LIST BUTTON
                     const supportBtn = document.getElementById('btnSupportList');
-                    if (currentUserRole === "SHOP OWNER") {
+                    const adminBtn = document.querySelector('button[onclick*="adminModal"]');
+                    const storageDiv = document.getElementById('serverHealth').parentElement;
+                    const pcTableDiv = document.getElementById('tableBody').closest('.table-container');
+                    const upStat = document.getElementById('countUp').parentElement;
+                    const downStat = document.getElementById('countDown').parentElement;
+                    const branchSelect = document.getElementById('globalBranchSelect');
+
+                    // 🛑 UI RESTRICTION LOGIC PARA SA MGA ROLES
+                    if (currentUserRole === "ADMIN") {
+                        // 1. Kapag Helpdesk Admin: Tago lahat ng PC controls!
+                        if(adminBtn) adminBtn.style.display = "none";
+                        if(storageDiv) storageDiv.style.display = "none";
+                        if(pcTableDiv) pcTableDiv.style.display = "none";
+                        if(upStat) upStat.style.display = "none";
+                        if(downStat) downStat.style.display = "none";
+                        if(branchSelect) branchSelect.style.display = "none";
+                        document.getElementById('pcFilterContainer').style.display = "none";
+
+                        // 2. I-setup ang Support Button para sa kanila
+                        supportBtn.disabled = false;
+                        supportBtn.innerHTML = `<span style="font-size: 16px !important; margin: 0;">📋</span> TICKET VIEWER`;
+                        
+                        // 3. Automatic buksan ang Ticket List pagka-login
+                        setTimeout(() => { openSupportList(); }, 500);
+                        setInterval(checkOpenTicketsAndAlert, 180000);
+
+                    } else if (currentUserRole === "SHOP OWNER") {
                         supportBtn.disabled = true;
                         supportBtn.style.opacity = "0.5";
                         supportBtn.style.cursor = "not-allowed";
                         supportBtn.innerHTML = `<span style="font-size: 16px !important; margin: 0;">🔒</span> Support List`;
                     } else {
+                        // Para sa MANAGER, TECHNICIAN, OWNER
                         supportBtn.disabled = false;
                         supportBtn.innerHTML = `<span style="font-size: 16px !important; margin: 0;">📋</span> Support List`;
-                        
-                        // 🗣️ SIMULAN ANG EGAY ALERT BACKGROUND CHECK (Every 3 mins)
                         setInterval(checkOpenTicketsAndAlert, 180000); 
                     }
                     
@@ -551,6 +590,8 @@
                 btn.innerText = "AUTHENTICATE ACCESS";
             }
         }
+
+
 
         // 🗣️ FUNCTION PARA SA EGAY VOICE ALERT
         function checkOpenTicketsAndAlert() {
@@ -626,13 +667,14 @@
 
                     html += `<tr>
                         <td><span style="font-weight:800; font-size:11px; color:#64748b;">${t.ticketId}</span></td>
-                        <td><span class='branch-tag'>${t.branch}</span></td>
+                        <td><span style="font-weight:700; color:#2563eb;">${t.mobileNo || "N/A"}</span></td>
                         <td style="font-weight:700; color:#1e293b;">${t.customerName}</td>
                         <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#475569;" title="${t.issue}">${t.issue}</td>
                         <td style="font-size:12px; color:#64748b; font-weight:600;">${dateStr}</td>
                         <td><span style="padding:6px 12px; border-radius:20px; font-size:11px; font-weight:800; ${badgeColor}">${t.statusOfSupport}</span></td>
                         <td><button onclick="openManageTicket('${t.ticketId}')" class="btn-authenticate" style="width:auto; padding:8px 16px; font-size:12px; background:#3b82f6;">MANAGE</button></td>
                     </tr>`;
+
                 });
                 document.getElementById("ticketTableBody").innerHTML = html;
             }).catch(e => {
