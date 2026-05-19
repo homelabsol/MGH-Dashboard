@@ -239,8 +239,6 @@
             
             <div class="table-container" style="padding: 0; box-shadow: none; border: 1px solid #e2e8f0;">
                 <table style="width: 100%;">
-                   
-
                    <thead style="background: #f8fafc;">
                         <tr>
                             <th>Ticket ID</th>
@@ -252,8 +250,6 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-
-
                     <tbody id="ticketTableBody">
                         <tr><td colspan="7" style="text-align:center; padding: 20px;">Loading tickets from Firebase...</td></tr>
                     </tbody>
@@ -272,14 +268,21 @@
             
             <input type="hidden" id="editTicketId">
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div>
                     <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase;">Customer Name</label>
                     <input type="text" id="tkCust" class="login-input" readonly style="background:#f1f5f9; color:#475569; margin-top:5px; padding:12px; font-size:14px;">
                 </div>
                 <div>
-                    <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase;">Invoice / Ref No.</label>
+                    <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase;">Mobile / Ref No.</label>
                     <input type="text" id="tkInv" class="login-input" readonly style="background:#f1f5f9; color:#475569; margin-top:5px; padding:12px; font-size:14px;">
+                </div>
+                <div>
+                    <label style="font-size:11px; font-weight:800; color:#2563eb; text-transform: uppercase;">Target PC</label>
+                    <div style="display: flex; gap: 8px; margin-top: 5px;">
+                        <input type="text" id="tkPcName" class="login-input" readonly style="background:#eff6ff; color:#1d4ed8; font-weight:800; border-color:#bfdbfe; margin-top:0; padding:12px; font-size:14px; flex-grow: 1;">
+                        <button id="btnInstallRustDesk" class="btn-authenticate" onclick="triggerInstallRustDesk()" title="Push Install RustDesk" style="width: 48px; background: #f59e0b; display: none; align-items: center; justify-content: center; font-size: 20px; padding: 0; border-radius: 12px;">📥</button>
+                    </div>
                 </div>
             </div>
 
@@ -333,7 +336,10 @@
                 <input type="text" id="tkRem" class="login-input" placeholder="Additional notes..." style="background:white; color:#1e293b; border-color:#cbd5e1; margin-top:5px; padding:12px; font-size:14px;">
             </div>
 
-            <button class="btn-authenticate" onclick="saveTicketUpdate()" style="margin-top:20px; background:#10b981;">💾 SAVE & UPDATE TICKET</button>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-authenticate" onclick="saveTicketUpdate()" style="flex: 2; background:#10b981;">💾 SAVE & UPDATE TICKET</button>
+                <button id="btnRustDesk" class="btn-authenticate" style="flex: 1; background:#3b82f6; display:none;">🌐 1-CLICK REMOTE</button>
+            </div>
         </div>
     </div>
 
@@ -507,9 +513,7 @@
         let currentTicketFilter = "ALL"; 
         let currentUserBranch = "";
 
-
-
-async function verifyAccess() {
+        async function verifyAccess() {
             const u = document.getElementById('loginUser').value.trim();
             const p = document.getElementById('loginPass').value.trim();
             if(!u || !p) return alert("Paki-fill up lahat ng login details!");
@@ -551,7 +555,6 @@ async function verifyAccess() {
 
                     // 🛑 UI RESTRICTION LOGIC PARA SA MGA ROLES
                     if (currentUserRole === "ADMIN") {
-                        // 1. Kapag Helpdesk Admin: Tago lahat ng PC controls!
                         if(adminBtn) adminBtn.style.display = "none";
                         if(storageDiv) storageDiv.style.display = "none";
                         if(pcTableDiv) pcTableDiv.style.display = "none";
@@ -560,11 +563,9 @@ async function verifyAccess() {
                         if(branchSelect) branchSelect.style.display = "none";
                         document.getElementById('pcFilterContainer').style.display = "none";
 
-                        // 2. I-setup ang Support Button para sa kanila
                         supportBtn.disabled = false;
                         supportBtn.innerHTML = `<span style="font-size: 16px !important; margin: 0;">📋</span> TICKET VIEWER`;
                         
-                        // 3. Automatic buksan ang Ticket List pagka-login
                         setTimeout(() => { openSupportList(); }, 500);
                         setInterval(checkOpenTicketsAndAlert, 180000);
 
@@ -574,7 +575,6 @@ async function verifyAccess() {
                         supportBtn.style.cursor = "not-allowed";
                         supportBtn.innerHTML = `<span style="font-size: 16px !important; margin: 0;">🔒</span> Support List`;
                     } else {
-                        // Para sa MANAGER, TECHNICIAN, OWNER
                         supportBtn.disabled = false;
                         supportBtn.innerHTML = `<span style="font-size: 16px !important; margin: 0;">📋</span> Support List`;
                         setInterval(checkOpenTicketsAndAlert, 180000); 
@@ -591,11 +591,9 @@ async function verifyAccess() {
             }
         }
 
-
-
         // 🗣️ FUNCTION PARA SA EGAY VOICE ALERT
         function checkOpenTicketsAndAlert() {
-            if (currentUserRole === "SHOP OWNER") return; // Ligtas check lang
+            if (currentUserRole === "SHOP OWNER") return; 
             
             db.ref('SupportTickets').once('value').then(snapshot => {
                 let hasOpen = false;
@@ -616,17 +614,15 @@ async function verifyAccess() {
         window.setTicketFilter = function(filter) {
             currentTicketFilter = filter;
             
-            // Tanggalin ang active class sa lahat
             document.getElementById('btnTktAll').classList.remove('active');
             document.getElementById('btnTktOpen').classList.remove('active');
             document.getElementById('btnTktClosed').classList.remove('active');
             
-            // Ilagay ang active class sa pinindot
             if(filter === 'ALL') document.getElementById('btnTktAll').classList.add('active');
             if(filter === 'OPEN') document.getElementById('btnTktOpen').classList.add('active');
             if(filter === 'RESOLVED') document.getElementById('btnTktClosed').classList.add('active');
             
-            openSupportList(); // I-reload ang listahan base sa bagong filter
+            openSupportList(); 
         }
 
         // 📋 1. FUNCTION PARA BUKSAN ANG SUPPORT LIST AT MAG-FETCH SA FIREBASE
@@ -641,7 +637,7 @@ async function verifyAccess() {
                 let tickets = [];
                 
                 snapshot.forEach(child => { tickets.push(child.val()); });
-                tickets.reverse(); // Para mauna sa taas yung pinakabagong ticket
+                tickets.reverse(); 
 
                 // 🎛️ I-APPLY ANG FILTER SA LISTAHAN
                 let filteredTickets = tickets.filter(t => {
@@ -660,8 +656,7 @@ async function verifyAccess() {
                     let dateObj = new Date(t.timestamp);
                     let dateStr = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
-                    // Logic ng kulay ng badge
-                    let badgeColor = "background:#fef2f2; color:#ef4444; border:1px solid #fecaca;"; // Default OPEN
+                    let badgeColor = "background:#fef2f2; color:#ef4444; border:1px solid #fecaca;"; 
                     if (t.statusOfSupport === "RESOLVED") badgeColor = "background:#ecfdf5; color:#10b981; border:1px solid #a7f3d0;";
                     if (t.statusOfSupport === "IN PROGRESS") badgeColor = "background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe;";
 
@@ -674,7 +669,6 @@ async function verifyAccess() {
                         <td><span style="padding:6px 12px; border-radius:20px; font-size:11px; font-weight:800; ${badgeColor}">${t.statusOfSupport}</span></td>
                         <td><button onclick="openManageTicket('${t.ticketId}')" class="btn-authenticate" style="width:auto; padding:8px 16px; font-size:12px; background:#3b82f6;">MANAGE</button></td>
                     </tr>`;
-
                 });
                 document.getElementById("ticketTableBody").innerHTML = html;
             }).catch(e => {
@@ -682,7 +676,7 @@ async function verifyAccess() {
             });
         }
 
-        // 🛠️ 2. FUNCTION PARA BUKSAN ANG EDIT MODAL NG ISANG TICKET
+        // 🛠️ 2. FUNCTION PARA BUKSAN ANG EDIT MODAL NG ISANG TICKET (UPDATED DATA READER)
         window.openManageTicket = function(tId) {
             db.ref('SupportTickets/' + tId).once('value').then(snap => {
                 let t = snap.val();
@@ -690,11 +684,36 @@ async function verifyAccess() {
                 
                 // I-load ang Data sa HTML inputs
                 document.getElementById('editTicketId').value = t.ticketId;
-                document.getElementById('tkCust').value = t.customerName;
-                document.getElementById('tkInv').value = t.invoiceNo;
+                document.getElementById('tkCust').value = t.customerName || "N/A";
+                document.getElementById('tkInv').value = t.mobileNo || t.invoiceNo || "N/A";
+                document.getElementById('tkPcName').value = t.pcName || "N/A";
                 document.getElementById('tkIssue').value = t.issue;
+
+                // 🌐 RUSTDESK 1-CLICK LOGIC
+                let rdBtn = document.getElementById('btnRustDesk');
+                let installBtn = document.getElementById('btnInstallRustDesk');
+                rdBtn.style.display = "none"; 
+                installBtn.style.display = "none";
+
+                if (t.pcName && t.pcName !== "N/A" && globalSnapshot && globalSnapshot[t.branch] && globalSnapshot[t.branch][t.pcName]) {
+                    let pcGames = globalSnapshot[t.branch][t.pcName].Games || {};
+                    let remoteData = pcGames["Remote Access"]; 
+                    
+                    if (remoteData && remoteData.LaunchCmd && remoteData.LaunchCmd.includes("rustdesk://")) {
+                        // KUNG MERON NA: Ipakita ang Remote Button
+                        rdBtn.style.display = "block";
+                        rdBtn.onclick = function() {
+                            window.location.href = remoteData.LaunchCmd; 
+                        };
+                    } else {
+                        // KUNG WALA PA: Ipakita ang Push Install Button na maliit
+                        installBtn.style.display = "flex"; // flex para gumitna yung icon
+                        installBtn.dataset.branch = t.branch;
+                        installBtn.dataset.pc = t.pcName;
+                    }
+                }
                 
-                // 🔄 AUTO-FILL TECHNICIAN NAME (Gagamitin ang currentClientName kung blank pa ang ticket)
+                // 🔄 AUTO-FILL TECHNICIAN NAME
                 document.getElementById('tkTech').value = t.assignedTechnician || currentClientName;
                 
                 document.getElementById('tkStatus').value = t.statusOfSupport || "OPEN";
@@ -704,7 +723,6 @@ async function verifyAccess() {
                 document.getElementById('tkReso').value = t.resolution || "";
                 document.getElementById('tkRem').value = t.remarks || "";
 
-                // Itago yung listahan, ipalabas yung Editor
                 document.getElementById('supportListModal').style.display='none';
                 document.getElementById('editTicketModal').style.display='flex';
             });
@@ -715,7 +733,6 @@ async function verifyAccess() {
             let tId = document.getElementById('editTicketId').value;
             if(!tId) return;
 
-            // Kunin ang mga bagong tinype ng Technician
             let updates = {
                 assignedTechnician: document.getElementById('tkTech').value.trim(),
                 statusOfSupport: document.getElementById('tkStatus').value,
@@ -726,12 +743,26 @@ async function verifyAccess() {
                 remarks: document.getElementById('tkRem').value.trim(),
             };
 
-            // I-push sa Firebase Database
             db.ref('SupportTickets/' + tId).update(updates).then(() => {
                 alert("✅ Ticket successfully updated!");
                 document.getElementById('editTicketModal').style.display='none';
-                openSupportList(); // Balik sa listahan at i-refresh para makita ang pagbabago
+                openSupportList(); 
             }).catch(e => alert("Error saving: " + e.message));
+        }
+
+        // 📥 4. FUNCTION PARA SA PUSH INSTALL RUSTDESK
+        window.triggerInstallRustDesk = function() {
+            let btn = document.getElementById('btnInstallRustDesk');
+            let branch = btn.dataset.branch;
+            let pc = btn.dataset.pc;
+            if(!branch || !pc) return;
+
+            if(confirm(`⚠️ Wala pang RustDesk ang ${pc}.\n\nGusto mo bang utusan ang PC na i-download at i-setup ito ngayon sa background?`)) {
+                sendFirebaseCommand(branch, pc, "Remote Access", "INSTALL_RUSTDESK");
+                alert(`✅ Command sent! Ang Agent sa ${pc} ay mag-iinstall na ng RustDesk.\n\nI-close muna ang ticket na ito at balikan mo mamaya kapag lumitaw na ang 1-Click Remote button.`);
+                document.getElementById('editTicketModal').style.display='none';
+                document.getElementById('supportListModal').style.display='flex';
+            }
         }
 
         function speakMessage(text) {
@@ -763,11 +794,10 @@ async function verifyAccess() {
 
             const chatBox = document.getElementById('ai-messages');
 
-            // 🚨 INTERCEPTOR PARA SA TOPIC 24 (TELEGRAM SOS TICKET)
+            // 🚨 INTERCEPTOR PARA SA TOPIC 24 (TELEGRAM SOS TICKET & RUSTDESK)
             if (userMsg === "24") {
                 
-                // 🛑 FILTER / CONFIRMATION BAGO MAG-TICKET
-                let isSure = confirm("⚠️ WAIT LANG PO!\n\nSigurado po ba kayo na WALA sa Number 1 hanggang 23 ang kailangan niyong support?\n\n👉 Click 'OK' (Yes, Wala po) para tumawag ng Technician.\n👉 Click 'Cancel' (No, Meron po) para hanapin muli sa listahan.");
+                let isSure = confirm("⚠️ WAIT LANG PO!\n\nSigurado po ba kayo na WALA sa Number 1 hanggang 23 ang kailangan niyong support?\n\n👉 Click 'OK' para tumawag ng Technician.\n👉 Click 'Cancel' para hanapin muli sa listahan.");
                 
                 if (!isSure) {
                     chatBox.innerHTML += `<div class="msg-bubble msg-user">24</div>`;
@@ -777,64 +807,34 @@ async function verifyAccess() {
                     return; 
                 }
 
-                let custName = prompt("🚨 [MGH TICKET] Ilagay ang Customer/Owner Name:");
-                if (!custName) return;
-                
-                let datePurchased = prompt("📅 Date of Purchase (Kailan binili - MM/DD/YYYY):");
-                if (!datePurchased) return;
-                
-                let invoiceNum = prompt("🧾 Invoice Number / Reference No:");
-                if (!invoiceNum) return;
-                
-                let mobileNum = prompt("📱 Mobile Number ng Kontak:");
-                if (!mobileNum) return;
-                
-                let issue = prompt("⚠️ Issue Encountered (Anong problema ng PC/Shop?):");
-                if (!issue) return;
+                // 🌐 BUO NG PC OPTIONS BASE SA ACTIVE BRANCH MO SA FIREBASE
+                let pcOptions = `<option value="">-- Pumili ng PC --</option>`;
+                if (activeBranch !== "NONE" && globalSnapshot && globalSnapshot[activeBranch]) {
+                    for (let pc in globalSnapshot[activeBranch]) {
+                        pcOptions += `<option value="${pc}">${pc}</option>`;
+                    }
+                } else {
+                    pcOptions = `<option value="N/A">Walang ma-detect na PC</option>`;
+                }
 
-                chatBox.innerHTML += `<div class="msg-bubble msg-user">Pinindot ang No. 24: Nag-submit ng Support Ticket</div>`;
-                chatBox.innerHTML += `<div class="msg-bubble msg-bot">⏳ Copy, Boss! Ipinapadala na ang Urgent Support Ticket sa Telegram Group ng mga Tech Team natin...</div>`;
+                // 📝 INJECT ANG FORM SA LOOB NG CHAT BUBBLE
+                let formHtml = `
+                    <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;">
+                        <div style="font-weight: 800; color: #ef4444; margin-bottom: 10px;">🚨 URGENT TICKET FORM</div>
+                        <input type="text" id="sosCust" placeholder="Pangalan mo (Customer/Owner)" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px;">
+                        <input type="text" id="sosMobile" placeholder="Mobile Number" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px;">
+                        <select id="sosPc" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px; background: white; color: black; cursor: pointer;">
+                            ${pcOptions}
+                        </select>
+                        <textarea id="sosIssue" placeholder="Ano po ang problema ng PC?" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px; resize: none; min-height: 60px;"></textarea>
+                        <button onclick="submitSosTicket()" class="btn-authenticate" style="background: #ef4444; padding: 10px; font-size: 12px;">📤 SUBMIT TICKET</button>
+                    </div>
+                `;
+
+                chatBox.innerHTML += `<div class="msg-bubble msg-user">24</div>`;
+                chatBox.innerHTML += `<div class="msg-bubble msg-bot">${formHtml}</div>`;
                 inputField.value = "";
                 chatBox.scrollTop = chatBox.scrollHeight;
-
-                // 💾 I-SAVE ANG TICKET SA FIREBASE (SupportTickets Node)
-                let ticketId = "TKT-" + Date.now();
-                let ticketData = {
-                    ticketId: ticketId,
-                    customerName: custName,
-                    datePurchased: datePurchased,
-                    invoiceNo: invoiceNum,
-                    mobileNo: mobileNum,
-                    issue: issue,
-                    assignedTechnician: "",
-                    resolution: "",
-                    statusOfSupport: "OPEN",
-                    itemWarrantyDetails: "",
-                    itemSerialNo: "",
-                    warrantyStatus: "N/A",
-                    remarks: "",
-                    timestamp: new Date().toISOString(),
-                    branch: activeBranch
-                };
-                db.ref('SupportTickets/' + ticketId).set(ticketData).catch(e => console.error("Firebase save error: " + e.message));
-
-                // ✈️ IPASA ANG DATA SA TELEGRAM
-                fetch(GAS_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'text/plain'
-                    },
-                    body: JSON.stringify({
-                        action: 'TELEGRAM_SOS',
-                        branch: activeBranch,
-                        customer: custName,
-                        date: datePurchased,
-                        invoice: invoiceNum,
-                        mobile: mobileNum,
-                        issueEncountered: issue
-                    })
-                });
                 return; 
             }
 
@@ -960,11 +960,6 @@ Customer Question: `;
             });
         }
 
-
-
-
-
-
     function updateBranchDropdown() {
             if (!globalSnapshot) return;
             const branches = Object.keys(globalSnapshot);
@@ -1049,12 +1044,6 @@ Customer Question: `;
             }
         }
 
-
-
-
-
-
-
         function populateDropdown(id) {
             let sel = document.getElementById(id);
             let currentVal = sel.value;
@@ -1081,8 +1070,6 @@ Customer Question: `;
                 sel.selectedIndex = firstEnabledIdx;
             }
         }
-
-
 
 function renderUI() {
             if(!globalSnapshot) return;
@@ -1168,6 +1155,11 @@ function renderUI() {
                             continue; 
                         }
 
+                        // 🟢 AUTO-HIDE REMOTE ACCESS KAPAG COMPLETE NA
+                        if (gameName === "Remote Access" && (info.Status.includes("Ready") || info.Status.includes("SUCCESS"))) {
+                            continue;
+                        }
+
                         if (currentFilter !== "ALL" && currentFilter !== pc) continue;
 
                         const isUpdateReq = info.Status === "Pending" || info.Status.includes("Force Update") || info.UpdateInfo === "Click Force Update";
@@ -1228,13 +1220,6 @@ function renderUI() {
             document.getElementById("countUp").innerText = upCount;
             document.getElementById("countDown").innerText = pndCount;
         }
-
-       
-
-
-
-
-
 
         function formatBytes(bytes) {
             if(bytes === "FOLDER" || !bytes || isNaN(bytes)) return bytes || "";
@@ -1557,7 +1542,7 @@ function renderUI() {
                 alert("Failed to send request.");
             }
         }
-    </script>    
+    </script>   
 
 </body>
 </html>
