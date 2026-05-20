@@ -60,29 +60,50 @@
         .stat-value { font-size: 24px; font-weight: 800; margin-bottom: 2px;}
         .stat-label { font-size: 11px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;}
 
-        .table-container { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow-x: auto; width: 100%; box-sizing: border-box; }
+        /* 🌟 ENTERPRISE TABLE STYLING POLISH */
+        .table-container { background: var(--card-bg); border-radius: 12px; padding: 20px 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow-x: auto; width: 100%; box-sizing: border-box; border: 1px solid #e2e8f0; max-height: 70vh; overflow-y: auto;}
         .sync-status { text-align: right; font-size: 12px; color: var(--text-muted); margin-bottom: 20px; font-weight: 600; display: flex; justify-content: flex-end; align-items: center; gap: 6px;}
         .sync-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
         
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        th { padding: 16px 20px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid var(--border); letter-spacing: 0.5px; }
-        td { padding: 18px 20px; font-size: 14px; font-weight: 500; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background 0.2s; }
+        
+        th { padding: 14px 20px; text-align: left; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 2px solid var(--border); letter-spacing: 1px; white-space: nowrap; position: sticky; top: 0; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); z-index: 10; }
+        
+        td { padding: 16px 20px !important; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background 0.2s; white-space: nowrap !important; color: #334155; }
+        
         tr:hover td { background-color: #f8fafc; }
         
-        .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
-        .badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
-        .needs-update { background-color: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
-        .needs-update::before { background-color: var(--danger); }
-        .is-updated { background-color: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
-        .is-updated::before { background-color: var(--success); }
-        .is-busy { background-color: #fffbeb; color: var(--warning); border: 1px solid #fde68a; }
+        /* Premium Badges */
+        .badge { padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+        
+        .needs-update { background-color: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
+        .needs-update::before { background-color: #ef4444; }
+        .is-updated { background-color: #ecfdf5; color: #10b981; border: 1px solid #a7f3d0; }
+        .is-updated::before { background-color: #10b981; }
+        .is-busy { background-color: #fffbeb; color: #f59e0b; border: 1px solid #fde68a; }
+        .is-busy::before { background-color: #f59e0b; }
 
-        .branch-tag { background-color: #f8fafc; color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); white-space: nowrap; display: inline-block; }
-        .pc-name { font-weight: 700; color: var(--text-main); }
-        .game-name { font-weight: 600; color: var(--text-main); }
-        .last-sync { color: var(--text-muted); font-size: 12px; }
+        .branch-tag { background-color: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; border: 1px solid #cbd5e1; }
+        .pc-name { font-weight: 800; color: #2563eb; }
+        .game-name { font-weight: 700; color: #0f172a; }
+        .last-sync { color: #94a3b8; font-size: 12px; font-weight: 500; }
 
-        .btn-update { border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; min-width: 110px; max-width: 140px; text-align: center; cursor: pointer; white-space: nowrap; }
+        .btn-update { 
+            border: none !important; 
+            padding: 5px 10px !important; 
+            border-radius: 6px !important; 
+            font-size: 11px !important; 
+            font-weight: 600 !important; 
+            transition: all 0.2s ease !important; 
+            width: auto !important; 
+            min-width: 0 !important; 
+            max-width: none !important; 
+            text-align: center !important; 
+            cursor: pointer !important; 
+            white-space: nowrap !important; 
+        }
+
         .btn-active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .btn-active:hover { background: var(--primary-hover); transform: translateY(-2px); }
         .btn-busy { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
@@ -141,10 +162,6 @@
             td { padding: 12px 10px; font-size: 12px; }
             .btn-update { font-size: 11px; padding: 8px; min-width: 90px; }
         }
-
-/* 🌟 UI POLISH: STICKY HEADER & TABLE SCROLL */
-        .table-container { max-height: 65vh; overflow-y: auto; overflow-x: auto; }
-        th { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         /* 🌟 UI POLISH: SMOOTH MODAL ANIMATIONS */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -681,6 +698,35 @@
             db.ref('SupportTickets/' + tId).once('value').then(snap => {
                 let t = snap.val();
                 if(!t) return alert("Hindi mahanap ang ticket sa database!");
+
+                let rdBtn = document.getElementById('btnRustDesk');
+                let installBtn = document.getElementById('btnInstallRustDesk');
+                
+                // Itago muna pareho bago mag-check
+                rdBtn.style.display = "none"; 
+                installBtn.style.display = "none";
+
+                let branch = t.branch;
+                let pc = t.pcName;
+
+                // Direct fetch sa Firebase base sa kung anong branch at PC ang nasa ticket
+                if (branch && pc) {
+                    db.ref(`Branches/${branch}/${pc}/Games`).once('value').then(gamesSnap => {
+                        let games = gamesSnap.val() || {};
+                        let remoteData = games["Remote Access"] || games["Remote_Access"];
+                        
+                        if (remoteData && remoteData.LaunchCmd) {
+                            rdBtn.style.display = "block";
+                            rdBtn.onclick = function() { window.location.href = remoteData.LaunchCmd; };
+                        } else {
+                            installBtn.style.display = "flex";
+                            installBtn.dataset.branch = branch;
+                            installBtn.dataset.pc = pc;
+                        }
+                    });
+                } else {
+                    installBtn.style.display = "flex";
+                }
                 
                 // I-load ang Data sa HTML inputs
                 document.getElementById('editTicketId').value = t.ticketId;
@@ -688,34 +734,7 @@
                 document.getElementById('tkInv').value = t.mobileNo || t.invoiceNo || "N/A";
                 document.getElementById('tkPcName').value = t.pcName || "N/A";
                 document.getElementById('tkIssue').value = t.issue;
-
-                // 🌐 RUSTDESK 1-CLICK LOGIC
-                let rdBtn = document.getElementById('btnRustDesk');
-                let installBtn = document.getElementById('btnInstallRustDesk');
-                rdBtn.style.display = "none"; 
-                installBtn.style.display = "none";
-
-                if (t.pcName && t.pcName !== "N/A" && globalSnapshot && globalSnapshot[t.branch] && globalSnapshot[t.branch][t.pcName]) {
-                    let pcGames = globalSnapshot[t.branch][t.pcName].Games || {};
-                    let remoteData = pcGames["Remote Access"]; 
-                    
-                    if (remoteData && remoteData.LaunchCmd && remoteData.LaunchCmd.includes("rustdesk://")) {
-                        // KUNG MERON NA: Ipakita ang Remote Button
-                        rdBtn.style.display = "block";
-                        rdBtn.onclick = function() {
-                            window.location.href = remoteData.LaunchCmd; 
-                        };
-                    } else {
-                        // KUNG WALA PA: Ipakita ang Push Install Button na maliit
-                        installBtn.style.display = "flex"; // flex para gumitna yung icon
-                        installBtn.dataset.branch = t.branch;
-                        installBtn.dataset.pc = t.pcName;
-                    }
-                }
-                
-                // 🔄 AUTO-FILL TECHNICIAN NAME
                 document.getElementById('tkTech').value = t.assignedTechnician || currentClientName;
-                
                 document.getElementById('tkStatus').value = t.statusOfSupport || "OPEN";
                 document.getElementById('tkSerial').value = t.itemSerialNo || "";
                 document.getElementById('tkWarranty').value = t.warrantyStatus || "N/A";
@@ -817,12 +836,13 @@
                     pcOptions = `<option value="N/A">Walang ma-detect na PC</option>`;
                 }
 
-                // 📝 INJECT ANG FORM SA LOOB NG CHAT BUBBLE
+               // 📝 INJECT ANG FORM SA LOOB NG CHAT BUBBLE (MAY INVOICE# NA)
                 let formHtml = `
                     <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;">
                         <div style="font-weight: 800; color: #ef4444; margin-bottom: 10px;">🚨 URGENT TICKET FORM</div>
                         <input type="text" id="sosCust" placeholder="Pangalan mo (Customer/Owner)" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px;">
                         <input type="text" id="sosMobile" placeholder="Mobile Number" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px;">
+                        <input type="text" id="sosInv" placeholder="Invoice#" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px;">
                         <select id="sosPc" class="login-input" style="padding: 10px; font-size: 12px; border-color: #cbd5e1; margin-bottom: 8px; background: white; color: black; cursor: pointer;">
                             ${pcOptions}
                         </select>
@@ -1184,15 +1204,23 @@ function renderUI() {
                         else if (isUpdateReq) priorityScore = 1; // 2nd Priority (Needs Update)
                         else if (isBusy) priorityScore = 2;   // 3rd Priority (Currently Downloading)
 
+                        // 🌟 ENTERPRISE FIX: CLEAN UP STATUS TEXT
+                        let displayStatus = info.UpdateInfo || info.Status;
+                        if (displayStatus && displayStatus.includes("New Version Available")) {
+                            displayStatus = "New Version Update";
+                        }
+
                         let rowHtml = `
                             <tr>
                                 <td><span class='branch-tag'>${branch}</span></td>
                                 <td><span class='pc-name'>${pc}</span></td>
-                                <td><span class='game-name'>${cleanGame}</span></td>
-                                <td>${info.Status}</td>
-                                <td><span class='badge ${badgeClass}'>${info.UpdateInfo || info.Status}</span></td>
+                                <td style="max-width: 280px; overflow: hidden; text-overflow: ellipsis;" title="${cleanGame}">
+                                    <span class='game-name'>${cleanGame}</span>
+                                </td>
+                                <td><span style="font-weight: 600; color: #64748b;">${info.Status}</span></td>
+                                <td><span class='badge ${badgeClass}'>${displayStatus}</span></td>
                                 <td><span class='last-sync'>${info.LastSync || "Just now"}</span></td>
-                                <td>${actionBtn}</td>
+                                <td style="text-align: right;">${actionBtn}</td>
                             </tr>
                         `;
 
@@ -1542,6 +1570,91 @@ function renderUI() {
                 alert("Failed to send request.");
             }
         }
+
+
+// 🚨 MISSING FUNCTION: URGENT TICKET SUBMISSION + TELEGRAM ALERT
+        window.submitSosTicket = function() {
+            const cust = document.getElementById('sosCust').value.trim();
+            const mobile = document.getElementById('sosMobile').value.trim();
+            const inv = document.getElementById('sosInv').value.trim(); // Invoice#
+            const pc = document.getElementById('sosPc').value;
+            const issue = document.getElementById('sosIssue').value.trim();
+
+            if (!cust || !mobile || !inv || !pc || !issue) {
+                return alert("⚠️ Paki-fill up lahat ng fields (kailangan ang Invoice#)!");
+            }
+
+            const btn = document.querySelector('button[onclick="submitSosTicket()"]');
+            btn.innerText = "⏳ SENDING...";
+            btn.disabled = true;
+
+            // Generate random Ticket ID
+            const ticketId = "TKT-" + Date.now().toString().slice(-6);
+            
+            // Hanapin kung anong branch ang active
+            let targetBranch = activeBranch !== "NONE" && activeBranch !== "ALL" ? activeBranch : currentUserBranch;
+
+            const ticketData = {
+                ticketId: ticketId,
+                customerName: cust,
+                mobileNo: mobile,
+                invoiceNo: inv, // Isinama sa data
+                pcName: pc,
+                branch: targetBranch,
+                issue: "🚨 [URGENT AI TICKET] " + issue,
+                timestamp: new Date().toISOString(),
+                statusOfSupport: "OPEN",
+                assignedTechnician: "",
+                itemSerialNo: "",
+                warrantyStatus: "N/A",
+                itemWarrantyDetails: "",
+                resolution: "",
+                remarks: "Submitted via AI Bot"
+            };
+
+            // 1. I-SAVE SA FIREBASE MUNA
+            db.ref('SupportTickets/' + ticketId).set(ticketData).then(() => {
+                
+                // ==========================================
+                // 2. I-SEND SA TELEGRAM
+                // ==========================================
+                // 👉👉👉 PAALALA: ILAGAY MO DITO YUNG TOTOONG TOKEN AT CHAT ID MO 👈👈👈
+                const telegramBotToken = "8977767453:AAGAu4RLPJhZVhSyIOfXPN9JDzs7_HzQils"; 
+                const telegramChatId = "-1003901231973"; 
+                
+                const tgMessage = `🚨 *URGENT SUPPORT TICKET* 🚨\n\n` +
+                                  `🆔 *Ticket ID:* ${ticketId}\n` +
+                                  `📍 *Branch:* ${targetBranch}\n` +
+                                  `👤 *Customer:* ${cust}\n` +
+                                  `📱 *Mobile:* ${mobile}\n` +
+                                  `🧾 *Invoice#:* ${inv}\n` +
+                                  `💻 *PC:* ${pc}\n\n` +
+                                  `⚠️ *Issue:* ${issue}`;
+
+                // I-push sa Telegram API
+                fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: telegramChatId,
+                        text: tgMessage,
+                        parse_mode: 'Markdown'
+                    })
+                }).then(() => {
+                    alert(`✅ URGENT TICKET SENT!\n\nNa-save sa database at nai-send na rin sa Telegram mo.\nTicket ID: ${ticketId}`);
+                    document.getElementById('ai-chat-window').style.display = 'none'; // I-close ang chat window
+                }).catch(err => {
+                    alert("✅ Na-save sa Firebase, pero nag-error ang Telegram: " + err.message);
+                });
+
+            }).catch(e => {
+                alert("❌ Firebase Error: " + e.message);
+                btn.innerText = "📤 SUBMIT TICKET";
+                btn.disabled = false;
+            });
+        }
+
+
     </script>   
 
 </body>
