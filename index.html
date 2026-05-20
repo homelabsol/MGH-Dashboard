@@ -983,89 +983,96 @@ Customer Question: `;
             });
         }
 
-    function updateBranchDropdown() {
-            if (!globalSnapshot) return;
-            const branches = Object.keys(globalSnapshot);
-            let sel = document.getElementById('globalBranchSelect');
-            let accDatalist = document.getElementById('newAccBranchList'); 
-            let currentVal = sel.value;
-            
-            // 🛠️ CHECK KUNG SINO LANG ANG PWEDENG MAKAKITA NG DROPDOWN
-            let isDropdownAllowed = (currentUserRole === "OWNER" || currentUserRole === "MANAGER" || currentUserRole === "TECHNICIAN");
-            
-            accDatalist.innerHTML = "";
-            sel.innerHTML = "";
+function updateBranchDropdown() {
+        if (!globalSnapshot) return;
+        const branches = Object.keys(globalSnapshot);
+        let sel = document.getElementById('globalBranchSelect');
+        let accDatalist = document.getElementById('newAccBranchList'); 
+        let currentVal = sel.value;
+        
+        // 🛠️ CHECK KUNG SINO LANG ANG PWEDENG MAKAKITA NG DROPDOWN
+        let isDropdownAllowed = (currentUserRole === "OWNER" || currentUserRole === "ADMIN" || currentUserRole === "MANAGER" || currentUserRole === "TECHNICIAN");
+        
+        accDatalist.innerHTML = "";
+        sel.innerHTML = "";
 
-            if (isDropdownAllowed) {
-                // 🌐 PARA SA MGA ADMIN / TECH / MANAGER - Ipakita ang Dropdown
-                sel.style.display = "inline-block";
-                sel.innerHTML = '<option value="ALL">🌐 VIEW ALL BRANCHES</option>';
+        if (isDropdownAllowed) {
+            // 🌐 PARA SA MGA ADMIN / TECH / MANAGER - Ipakita ang Dropdown
+            sel.style.display = "inline-block";
+            sel.innerHTML = '<option value="ALL">🌐 VIEW ALL BRANCHES</option>';
 
-                branches.forEach(b => {
-                    let disabled = isRestricted(b);
-                    let disabledAttr = disabled ? "disabled" : "";
-                    let lockText = disabled ? " 🔒 (Restricted)" : "";
+            branches.forEach(b => {
+                let disabled = isRestricted(b);
+                let disabledAttr = disabled ? "disabled" : "";
+                let lockText = disabled ? " 🔒 (Restricted)" : "";
 
-                    sel.innerHTML += `<option value="${b}" ${disabledAttr}>${b}${lockText}</option>`;
-                    
-                    if (!disabled) {
-                        accDatalist.innerHTML += `<option value="${b}">`;
-                    }
-                });
+                sel.innerHTML += `<option value="${b}" ${disabledAttr}>${b}${lockText}</option>`;
                 
-                if (currentVal && sel.querySelector(`option[value="${currentVal}"]:not([disabled])`)) {
-                    sel.value = currentVal;
-                } else {
-                    sel.value = "ALL";
-                    activeBranch = "ALL";
+                if (!disabled) {
+                    accDatalist.innerHTML += `<option value="${b}">`;
                 }
-
-                // Itago ang static label kung meron
-                let staticDisp = document.getElementById('staticBranchDisplay');
-                if (staticDisp) staticDisp.style.display = "none";
-
+            });
+            
+            if (currentVal && sel.querySelector(`option[value="${currentVal}"]:not([disabled])`)) {
+                sel.value = currentVal;
             } else {
-                // 🛑 PARA SA SHOP OWNER - Itago ang Dropdown at gawing Static Label
-                sel.style.display = "none";
+                sel.value = "ALL";
+                activeBranch = "ALL";
+            }
 
-                let myBranch = "";
-                let cleanClient = currentClientName.replace(/[^A-Z0-9]/g, '');
-                let cleanAssigned = currentUserBranch.replace(/[^A-Z0-9]/g, '');
+            // Itago ang static label kung meron
+            let staticDisp = document.getElementById('staticBranchDisplay');
+            if (staticDisp) staticDisp.style.display = "none";
 
-                // Hanapin sa listahan ang branch nila
-                branches.forEach(b => {
-                    let cleanBranch = b.replace(/[^A-Z0-9]/g, '').toUpperCase();
-                    if ((cleanAssigned !== "" && (cleanBranch === cleanAssigned || cleanBranch.includes(cleanAssigned) || cleanAssigned.includes(cleanBranch))) ||
-                        (cleanClient !== "" && (cleanBranch === cleanClient || cleanBranch.includes(cleanClient) || cleanClient.includes(cleanBranch)))) {
-                        myBranch = b;
-                    }
-                });
+        } else {
+            // 🛑 PARA SA SHOP OWNER - Itago ang Dropdown at gawing Static Label
+            sel.style.display = "none";
 
-                activeBranch = myBranch !== "" ? myBranch : "NONE";
+            let myBranch = "";
+            
+            // 🌟 ETO YUNG FIX: Isinama na ang 'a-zA-Z0-9' at ginawang toLowerCase para sakto ang spelling!
+            let cleanClient = currentClientName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            let cleanAssigned = currentUserBranch.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 
-                // Gumawa ng magandang Static Label para sa Shop Owner
-                let staticDisp = document.getElementById('staticBranchDisplay');
-                if (!staticDisp) {
-                    staticDisp = document.createElement('div');
-                    staticDisp.id = 'staticBranchDisplay';
-                    staticDisp.style.cssText = "margin-top:8px; padding:10px 16px; border-radius:8px; font-weight:800; font-size:14px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);";
-                    sel.parentNode.insertBefore(staticDisp, sel.nextSibling);
+            // Hanapin sa listahan ang branch nila
+            branches.forEach(b => {
+                let cleanBranch = b.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                
+                if ((cleanAssigned !== "" && (cleanBranch === cleanAssigned || cleanBranch.includes(cleanAssigned) || cleanAssigned.includes(cleanBranch))) ||
+                    (cleanClient !== "" && (cleanBranch === cleanClient || cleanBranch.includes(cleanClient) || cleanClient.includes(cleanBranch)))) {
+                    myBranch = b;
                 }
-                staticDisp.style.display = "inline-flex";
+            });
 
-                if (activeBranch === "NONE") {
-                    staticDisp.innerHTML = `❌ WALANG ACTIVE PC SA BRANCH MO`;
-                    staticDisp.style.color = "#ef4444";
-                    staticDisp.style.background = "rgba(239,68,68,0.1)";
-                    staticDisp.style.border = "1px solid rgba(239,68,68,0.3)";
-                } else {
-                    staticDisp.innerHTML = `📍 BRANCH: ${activeBranch.toUpperCase()}`;
-                    staticDisp.style.color = "#1d4ed8";
-                    staticDisp.style.background = "#eff6ff";
-                    staticDisp.style.border = "2px solid #2563eb";
-                }
+            activeBranch = myBranch !== "" ? myBranch : "NONE";
+
+            // Gumawa ng magandang Static Label para sa Shop Owner
+            let staticDisp = document.getElementById('staticBranchDisplay');
+            if (!staticDisp) {
+                staticDisp = document.createElement('div');
+                staticDisp.id = 'staticBranchDisplay';
+                staticDisp.style.cssText = "margin-top:8px; padding:10px 16px; border-radius:8px; font-weight:800; font-size:14px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);";
+                sel.parentNode.insertBefore(staticDisp, sel.nextSibling);
+            }
+            staticDisp.style.display = "inline-flex";
+
+            if (activeBranch === "NONE") {
+                staticDisp.innerHTML = `❌ WALANG ACTIVE PC SA BRANCH MO`;
+                staticDisp.style.color = "#ef4444";
+                staticDisp.style.background = "rgba(239,68,68,0.1)";
+                staticDisp.style.border = "1px solid rgba(239,68,68,0.3)";
+            } else {
+                staticDisp.innerHTML = `📍 BRANCH: ${activeBranch.toUpperCase()}`;
+                staticDisp.style.color = "#1d4ed8";
+                staticDisp.style.background = "#eff6ff";
+                staticDisp.style.border = "2px solid #2563eb";
             }
         }
+    }
+
+    
+
+
 
         function populateDropdown(id) {
             let sel = document.getElementById(id);
@@ -1261,25 +1268,40 @@ function renderUI() {
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        function isRestricted(branch) {
-            if (currentUserRole === "OWNER") return false; // Allowed lahat kapag Owner
+        
 
-            let cleanClient = currentClientName.replace(/[^A-Z0-9]/g, '');
-            let cleanAssigned = currentUserBranch.replace(/[^A-Z0-9]/g, '');
-            let cleanBranch = branch.replace(/[^A-Z0-9]/g, '').toUpperCase();
+function isRestricted(branch) {
+            // 1. OWNER at ADMIN - Walang harang, makikita lahat
+            if (currentUserRole === "OWNER" || currentUserRole === "ADMIN") {
+                return false; 
+            }
 
-            // 1. I-check kung tugma sa Assigned Branch niya galing Database
-            if (cleanAssigned !== "" && (cleanBranch === cleanAssigned || cleanBranch.includes(cleanAssigned) || cleanAssigned.includes(cleanBranch))) {
+            // 2. MANAGER at TECHNICIAN - Bawal sa Concepcion at Parang
+            if (currentUserRole === "MANAGER" || currentUserRole === "TECHNICIAN") {
+                // Diretsong harang sa eksaktong pangalan ng dalawang main branches
+                if (branch === "MGH-Concepcion" || branch === "MGH-Parang" || branch === "MGH-CONCEPCION") {
+                    return true; // 🔒 Naka-lock! Bawal sila dito.
+                }
+                return false; // Pwede sila sa lahat ng ibang branch
+            }
+
+            // 3. SHOP OWNER - Makikita LANG ang naka-assign na branch sa kanila
+            let checkBranch = branch.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            let client = currentClientName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            let assigned = currentUserBranch.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+            if (assigned !== "" && (checkBranch === assigned || checkBranch.includes(assigned) || assigned.includes(checkBranch))) {
                 return false; 
             }
             
-            // 2. I-check kung tugma sa mismong Client Name (Fallback kung walang branch data)
-            if (cleanClient !== "" && (cleanBranch === cleanClient || cleanBranch.includes(cleanClient) || cleanClient.includes(cleanBranch))) {
+            if (client !== "" && (checkBranch === client || checkBranch.includes(client) || client.includes(checkBranch))) {
                 return false; 
             }
 
-            return true; // Kapag wala talagang match sa dalawa, HARANG!
+            return true; // HARANG lahat ng hindi nag-match
         }
+
+
 
         let genTarget = ""; let genCmd = "";
 
