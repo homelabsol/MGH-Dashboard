@@ -8,6 +8,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
     <style>
         :root {
@@ -45,15 +46,24 @@
         .pc-filter-btn:hover { background: rgba(255,255,255,0.15); color: white; }
         .pc-filter-btn.active { background: var(--primary); color: white; border-color: var(--primary-hover); box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
 
-        .admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
-        .grid-btn { background: #f8fafc; color: #1e293b; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 5px; text-align: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); height: 95px; }
-        .grid-btn span { font-size: 26px !important; line-height: 1; margin-bottom: 2px; }
-        .grid-btn:hover:not(:disabled) { background: #f1f5f9; transform: translateY(-2px); border-color: #cbd5e1; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        .grid-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .grid-btn.warning-btn { color: #b45309; border-color: #fde68a; background: #fffbeb; }
-        .grid-btn.action-btn { color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff; }
-        .grid-btn.driver-btn { color: #047857; border-color: #a7f3d0; background: #ecfdf5; }
-        .grid-btn.diag-btn { color: #8b5cf6; border-color: #ddd6fe; background: #faf5ff; }
+        /* 🏢 ENTERPRISE ADMIN TOOLS */
+        .admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .admin-divider { grid-column: 1/-1; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #94a3b8; padding: 12px 2px 4px; border-top: 1px solid #f1f5f9; }
+        .admin-divider:first-child { border-top: none; padding-top: 0; }
+        .grid-btn { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; align-items: center; padding: 18px 8px; gap: 10px; position: relative; width: 100%; }
+        .grid-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1); border-color: var(--hover-border, #cbd5e1); }
+        .grid-btn:active { transform: translateY(0) scale(0.97); box-shadow: none; }
+        .grid-btn .btn-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .grid-btn:hover .btn-icon { transform: scale(1.1) rotate(-5deg); }
+        .grid-btn .btn-label { font-size: 11.5px; font-weight: 700; color: #475569; letter-spacing: 0.1px; }
+        .grid-btn.span-full { grid-column: 1/-1; flex-direction: row; justify-content: center; padding: 14px 20px; gap: 14px; background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%); border-color: #a7f3d0; }
+        .grid-btn.span-full .btn-label { font-size: 13px; }
+        .grid-btn.span-full:hover { border-color: #6ee7b7; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); }
+
+        /* 🎨 ENTERPRISE MODAL CONSISTENCY */
+        .modal-card { border-radius: 20px; }
+        .modal-card .btn-authenticate { border-radius: 12px; font-weight: 700; }
+        .modal-card .login-input, .modal-card .branch-selector { border-radius: 10px; }
 
         .stats-container { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
         .stat-box { background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center; backdrop-filter: blur(10px); min-width: 100px; }
@@ -175,6 +185,26 @@
         /* 🌟 UI POLISH: INTERACTIVE LOADING BUTTONS */
         @keyframes pulse-bg { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
         .btn-busy { animation: pulse-bg 1.5s infinite ease-in-out; border: 1px dashed #94a3b8; }
+
+        /* 🔔 PREMIUM TOAST NOTIFICATION SYSTEM */
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: rgba(15, 23, 42, 0.95); color: white; padding: 16px 24px; border-radius: 14px; font-size: 14px; font-weight: 600; box-shadow: 0 15px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; pointer-events: auto; animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; backdrop-filter: blur(20px); max-width: 380px; min-width: 260px; }
+        .toast.success { border-left: 4px solid #10b981; }
+        .toast.error { border-left: 4px solid #ef4444; }
+        .toast.warning { border-left: 4px solid #f59e0b; }
+        .toast.info { border-left: 4px solid #2563eb; }
+        .toast-exit { animation: toastSlideOut 0.3s ease-in forwards !important; }
+        @keyframes toastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toastSlideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+
+        /* 📱 MOBILE SHADOW DEFENDER & TOAST IMPROVEMENTS */
+        @media screen and (max-width: 768px) {
+            #shadowModal .modal-card { padding: 20px 16px; }
+            #shadowModal .btn-authenticate { padding: 18px; font-size: 16px; min-height: 56px; border-radius: 14px; }
+            #shadowModal .login-input { font-size: 16px; padding: 16px; }
+            #toast-container { top: auto; bottom: 20px; right: 12px; left: 12px; }
+            .toast { max-width: 100%; min-width: 0; font-size: 13px; padding: 14px 18px; }
+        }
 
     </style>
 </head>
@@ -392,23 +422,64 @@
     </div>
 
     <div id="adminModal" class="modal-overlay">
-        <div class="modal-card">
+        <div class="modal-card" style="max-width: 500px;">
             <span class="modal-close" onclick="document.getElementById('adminModal').style.display='none'">&times;</span>
             <div style="text-align: center; margin-bottom: 20px;">
-                <h2 style="margin:0; font-weight:800; color:#1e293b; font-size: 24px;">⚙️ ADMIN TOOLS</h2>
-                <p style="margin: 5px 0 0 0; font-size: 13px; color: #64748b; font-weight: 500;">Select an action to perform.</p>
+                <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(15,23,42,0.25);">
+                    <i data-lucide="settings" style="color: #e2e8f0; width: 26px; height: 26px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 22px; letter-spacing: -0.5px;">Admin Tools</h2>
+                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Manage your shop infrastructure</p>
             </div>
             <div class="admin-grid">
-                <button class="grid-btn action-btn" onclick="openCreateAccModal()"><span>👥</span> Create Account</button>
-                <button class="grid-btn action-btn" onclick="openMartecModal()"><span>🔑</span> Martec License</button>
-                <button class="grid-btn" onclick="openGameLib('OFFLINE')"><span>🕹️</span> Offline Games</button>
-                <button class="grid-btn" onclick="openGameLib('ONLINE')"><span>🌐</span> Online Games</button>
-                <button class="grid-btn warning-btn" onclick="openStorageModal()"><span>🧹</span> Free Storage</button>
-                <button class="grid-btn driver-btn" onclick="openGenericModal('SYSTEM_UPDATE', 'AUTO_UPDATE_DRIVERS', '🛠️ AUTO DRIVERS')"><span>🛠️</span> Auto Drivers</button>
-                <button class="grid-btn action-btn" onclick="openGenericModal('SYSTEM_RENAME', 'RENAME_PC|NEW_NAME', '🏷️ RENAME PC')"><span>🏷️</span> Rename PC</button>
-                <button class="grid-btn action-btn" onclick="openGenericModal('SYSTEM_BACKUP', 'BACKUP_ICAFE', '💾 ICAFE BACKUP')"><span>💾</span> ICafe Backup</button>
-                <button class="grid-btn driver-btn" onclick="openGenericModal('SYSTEM_UPDATE', 'ACTIVATE_OS', '🪟 OS/OFFICE ACT.')"><span>🪟</span> OS/Office Act.</button>
-                <button class="grid-btn diag-btn" onclick="openDiagModal()"><span>🧰</span> Windows Diag</button>
+                <div class="admin-divider">Account & License</div>
+                <button class="grid-btn" style="--hover-border: #bfdbfe;" onclick="openCreateAccModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="user-plus" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Create Account</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #e9d5ff;" onclick="openMartecModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #faf5ff, #ede9fe); color: #7c3aed;"><i data-lucide="key-round" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Martec License</span>
+                </button>
+                <div class="admin-divider">Game Library</div>
+                <button class="grid-btn" style="--hover-border: #99f6e4;" onclick="openGameLib('OFFLINE')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); color: #0d9488;"><i data-lucide="gamepad-2" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Offline Games</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #99f6e4;" onclick="openGameLib('ONLINE')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); color: #0d9488;"><i data-lucide="globe" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Online Games</span>
+                </button>
+                <div class="admin-divider">System Management</div>
+                <button class="grid-btn" style="--hover-border: #fde68a;" onclick="openStorageModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #d97706;"><i data-lucide="hard-drive" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Free Storage</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #a7f3d0;" onclick="openGenericModal('SYSTEM_UPDATE', 'AUTO_UPDATE_DRIVERS', '🛠️ AUTO DRIVERS')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669;"><i data-lucide="wrench" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Auto Drivers</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #bfdbfe;" onclick="openGenericModal('SYSTEM_RENAME', 'RENAME_PC|NEW_NAME', '🏷️ RENAME PC')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="pen-line" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Rename PC</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #bfdbfe;" onclick="openGenericModal('SYSTEM_BACKUP', 'BACKUP_ICAFE', '💾 ICAFE BACKUP')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="save" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">ICafe Backup</span>
+                </button>
+                <div class="admin-divider">Diagnostics & Security</div>
+                <button class="grid-btn" style="--hover-border: #e9d5ff;" onclick="openGenericModal('SYSTEM_UPDATE', 'ACTIVATE_OS', '🪟 OS/OFFICE ACT.')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #faf5ff, #ede9fe); color: #7c3aed;"><i data-lucide="monitor" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">OS/Office Act.</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #fecdd3;" onclick="openDiagModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #e11d48;"><i data-lucide="stethoscope" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Windows Diag</span>
+                </button>
+                <button class="grid-btn span-full" style="--hover-border: #6ee7b7;" onclick="openShadowModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669;"><i data-lucide="shield" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Shadow Defender</span>
+                </button>
             </div>
         </div>
     </div>
@@ -417,27 +488,58 @@
         <div class="modal-card">
             <span class="modal-close" onclick="document.getElementById('diagModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
             <div style="text-align: center; margin-bottom: 20px;">
-                <h2 style="margin:0; font-weight:800; color:#1e293b; font-size: 24px;">🧰 WINDOWS DIAGNOSTICS</h2>
-                <p style="margin: 5px 0 0 0; font-size: 13px; color: #64748b; font-weight: 500;">Select PC to troubleshoot.</p>
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #881337, #be123c); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(136,19,55,0.3);">
+                    <i data-lucide="stethoscope" style="color: #fecdd3; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">Windows Diagnostics</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Select PC to troubleshoot</p>
             </div>
             
             <select id="diagPcSelector" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1;"></select>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px;" class="diag-actions">
-                <button onclick="runDiagCommand('FIX_AUDIO')" class="btn-authenticate" style="background:#0ea5e9; font-size: 12px; padding: 12px;">🔊 Fix Audio</button>
-                <button onclick="runDiagCommand('FIX_NETWORK')" class="btn-authenticate" style="background:#0ea5e9; font-size: 12px; padding: 12px;">🌐 Fix Network</button>
-                <button onclick="runDiagCommand('CLEAR_RAM')" class="btn-authenticate" style="background:#0ea5e9; font-size: 12px; padding: 12px;">🧹 Clear RAM / Apps</button>
-                <button onclick="runDiagCommand('RESTART_GPU')" class="btn-authenticate" style="background:#0ea5e9; font-size: 12px; padding: 12px;">🖥️ Restart GPU Driver</button>
-                
-                <button onclick="runDiagCommand('FETCH_LOGS')" class="btn-authenticate" style="background:#f59e0b; font-size: 12px; padding: 12px;">📄 Fetch Crash Logs</button>
-                <button onclick="runDiagCommand('REPAIR_OS')" class="btn-authenticate" style="background:#f59e0b; font-size: 12px; padding: 12px;">🛠️ Repair OS (SFC)</button>
-                <button onclick="runDiagCommand('CHECK_DISK')" class="btn-authenticate" style="background:#f59e0b; font-size: 12px; padding: 12px;">💾 Check Disk Health</button>
-                <button onclick="runDiagCommand('SET_STATIC_IP')" class="btn-authenticate" style="background:#ef4444; font-size: 12px; padding: 12px;">🔌 Assign Static IP</button>
-                
-                <button onclick="runDiagCommand('BACKUP_TO_USB')" class="btn-authenticate" style="background:#10b981; font-size: 12px; padding: 12px; grid-column: span 2;">💾 Backup OS to USB</button>
+            <div class="admin-grid" style="margin-top: 15px;">
+                <div class="admin-divider">Quick Fix</div>
+                <button class="grid-btn" style="--hover-border: #7dd3fc;" onclick="runDiagCommand('FIX_AUDIO')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;"><i data-lucide="volume-2" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Fix Audio</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #7dd3fc;" onclick="runDiagCommand('FIX_NETWORK')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;"><i data-lucide="wifi" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Fix Network</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #7dd3fc;" onclick="runDiagCommand('CLEAR_RAM')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;"><i data-lucide="eraser" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Clear RAM / Apps</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #7dd3fc;" onclick="runDiagCommand('RESTART_GPU')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;"><i data-lucide="monitor" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Restart GPU Driver</span>
+                </button>
+                <div class="admin-divider">Advanced</div>
+                <button class="grid-btn" style="--hover-border: #fde68a;" onclick="runDiagCommand('FETCH_LOGS')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fef9c3, #fde68a); color: #b45309;"><i data-lucide="file-text" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Fetch Crash Logs</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #fde68a;" onclick="runDiagCommand('REPAIR_OS')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fef9c3, #fde68a); color: #b45309;"><i data-lucide="wrench" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Repair OS (SFC)</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #fde68a;" onclick="runDiagCommand('CHECK_DISK')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fef9c3, #fde68a); color: #b45309;"><i data-lucide="hard-drive" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Check Disk Health</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #fecdd3;" onclick="runDiagCommand('SET_STATIC_IP')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #ffe4e6, #fecdd3); color: #e11d48;"><i data-lucide="cable" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Assign Static IP</span>
+                </button>
+                <div class="admin-divider">Backup</div>
+                <button class="grid-btn span-full" style="--hover-border: #6ee7b7; background: linear-gradient(135deg, #f0fdfa, #ecfdf5); border-color: #a7f3d0;" onclick="runDiagCommand('BACKUP_TO_USB')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669;"><i data-lucide="save" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Backup OS to USB</span>
+                </button>
             </div>
 
-            <div id="diagStatus" style="margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 12px; color: #475569; font-family: monospace; text-align: left; min-height: 60px;">
+            <div id="diagStatus" style="margin-top: 15px; padding: 14px 16px; background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid #e2e8f0; border-radius: 14px; font-size: 12px; color: #475569; font-family: 'Inter', monospace; text-align: left; min-height: 50px;">
                 Status: Waiting for command...
             </div>
         </div>
@@ -446,8 +548,14 @@
     <div id="genericModal" class="modal-overlay">
         <div class="modal-card">
             <span class="modal-close" onclick="document.getElementById('genericModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
-            <h2 id="genTitle" style="margin-top:0; font-weight:800;">ACTION</h2>
-            <label style="font-size:12px; font-weight:700;">Select Target PC</label>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(15,23,42,0.25);">
+                    <i data-lucide="terminal" style="color: #e2e8f0; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 id="genTitle" style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">ACTION</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Execute remote command</p>
+            </div>
+            <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Select Target PC</label>
             <select id="genPcSelector" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1;"></select>
             <div id="renameBox" style="display:none; margin-bottom:15px;">
                 <label style="font-size:12px; font-weight:700;">New Computer Name</label>
@@ -460,7 +568,13 @@
     <div id="storageModal" class="modal-overlay">
         <div class="modal-card large">
             <span class="modal-close" onclick="document.getElementById('storageModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
-            <h2 style="margin-top:0; font-weight:800;">🧹 SMART STORAGE CLEANER</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #92400e, #b45309); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(146,64,14,0.3);">
+                    <i data-lucide="hard-drive" style="color: #fef3c7; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">Smart Storage Cleaner</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Scan and clean large files</p>
+            </div>
             <div style="background:#fffbeb; border: 1px solid #fde68a; padding:15px; border-radius:12px; margin-bottom:20px; display:flex; align-items:center; gap:15px; flex-wrap: wrap;">
                 <span style="font-size:14px; font-weight:700; color:#b45309;">Select PC to Scan:</span>
                 <select id="storagePcSelector" class="branch-selector" style="flex-grow:1; background:white; min-width: 200px;"></select>
@@ -474,7 +588,13 @@
     <div id="gameLibModal" class="modal-overlay">
         <div class="modal-card large">
             <span class="modal-close" onclick="document.getElementById('gameLibModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
-            <h2 id="glTitle" style="margin-top:0; font-weight:800;">GAMES</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #134e4a, #0f766e); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(19,78,74,0.3);">
+                    <i data-lucide="gamepad-2" style="color: #ccfbf1; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 id="glTitle" style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">GAMES</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Download games to your PC</p>
+            </div>
             <select id="glPcSelector" class="branch-selector" style="width:100%; margin-bottom:20px;"></select>
             <div id="glGrid" class="gl-grid"></div>
         </div>
@@ -483,7 +603,13 @@
     <div id="martecModal" class="modal-overlay">
         <div class="modal-card">
             <span class="modal-close" onclick="document.getElementById('martecModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
-            <h2 id="martecTitle" style="margin-top:0; font-weight:800;">🔑 MARTEC REACTIVATION</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4c1d95, #6d28d9); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(76,29,149,0.3);">
+                    <i data-lucide="key-round" style="color: #ede9fe; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 id="martecTitle" style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">Martec Reactivation</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Select license type for activation</p>
+            </div>
             <div id="martecInputs">
                 <select id="martecPcSelector" class="branch-selector" style="width:100%; margin-bottom:15px;"></select>
                 <button class="btn-authenticate" style="margin-bottom:10px; background:#2563eb;" onclick="triggerMartec(1)">TYPE 1 (Timer)</button>
@@ -501,7 +627,13 @@
     <div id="createAccModal" class="modal-overlay">
         <div class="modal-card">
             <span class="modal-close" onclick="document.getElementById('createAccModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
-            <h2 style="margin-top:0; font-weight:800;">👥 CREATE ACCOUNT</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #1e3a5f, #1d4ed8); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(30,58,95,0.3);">
+                    <i data-lucide="user-plus" style="color: #dbeafe; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">Create Account</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Register new shop owner or technician</p>
+            </div>
             
             <label style="font-size:12px; font-weight:700;">Branch / Shop Name</label>
             <input type="text" id="newAccBranch" list="newAccBranchList" class="login-input" placeholder="Type or Select Branch..." style="background:white; color:#1e293b; border-color:#cbd5e1;">
@@ -516,6 +648,38 @@
             <button class="btn-authenticate" onclick="submitNewAccount()" style="margin-top:10px;">REGISTER ACCOUNT</button>
         </div>
     </div>
+
+
+
+<div id="shadowModal" class="modal-overlay">
+        <div class="modal-card">
+            <span class="modal-close" onclick="document.getElementById('shadowModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #064e3b, #047857); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(6,78,59,0.3);">
+                    <i data-lucide="shield" style="color: #d1fae5; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">Shadow Defender</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Toggle shadow mode — PC will restart</p>
+            </div>
+            
+            <label style="font-size:12px; font-weight:700;">Select Target PC</label>
+            <select id="sdPcSelector" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1;"></select>
+            
+            <div style="margin-top: 15px;">
+                <label style="font-size:12px; font-weight:700;">Shadow Defender Password</label>
+                <input type="password" id="sdPassword" class="login-input" placeholder="Enter SD Password" style="background:white; color:#1e293b; border-color:#cbd5e1;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                <button class="btn-authenticate" onclick="toggleShadowDefender('DISABLE')" style="background:#ef4444;">❌ DISABLE (Normal)</button>
+                <button class="btn-authenticate" onclick="toggleShadowDefender('ENABLE')" style="background:#10b981;">✅ ENABLE (Shadow)</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
 
 <script>
         const gemP1 = "AIzaSyCJ_dJ";
@@ -1693,7 +1857,70 @@ function isRestricted(branch) {
         }
 
 
+         // ==========================================
+        // 🛡️ SHADOW DEFENDER MODULE
+        // ==========================================
+        window.openShadowModal = function() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('shadowModal').style.display = 'flex';
+            populateDropdown('sdPcSelector');
+            document.getElementById('sdPassword').value = ""; // Clear pass
+        }
+
+        window.toggleShadowDefender = function(action) {
+            let sel = document.getElementById('sdPcSelector');
+            let pass = document.getElementById('sdPassword').value.trim();
+            
+            if(!sel.value) return showToast("Pumili muna ng PC!", "warning");
+            if(!pass) return showToast("Kailangan ang SD Password!", "error");
+
+            const branch = sel.value.split("|||")[0];
+            const pc = sel.value.split("|||")[1];
+            
+            if (isRestricted(branch)) return showToast("🔒 Restricted: Owner accounts lamang.", "warning");
+
+            let confirmMsg = action === 'DISABLE' 
+                ? `⚠️ BABALA!\n\nIdi-disable ang Shadow Defender sa ${pc} at MAGRE-RESTART ito. Ituloy?` 
+                : `Isa-Shadow Mode ulit ang ${pc} at MAGRE-RESTART ito. Ituloy?`;
+
+            if(!confirm(confirmMsg)) return;
+
+            // Magpapadala ng command: SHADOW_TOGGLE|DISABLE|password123
+            let cmdStr = `SHADOW_TOGGLE|${action}|${pass}`;
+            
+            sendFirebaseCommand(branch, pc, "SYSTEM_UPDATE", cmdStr);
+            showToast(`Command sent! Magre-restart ang ${pc} saglit.`, "success");
+            
+            document.getElementById('shadowModal').style.display = 'none';
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        // ==========================================
+        // 🔔 PREMIUM TOAST NOTIFICATION SYSTEM
+        // ==========================================
+        function showToast(message, type) {
+            type = type || 'info';
+            var container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                document.body.appendChild(container);
+            }
+            var icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.innerHTML = '<span style="font-size:18px;">' + (icons[type] || 'ℹ️') + '</span><span>' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(function() {
+                toast.classList.add('toast-exit');
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 3500);
+        }
+
+
+
     </script>   
 
+<script>if(typeof lucide!=='undefined')lucide.createIcons();</script>
 </body>
 </html>
