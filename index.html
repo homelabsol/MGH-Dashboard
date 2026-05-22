@@ -197,13 +197,112 @@
         @keyframes toastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes toastSlideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
 
-        /* 📱 MOBILE SHADOW DEFENDER & TOAST IMPROVEMENTS */
+        /* ============================================ */
+        /* 📱 FULL MOBILE OPTIMIZATION                  */
+        /* ============================================ */
         @media screen and (max-width: 768px) {
-            #shadowModal .modal-card { padding: 20px 16px; }
-            #shadowModal .btn-authenticate { padding: 18px; font-size: 16px; min-height: 56px; border-radius: 14px; }
-            #shadowModal .login-input { font-size: 16px; padding: 16px; }
+
+            /* --- GLOBAL TOUCH & UX --- */
+            html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+            body { padding-bottom: env(safe-area-inset-bottom, 0); }
+            button, select, input { font-size: 16px !important; } /* Prevents iOS zoom */
+
+            /* --- LOGIN PAGE --- */
+            #loginPage { align-items: center; justify-content: center; min-height: 100vh; }
+            .login-left { max-width: 100%; border-right: none; padding: 30px 20px; display: flex; align-items: center; }
+            .login-right { display: none; }
+            .login-input { padding: 16px; min-height: 48px; }
+            .btn-authenticate { min-height: 52px; font-size: 15px !important; }
+
+            /* --- DASHBOARD HEADER --- */
+            .container { padding: 10px !important; }
+            .header-card { flex-direction: column; padding: 16px !important; gap: 16px; }
+            .header-card > div { flex: 1 1 100% !important; }
+            .app-title { font-size: 22px !important; }
+            .branch-selector { width: 100%; font-size: 15px !important; min-height: 48px; }
+            .stats-container { flex-direction: row !important; gap: 8px; }
+            .stat-box { flex: 1; padding: 10px 8px !important; min-width: 0 !important; }
+            .stat-value { font-size: 20px !important; }
+            .stat-label { font-size: 9px !important; }
+            #pcFilterContainer { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap !important; }
+            .pc-filter-btn { flex-shrink: 0; min-height: 40px; font-size: 12px !important; }
+
+            /* --- DATA TABLE → CARD VIEW --- */
+            .table-container { padding: 10px !important; border-radius: 12px; }
+            table { border-collapse: collapse; }
+            thead { display: none !important; }
+            tbody { display: flex; flex-direction: column; gap: 10px; }
+            tr { display: flex; flex-wrap: wrap; gap: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; position: relative; align-items: center; }
+            tr:hover td { background: transparent; }
+            td { display: inline-flex; align-items: center; padding: 0 !important; border: none !important; white-space: normal !important; font-size: 13px !important; background: transparent !important; }
+
+            /* Branch tag */
+            td:nth-child(1) { order: 1; font-size: 10px !important; }
+            /* PC Name - prominent */
+            td:nth-child(2) { order: 2; width: 100%; font-size: 15px !important; font-weight: 800 !important; }
+            /* Game Title */
+            td:nth-child(3) { order: 3; width: 100%; }
+            /* App Status badge */
+            td:nth-child(4) { order: 5; }
+            /* Update Status badge */
+            td:nth-child(5) { order: 6; }
+            /* Last Sync */
+            td:nth-child(6) { order: 4; font-size: 11px !important; color: #94a3b8; margin-left: auto; }
+            /* Action button */
+            td:nth-child(7) { order: 7; width: 100%; margin-top: 4px; }
+            td:nth-child(7) .btn-update { width: 100%; min-height: 42px; font-size: 12px !important; border-radius: 10px !important; padding: 10px !important; }
+
+            /* --- MODALS --- */
+            .modal-overlay { padding: 12px 8px !important; align-items: flex-start !important; }
+            .modal-card { padding: 24px 18px !important; border-radius: 20px; max-width: 100% !important; }
+            .modal-card.large, .modal-card.xlarge { max-width: 100% !important; }
+            .modal-close { right: 16px !important; top: 14px !important; font-size: 28px !important; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+            .modal-card .btn-authenticate { min-height: 48px; }
+            .modal-card .login-input, .modal-card .branch-selector { min-height: 48px; }
+
+            /* Shadow Defender modal - extra prominent */
+            #shadowModal .btn-authenticate { padding: 18px; font-size: 16px !important; min-height: 56px; border-radius: 14px; }
+            #shadowModal .login-input { font-size: 16px !important; padding: 16px; }
+
+            /* Admin & Diag grid - slightly bigger on mobile */
+            .admin-grid { gap: 8px; }
+            .grid-btn { padding: 14px 6px; }
+            .grid-btn .btn-icon { width: 42px; height: 42px; }
+            .grid-btn .btn-label { font-size: 11px !important; }
+            .admin-divider { font-size: 9px !important; padding: 10px 2px 3px; }
+
+            /* --- SUPPORT TICKET TABLE → CARDS --- */
+            #supportListModal table thead { display: none !important; }
+            #supportListModal tbody { display: flex; flex-direction: column; gap: 10px; }
+            #supportListModal tr { display: flex; flex-wrap: wrap; gap: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+            #supportListModal td { display: inline-flex; padding: 0 !important; border: none !important; white-space: normal !important; background: transparent !important; }
+            #supportListModal td:nth-child(1) { order: 1; font-size: 10px !important; color: #94a3b8; }
+            #supportListModal td:nth-child(2) { order: 3; font-size: 12px !important; }
+            #supportListModal td:nth-child(3) { order: 2; width: 100%; font-size: 15px !important; font-weight: 800 !important; }
+            #supportListModal td:nth-child(4) { order: 4; width: 100%; font-size: 13px !important; }
+            #supportListModal td:nth-child(5) { order: 5; font-size: 11px !important; color: #94a3b8; }
+            #supportListModal td:nth-child(6) { order: 6; }
+            #supportListModal td:nth-child(7) { order: 7; width: 100%; margin-top: 4px; }
+            .ticket-filter-btn { font-size: 11px !important; padding: 8px 12px; min-height: 40px; }
+
+            /* --- AI CHAT → FULLSCREEN --- */
+            #ai-chat-window { width: 100% !important; height: 100% !important; bottom: 0 !important; right: 0 !important; border-radius: 0 !important; max-height: 100vh !important; }
+            #ai-btn { bottom: 16px !important; right: 16px !important; width: 52px; height: 52px; }
+            #ai-input { font-size: 16px !important; }
+            #ai-send { width: 44px; height: 44px; }
+
+            /* --- TOAST (bottom on mobile) --- */
             #toast-container { top: auto; bottom: 20px; right: 12px; left: 12px; }
             .toast { max-width: 100%; min-width: 0; font-size: 13px; padding: 14px 18px; }
+
+            /* --- STORAGE MODAL MOBILE --- */
+            #storageModal .modal-card { padding: 18px 14px !important; }
+            .storage-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .storage-item button { width: 100%; min-height: 44px; }
+
+            /* --- GAME LIBRARY MOBILE --- */
+            .gl-grid { gap: 10px; }
+            .gl-card { flex: 1 1 100% !important; padding: 16px; }
         }
 
     </style>
