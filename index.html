@@ -305,6 +305,51 @@
             .gl-card { flex: 1 1 100% !important; padding: 16px; }
         }
 
+        /* 🎮 PISONET SETUP WIZARD */
+        .wiz-progress { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 24px; }
+        .wiz-step-dot { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; transition: all 0.3s; flex-shrink: 0; }
+        .wiz-step-dot.active { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.35); transform: scale(1.1); }
+        .wiz-step-dot.done { background: #10b981; color: white; }
+        .wiz-step-line { width: 40px; height: 3px; background: #e2e8f0; transition: background 0.3s; }
+        .wiz-step-line.done { background: #10b981; }
+        .wiz-slide { display: none; }
+        .wiz-slide.active { display: block; animation: slideUp 0.3s ease-out; }
+        .wiz-diagram { background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; min-height: 120px; position: relative; }
+        .wiz-hw { display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 1; }
+        .wiz-hw-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .wiz-hw-name { font-size: 11px; font-weight: 700; color: #475569; text-align: center; max-width: 70px; }
+        .wiz-cable { flex: 1; min-width: 40px; max-width: 80px; height: 4px; background: repeating-linear-gradient(90deg, #2563eb 0px, #2563eb 8px, transparent 8px, transparent 14px); background-size: 200% 100%; animation: cableFlow 1s linear infinite; position: relative; align-self: center; margin-bottom: 20px; border-radius: 2px; }
+        .wiz-cable-label { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #2563eb; white-space: nowrap; background: #eff6ff; padding: 2px 6px; border-radius: 4px; }
+        @keyframes cableFlow { from { background-position: 0 0; } to { background-position: -28px 0; } }
+        .wiz-parts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .wiz-part-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 8px; text-align: center; transition: all 0.2s; }
+        .wiz-part-card.checked { border-color: #10b981; background: #f0fdf4; }
+        .wiz-part-card .wiz-hw-icon { margin: 0 auto 6px; width: 44px; height: 44px; border-radius: 12px; }
+        .wiz-part-card span { font-size: 11px; font-weight: 700; color: #475569; }
+        .wiz-checklist { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+        .wiz-check-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 600; color: #334155; }
+        .wiz-check-item:has(input:checked) { background: #f0fdf4; border-color: #10b981; color: #166534; }
+        .wiz-check-item input { width: 18px; height: 18px; accent-color: #10b981; cursor: pointer; }
+        .wiz-nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+        .wiz-nav button { flex: 1; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }
+        .wiz-btn-back { background: #f1f5f9; color: #475569; }
+        .wiz-btn-back:hover { background: #e2e8f0; }
+        .wiz-btn-next { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .wiz-btn-next:hover { background: #1d4ed8; }
+        .wiz-btn-next:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+        .wiz-complete { text-align: center; padding: 20px 0; }
+        .wiz-complete-icon { font-size: 64px; margin-bottom: 16px; animation: bounceIn 0.5s ease-out; }
+        @keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .wiz-step-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .wiz-step-desc { font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+        @media screen and (max-width: 768px) {
+            .wiz-parts-grid { grid-template-columns: repeat(2, 1fr); }
+            .wiz-cable { min-width: 20px; max-width: 40px; }
+            .wiz-hw-icon { width: 46px; height: 46px; }
+            .wiz-step-dot { width: 30px; height: 30px; font-size: 12px; }
+            .wiz-step-line { width: 24px; }
+        }
+
     </style>
 </head>
 <body>
@@ -338,6 +383,9 @@
                         </button>
                         <button id="btnSupportList" onclick="openSupportList()" style="background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); color:#ddd6fe; padding:10px 18px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px;">
                             <span style="font-size:16px;">📋</span> Support List
+                        </button>
+                        <button onclick="wizReset(); document.getElementById('setupWizardModal').style.display='flex'; if(typeof lucide!=='undefined') lucide.createIcons();" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; padding:10px 18px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:16px;">📖</span> Setup Guide
                         </button>
                     </div>
                     
@@ -776,6 +824,138 @@
         </div>
     </div>
 
+
+    <!-- 🎮 PISONET SETUP WIZARD -->
+    <div id="setupWizardModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 540px;">
+            <span class="modal-close" onclick="document.getElementById('setupWizardModal').style.display='none'">&times;</span>
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #064e3b, #059669); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(6,78,59,0.3);">
+                    <i data-lucide="book-open" style="color: #d1fae5; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 20px;">Pisonet Setup Guide</h2>
+                <p style="margin: 4px 0 0; font-size: 13px; color: #94a3b8;">Sundan ang mga steps para ma-setup ang iyong pisonet</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="wiz-progress">
+                <div class="wiz-step-dot active" id="wizDot1">1</div><div class="wiz-step-line" id="wizLine1"></div>
+                <div class="wiz-step-dot" id="wizDot2">2</div><div class="wiz-step-line" id="wizLine2"></div>
+                <div class="wiz-step-dot" id="wizDot3">3</div><div class="wiz-step-line" id="wizLine3"></div>
+                <div class="wiz-step-dot" id="wizDot4">4</div><div class="wiz-step-line" id="wizLine4"></div>
+                <div class="wiz-step-dot" id="wizDot5">5</div>
+            </div>
+
+            <!-- STEP 1: Unbox -->
+            <div class="wiz-slide active" id="wizSlide1">
+                <div class="wiz-step-title">📦 Step 1: I-check ang Parts</div>
+                <div class="wiz-step-desc">I-labas lahat ng parts sa pisonet box at i-verify kung kumpleto.</div>
+                <div class="wiz-parts-grid">
+                    <div class="wiz-part-card"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#eff6ff,#dbeafe); color:#2563eb;"><i data-lucide="monitor" style="width:22px;height:22px;"></i></div><span>Monitor</span></div>
+                    <div class="wiz-part-card"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#f0fdfa,#ccfbf1); color:#0d9488;"><i data-lucide="cpu" style="width:22px;height:22px;"></i></div><span>CPU</span></div>
+                    <div class="wiz-part-card"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#fef9c3,#fde68a); color:#b45309;"><i data-lucide="coins" style="width:22px;height:22px;"></i></div><span>Coinbox</span></div>
+                    <div class="wiz-part-card"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#faf5ff,#ede9fe); color:#7c3aed;"><i data-lucide="keyboard" style="width:22px;height:22px;"></i></div><span>Keyboard</span></div>
+                    <div class="wiz-part-card"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#fff1f2,#fecdd3); color:#e11d48;"><i data-lucide="mouse" style="width:22px;height:22px;"></i></div><span>Mouse</span></div>
+                    <div class="wiz-part-card"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#ecfdf5,#d1fae5); color:#059669;"><i data-lucide="cable" style="width:22px;height:22px;"></i></div><span>LAN Cable</span></div>
+                </div>
+                <div class="wiz-checklist" id="wizCheck1">
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Kumpleto lahat ng parts sa taas</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Walang sira o basag</label>
+                </div>
+            </div>
+
+            <!-- STEP 2: Monitor + Power -->
+            <div class="wiz-slide" id="wizSlide2">
+                <div class="wiz-step-title">🖵 Step 2: Connect Monitor & Power On</div>
+                <div class="wiz-step-desc">I-connect ang VGA o HDMI cable ng monitor sa CPU, tapos i-power on pareho.</div>
+                <div class="wiz-diagram">
+                    <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#eff6ff,#dbeafe); color:#2563eb;"><i data-lucide="monitor" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">Monitor</div></div>
+                    <div class="wiz-cable"><span class="wiz-cable-label">VGA / HDMI</span></div>
+                    <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#f0fdfa,#ccfbf1); color:#0d9488;"><i data-lucide="cpu" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">CPU</div></div>
+                    <div class="wiz-cable" style="background: repeating-linear-gradient(90deg, #10b981 0px, #10b981 8px, transparent 8px, transparent 14px);"><span class="wiz-cable-label" style="color:#059669; background:#ecfdf5;">Power</span></div>
+                    <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#fef9c3,#fde68a); color:#b45309;"><i data-lucide="plug" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">Outlet</div></div>
+                </div>
+                <div class="wiz-checklist" id="wizCheck2">
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Monitor cable na-connect sa CPU</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Naka-plug sa power outlet</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Na-power on at may display</label>
+                </div>
+            </div>
+
+            <!-- STEP 3: Coinbox to CPU -->
+            <div class="wiz-slide" id="wizSlide3">
+                <div class="wiz-step-title">🪙 Step 3: Connect Coinbox sa CPU</div>
+                <div class="wiz-step-desc">I-connect ang USB cable ng coinbox (Martec timer) papunta sa USB port ng CPU.</div>
+                <div class="wiz-diagram">
+                    <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#fef9c3,#fde68a); color:#b45309;"><i data-lucide="coins" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">Coinbox</div></div>
+                    <div class="wiz-cable" style="background: repeating-linear-gradient(90deg, #7c3aed 0px, #7c3aed 8px, transparent 8px, transparent 14px);"><span class="wiz-cable-label" style="color:#7c3aed; background:#faf5ff;">USB Cable</span></div>
+                    <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#f0fdfa,#ccfbf1); color:#0d9488;"><i data-lucide="cpu" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">CPU</div></div>
+                </div>
+                <div class="wiz-checklist" id="wizCheck3">
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> USB cable na-connect sa CPU port</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Na-detect ng computer ang coinbox</label>
+                </div>
+            </div>
+
+            <!-- STEP 4: Coinbox Wires -->
+            <div class="wiz-slide" id="wizSlide4">
+                <div class="wiz-step-title">🔌 Step 4: Connect Coinbox Wires</div>
+                <div class="wiz-step-desc">I-connect ang mga power at signal wires mula sa coin acceptor papunta sa Martec timer board.</div>
+                <div class="wiz-diagram" style="flex-direction: column; gap: 10px;">
+                    <div style="display:flex; align-items:center; gap:0; width:100%; justify-content:center;">
+                        <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#fff1f2,#fecdd3); color:#e11d48;"><i data-lucide="circle-dot" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">Coin Acceptor</div></div>
+                        <div class="wiz-cable" style="background: repeating-linear-gradient(90deg, #e11d48 0px, #e11d48 8px, transparent 8px, transparent 14px);"><span class="wiz-cable-label" style="color:#e11d48; background:#fff1f2;">Signal Wire</span></div>
+                        <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#fef9c3,#fde68a); color:#b45309;"><i data-lucide="timer" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">Martec Timer</div></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0; width:100%; justify-content:center;">
+                        <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#fef9c3,#fde68a); color:#b45309;"><i data-lucide="timer" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">Martec Timer</div></div>
+                        <div class="wiz-cable" style="background: repeating-linear-gradient(90deg, #10b981 0px, #10b981 8px, transparent 8px, transparent 14px);"><span class="wiz-cable-label" style="color:#059669; background:#ecfdf5;">Power Wire</span></div>
+                        <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#f0fdfa,#ccfbf1); color:#0d9488;"><i data-lucide="cpu" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">CPU</div></div>
+                    </div>
+                </div>
+                <div class="wiz-checklist" id="wizCheck4">
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Signal wire na-connect (acceptor → timer)</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Power wire na-connect (timer → CPU)</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> Walang loose na wires</label>
+                </div>
+            </div>
+
+            <!-- STEP 5: LAN Cable -->
+            <div class="wiz-slide" id="wizSlide5">
+                <div class="wiz-step-title">🌐 Step 5: Connect LAN Cable</div>
+                <div class="wiz-step-desc">I-connect ang LAN cable mula sa CPU papunta sa Switch Hub o Router.</div>
+                <div class="wiz-diagram">
+                    <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#f0fdfa,#ccfbf1); color:#0d9488;"><i data-lucide="cpu" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">CPU</div></div>
+                    <div class="wiz-cable" style="background: repeating-linear-gradient(90deg, #2563eb 0px, #2563eb 8px, transparent 8px, transparent 14px);"><span class="wiz-cable-label">LAN Cable</span></div>
+                    <div class="wiz-hw"><div class="wiz-hw-icon" style="background: linear-gradient(135deg,#eff6ff,#dbeafe); color:#2563eb;"><i data-lucide="router" style="width:24px;height:24px;"></i></div><div class="wiz-hw-name">Switch Hub</div></div>
+                </div>
+                <div class="wiz-checklist" id="wizCheck5">
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> LAN cable na-connect sa CPU</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> LAN cable na-connect sa Switch Hub</label>
+                    <label class="wiz-check-item"><input type="checkbox" onchange="wizValidate()"> May internet/network connection</label>
+                </div>
+            </div>
+
+            <!-- COMPLETE -->
+            <div class="wiz-slide" id="wizSlideComplete">
+                <div class="wiz-complete">
+                    <div class="wiz-complete-icon">🎉</div>
+                    <div class="wiz-step-title">Setup Complete!</div>
+                    <div class="wiz-step-desc">Matagumpay na na-setup ang iyong pisonet! Pwede mo nang i-test ang coin insertion.</div>
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 16px; margin-top: 16px; text-align: left;">
+                        <div style="font-size: 12px; font-weight: 800; color: #166534; margin-bottom: 8px;">✅ Setup Summary:</div>
+                        <div style="font-size: 12px; color: #15803d; line-height: 1.8;">• Monitor connected & powered on<br>• Coinbox connected via USB<br>• Wires secured (signal + power)<br>• LAN cable connected to network</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="wiz-nav" id="wizNav">
+                <button class="wiz-btn-back" id="wizBack" onclick="wizGoStep(wizCurrentStep - 1)" style="display:none;">← Back</button>
+                <button class="wiz-btn-next" id="wizNext" onclick="wizGoStep(wizCurrentStep + 1)" disabled>Next Step →</button>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -2017,6 +2197,90 @@ function isRestricted(branch) {
         }
 
 
+
+        // 🎮 PISONET SETUP WIZARD
+        var wizCurrentStep = 1;
+        var wizTotalSteps = 5;
+
+        window.wizValidate = function() {
+            var checklistId = 'wizCheck' + wizCurrentStep;
+            var checklist = document.getElementById(checklistId);
+            if (!checklist) return;
+            var boxes = checklist.querySelectorAll('input[type=checkbox]');
+            var allChecked = Array.from(boxes).every(function(cb) { return cb.checked; });
+            document.getElementById('wizNext').disabled = !allChecked;
+        }
+
+        window.wizGoStep = function(step) {
+            if (step < 1) return;
+            if (step > wizTotalSteps + 1) return;
+
+            // Hide all slides
+            for (var i = 1; i <= wizTotalSteps; i++) {
+                document.getElementById('wizSlide' + i).classList.remove('active');
+            }
+            document.getElementById('wizSlideComplete').classList.remove('active');
+
+            // Update dots
+            for (var i = 1; i <= wizTotalSteps; i++) {
+                var dot = document.getElementById('wizDot' + i);
+                dot.classList.remove('active', 'done');
+                if (i < step) { dot.classList.add('done'); dot.innerHTML = '✓'; }
+                else if (i === step) { dot.classList.add('active'); dot.innerHTML = i; }
+                else { dot.innerHTML = i; }
+                if (i < wizTotalSteps) {
+                    var line = document.getElementById('wizLine' + i);
+                    line.classList.toggle('done', i < step);
+                }
+            }
+
+            wizCurrentStep = step;
+
+            if (step > wizTotalSteps) {
+                // Show completion
+                document.getElementById('wizSlideComplete').classList.add('active');
+                document.getElementById('wizNav').style.display = 'none';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+
+            document.getElementById('wizSlide' + step).classList.add('active');
+            document.getElementById('wizNav').style.display = 'flex';
+            document.getElementById('wizBack').style.display = step > 1 ? 'block' : 'none';
+            document.getElementById('wizNext').textContent = step === wizTotalSteps ? 'Complete! 🎉' : 'Next Step →';
+
+            // Re-validate checkboxes for this step
+            wizValidate();
+
+            // Re-init Lucide icons for new step
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        window.wizReset = function() {
+            wizCurrentStep = 1;
+            // Clear all checkboxes
+            for (var i = 1; i <= wizTotalSteps; i++) {
+                var cl = document.getElementById('wizCheck' + i);
+                if (cl) cl.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+            }
+            // Reset dots
+            for (var i = 1; i <= wizTotalSteps; i++) {
+                var dot = document.getElementById('wizDot' + i);
+                dot.classList.remove('active', 'done');
+                dot.innerHTML = i;
+                if (i < wizTotalSteps) document.getElementById('wizLine' + i).classList.remove('done');
+            }
+            document.getElementById('wizDot1').classList.add('active');
+            // Hide all slides, show step 1
+            for (var i = 1; i <= wizTotalSteps; i++) document.getElementById('wizSlide' + i).classList.remove('active');
+            document.getElementById('wizSlideComplete').classList.remove('active');
+            document.getElementById('wizSlide1').classList.add('active');
+            // Reset nav
+            document.getElementById('wizNav').style.display = 'flex';
+            document.getElementById('wizBack').style.display = 'none';
+            document.getElementById('wizNext').textContent = 'Next Step \u2192';
+            document.getElementById('wizNext').disabled = true;
+        }
 
     </script>   
 
