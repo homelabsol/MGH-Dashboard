@@ -975,8 +975,8 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:12px;">
                         <div class="fpm-legend">
-                            <div class="fpm-leg"><div class="fpm-dot av"></div> Available</div>
-                            <div class="fpm-leg"><div class="fpm-dot iu"></div> In Use</div>
+                            <div class="fpm-leg"><div class="fpm-dot iu"></div> Active</div>
+                            <div class="fpm-leg"><div class="fpm-dot av"></div> Online</div>
                             <div class="fpm-leg"><div class="fpm-dot of"></div> Offline</div>
                         </div>
                         <button onclick="document.getElementById('floorMapModal').style.display='none'" style="background:#ef4444; color:white; border:none; border-radius:6px; width:26px; height:26px; font-size:14px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; line-height:1;">&times;</button>
@@ -984,8 +984,8 @@
                 </div>
                 <!-- Stats -->
                 <div class="fpm-pills">
-                    <span class="fpm-pill av">🟢 <span id="fpmAv">0</span> Available</span>
-                    <span class="fpm-pill iu">🔴 <span id="fpmIu">0</span> In Use</span>
+                    <span class="fpm-pill iu">🟢 <span id="fpmAv">0</span> Active</span>
+                    <span class="fpm-pill av">🔵 <span id="fpmIu">0</span> Online</span>
                     <span class="fpm-pill of">⚫ <span id="fpmOf">40</span> Offline</span>
                 </div>
 
@@ -1794,6 +1794,10 @@ Customer Question: `;
                 globalSnapshot = snapshot.val();
                 updateBranchDropdown();
                 renderUI();
+                // 🗺️ Auto-refresh floor map if it's open
+                if (document.getElementById('floorMapModal').style.display === 'flex') {
+                    updateFloorMap();
+                }
             });
         }
 
@@ -2513,61 +2517,79 @@ function isRestricted(branch) {
         }
 
         window.updateFloorMap = function() {
-            var av = 0, iu = 0, of = 0;
-            // All 40 PCs in MGH-Concepcion
+            var active = 0, online = 0, offline = 0;
             var allPcNums = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
                              21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
+
+            // 🎯 Find the active branch for this floor map (MGH-Concepcion)
+            var targetBranch = null;
+            if (globalSnapshot) {
+                Object.keys(globalSnapshot).forEach(function(b) {
+                    var bClean = b.replace(/[^a-z0-9]/gi,'').toLowerCase();
+                    // Match the user's branch: shop owner sees their own, admin/tech can see all
+                    if (activeBranch !== 'ALL' && b === activeBranch) targetBranch = b;
+                    if (activeBranch === 'ALL' && (bClean.includes('concepcion') || bClean.includes('mghconcepcion'))) targetBranch = b;
+                });
+                // Fallback: use whatever activeBranch is if not found
+                if (!targetBranch && activeBranch !== 'ALL' && globalSnapshot[activeBranch]) {
+                    targetBranch = activeBranch;
+                }
+            }
 
             allPcNums.forEach(function(num) {
                 var el = document.getElementById('fpc-' + num);
                 if (!el) return;
 
-                // Try to find matching PC in Firebase data
-                // Matches names like "PC-1", "PC1", "PC 1", "MGH-PC1" etc.
-                var status = 'of'; // default offline
-                var matched = false;
+                var status = 'of'; // default: offline
 
-                if (typeof allPcData !== 'undefined') {
-                    Object.keys(allPcData).forEach(function(branch) {
-                        Object.keys(allPcData[branch] || {}).forEach(function(pcName) {
-                            // Match PC number in name
-                            var patterns = [
-                                new RegExp('(?:^|\\D)' + num + '(?:\\D|$)'),
-                                new RegExp('PC-?0*' + num + '(?:\\D|$)', 'i')
-                            ];
-                            var isMatch = patterns.some(function(p) { return p.test(pcName); });
-                            if (isMatch && !matched) {
-                                matched = true;
-                                // Check if PC has recent data = online
-                                var pcGames = allPcData[branch][pcName] || {};
-                                var hasData = Object.keys(pcGames).length > 0;
-                                if (hasData) {
-                                    // Check for active session / in-use indicator
-                                    var isActive = Object.values(pcGames).some(function(g) {
-                                        return g && g.Status && (g.Status.includes('Running') || g.Status.includes('Active'));
-                                    });
-                                    status = isActive ? 'iu' : 'av';
-                                } else {
-                                    status = 'of';
-                                }
-                            }
-                        });
+                if (targetBranch && globalSnapshot && globalSnapshot[targetBranch]) {
+                    var branchData = globalSnapshot[targetBranch];
+
+                    // 🔍 Match PC name: supports "PC1", "PC-1", "PC 1", "PC01", "pc1" etc.
+                    var matchedPcKey = Object.keys(branchData).find(function(pcName) {
+                        var stripped = pcName.replace(/[^0-9]/g, '');
+                        return parseInt(stripped, 10) === num;
                     });
+
+                    if (matchedPcKey) {
+                        var pcData = branchData[matchedPcKey];
+                        var games = pcData.Games || pcData || {};
+
+                        // 🟢 ACTIVE = has any game/task with "Running" or "Active" status
+                        var isActive = Object.values(games).some(function(g) {
+                            if (!g || typeof g !== 'object') return false;
+                            var s = (g.Status || '').toLowerCase();
+                            return s.includes('running') || s.includes('active') || s.includes('playing');
+                        });
+
+                        if (isActive) {
+                            status = 'iu'; // Active (green in CSS)
+                        } else {
+                            status = 'av'; // Online / connected but idle (blue)
+                        }
+                    }
+                    // If matchedPcKey not found → stays 'of' (offline)
                 }
 
+                // Apply class and update tooltip
                 el.className = 'fpc ' + status;
-                if (status === 'av') av++;
-                else if (status === 'iu') iu++;
-                else of++;
+                el.title = status === 'iu' ? 'PC' + num + ': ACTIVE' :
+                           status === 'av' ? 'PC' + num + ': ONLINE' :
+                                            'PC' + num + ': OFFLINE';
+
+                if (status === 'iu') active++;
+                else if (status === 'av') online++;
+                else offline++;
             });
 
             var avEl = document.getElementById('fpmAv');
             var iuEl = document.getElementById('fpmIu');
             var ofEl = document.getElementById('fpmOf');
-            if (avEl) avEl.textContent = av;
-            if (iuEl) iuEl.textContent = iu;
-            if (ofEl) ofEl.textContent = of;
+            if (avEl) avEl.textContent = active;
+            if (iuEl) iuEl.textContent = online;
+            if (ofEl) ofEl.textContent = offline;
         }
+
 
         // ==========================================
         window.openRestartModal = function() {
