@@ -446,9 +446,13 @@
         .fpm-aisle-lbl { font-size:6px; color:#cbd5e1; writing-mode:vertical-rl; font-weight:700; letter-spacing:1px; }
         .fpc { width:34px; height:30px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; cursor:pointer; transition:all 0.2s; border:2px solid transparent; flex-shrink:0; }
         .fpc:hover { transform:scale(1.18); z-index:5; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
-        .fpc.av { background:#dcfce7; color:#15803d; border-color:#86efac; }
-        .fpc.iu { background:#fee2e2; color:#dc2626; border-color:#fca5a5; }
+        /* 🟢 ACTIVE = someone is currently playing */
+        .fpc.iu { background:#dcfce7; color:#15803d; border-color:#4ade80; box-shadow:0 0 6px rgba(74,222,128,0.5); animation:fpcPulse 2s infinite; }
+        /* 🔵 ONLINE = PC is on but idle */
+        .fpc.av { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
+        /* ⚫ OFFLINE = no connection */
         .fpc.of { background:#f1f5f9; color:#94a3b8; border-color:#e2e8f0; }
+        @keyframes fpcPulse { 0%,100% { box-shadow:0 0 6px rgba(74,222,128,0.4); } 50% { box-shadow:0 0 14px rgba(74,222,128,0.9); } }
         .fpm-door-tag { font-size:8px; font-weight:800; color:#64748b; background:#e2e8f0; border-radius:4px; padding:2px 5px; writing-mode:vertical-rl; align-self:center; flex-shrink:0; }
         .fpm-connector { text-align:center; font-size:10px; font-weight:700; color:#94a3b8; padding:2px 0 4px; }
         .fpm-bottom-inner { display:flex; gap:12px; align-items:flex-start; }
@@ -456,6 +460,9 @@
         .fpm-row { display:flex; gap:3px; }
         .fpm-waiting { background:linear-gradient(135deg,#eff6ff,#dbeafe); border:2px dashed #bfdbfe; border-radius:8px; font-size:11px; font-weight:800; color:#1d4ed8; display:flex; align-items:center; justify-content:center; flex:1; min-height:68px; text-align:center; padding:8px; min-width:80px; }
         .fpm-cr-tag { font-size:8px; font-weight:800; background:#7c3aed; color:white; border-radius:5px; padding:3px 7px; text-transform:uppercase; display:inline-block; margin-top:5px; }
+        .fpm-dot.av { background:#3b82f6; }
+        .fpm-dot.iu { background:#22c55e; }
+        .fpm-dot.of { background:#94a3b8; }
     </style>
 </head>
 <body>
@@ -2521,20 +2528,22 @@ function isRestricted(branch) {
             var allPcNums = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
                              21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
 
-            // 🎯 Find the active branch for this floor map (MGH-Concepcion)
+            // 🎯 Find the target branch for MGH-Concepcion floor map
             var targetBranch = null;
             if (globalSnapshot) {
                 Object.keys(globalSnapshot).forEach(function(b) {
-                    var bClean = b.replace(/[^a-z0-9]/gi,'').toLowerCase();
-                    // Match the user's branch: shop owner sees their own, admin/tech can see all
                     if (activeBranch !== 'ALL' && b === activeBranch) targetBranch = b;
-                    if (activeBranch === 'ALL' && (bClean.includes('concepcion') || bClean.includes('mghconcepcion'))) targetBranch = b;
+                    if (activeBranch === 'ALL') {
+                        var bClean = b.replace(/[^a-z0-9]/gi,'').toLowerCase();
+                        if (bClean.includes('concepcion') || bClean.includes('mghconcepcion')) targetBranch = b;
+                    }
                 });
-                // Fallback: use whatever activeBranch is if not found
                 if (!targetBranch && activeBranch !== 'ALL' && globalSnapshot[activeBranch]) {
                     targetBranch = activeBranch;
                 }
             }
+
+            var now = new Date();
 
             allPcNums.forEach(function(num) {
                 var el = document.getElementById('fpc-' + num);
@@ -2545,7 +2554,7 @@ function isRestricted(branch) {
                 if (targetBranch && globalSnapshot && globalSnapshot[targetBranch]) {
                     var branchData = globalSnapshot[targetBranch];
 
-                    // 🔍 Match PC name: supports "PC1", "PC-1", "PC 1", "PC01", "pc1" etc.
+                    // 🔍 Match PC name: "PC1", "PC-1", "PC 1", "PC01" etc.
                     var matchedPcKey = Object.keys(branchData).find(function(pcName) {
                         var stripped = pcName.replace(/[^0-9]/g, '');
                         return parseInt(stripped, 10) === num;
@@ -2553,28 +2562,35 @@ function isRestricted(branch) {
 
                     if (matchedPcKey) {
                         var pcData = branchData[matchedPcKey];
-                        var games = pcData.Games || pcData || {};
 
-                        // 🟢 ACTIVE = has any game/task with "Running" or "Active" status
-                        var isActive = Object.values(games).some(function(g) {
-                            if (!g || typeof g !== 'object') return false;
-                            var s = (g.Status || '').toLowerCase();
-                            return s.includes('running') || s.includes('active') || s.includes('playing');
-                        });
-
-                        if (isActive) {
-                            status = 'iu'; // Active (green in CSS)
-                        } else {
-                            status = 'av'; // Online / connected but idle (blue)
+                        // 🫀 CHECK HEARTBEAT — is the PC truly online?
+                        var isOnline = false;
+                        var heartbeat = pcData.Heartbeat;
+                        if (heartbeat && heartbeat.lastSeen) {
+                            var lastSeen = new Date(heartbeat.lastSeen);
+                            var ageSeconds = (now - lastSeen) / 1000;
+                            // Online = heartbeat within last 2 minutes (120 seconds)
+                            // Loop runs every 12-20s, so 120s gives plenty of buffer
+                            isOnline = (ageSeconds < 120);
                         }
+
+                        if (isOnline) {
+                            // 🟢 ACTIVE = PC is online AND has a Running/Active game session
+                            var games = pcData.Games || {};
+                            var hasActiveSession = Object.values(games).some(function(g) {
+                                if (!g || typeof g !== 'object') return false;
+                                var s = (g.Status || '').toLowerCase();
+                                return s.includes('running') || s.includes('active') || s.includes('playing');
+                            });
+                            status = hasActiveSession ? 'iu' : 'av';
+                        }
+                        // else: stays 'of' — PC is in Firebase but heartbeat is old = truly offline
                     }
-                    // If matchedPcKey not found → stays 'of' (offline)
                 }
 
-                // Apply class and update tooltip
                 el.className = 'fpc ' + status;
-                el.title = status === 'iu' ? 'PC' + num + ': ACTIVE' :
-                           status === 'av' ? 'PC' + num + ': ONLINE' :
+                el.title = status === 'iu' ? 'PC' + num + ': ACTIVE (playing)' :
+                           status === 'av' ? 'PC' + num + ': ONLINE (idle)' :
                                             'PC' + num + ': OFFLINE';
 
                 if (status === 'iu') active++;
@@ -2589,6 +2605,8 @@ function isRestricted(branch) {
             if (iuEl) iuEl.textContent = online;
             if (ofEl) ofEl.textContent = offline;
         }
+
+
 
 
         // ==========================================
