@@ -2612,9 +2612,9 @@ function isRestricted(branch) {
                         layoutHtml += rowHtml;
                     });
                 } else {
-                    var pcKeys = Object.keys(branchData).filter(k => k.toLowerCase().startsWith('pc'));
                     var maxPc = 0;
-                    pcKeys.forEach(function(k) {
+                    Object.keys(branchData).forEach(function(k) {
+                        if (k === 'FloorMapConfig') return;
                         var num = parseInt(k.replace(/[^0-9]/g, ''), 10);
                         if (!isNaN(num) && num > maxPc) maxPc = num;
                     });
@@ -2647,7 +2647,13 @@ function isRestricted(branch) {
                     var branchData = globalSnapshot[targetBranch];
 
                     // 🔍 Match PC name: "PC1", "PC-1", "PC 1", "PC01" etc.
+                    // Ignore server-like hostnames
                     var matchedPcKey = Object.keys(branchData).find(function(pcName) {
+                        if (pcName === 'FloorMapConfig') return false;
+                        var upperName = pcName.toUpperCase();
+                        if (upperName.includes('SERVER') || upperName.includes('ADMIN') || upperName.includes('PANDO') || upperName.includes('CCBOOT') || upperName.includes('MASTER') || upperName.includes('CASHIER')) {
+                            return false; 
+                        }
                         var stripped = pcName.replace(/[^0-9]/g, '');
                         return parseInt(stripped, 10) === num;
                     });
