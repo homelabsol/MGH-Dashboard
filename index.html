@@ -2733,6 +2733,9 @@ function isRestricted(branch) {
             sel.innerHTML = "";
             if (globalSnapshot) {
                 Object.keys(globalSnapshot).forEach(function(b) {
+                    // FILTER: Kung hindi 'ALL' ang active branch, sariling branch lang ang ipapakita
+                    if (activeBranch !== 'ALL' && b !== activeBranch) return;
+
                     var opt = document.createElement('option');
                     opt.value = b;
                     opt.textContent = b;
