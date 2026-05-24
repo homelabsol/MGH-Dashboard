@@ -2562,21 +2562,30 @@ function isRestricted(branch) {
 
                     if (matchedPcKey) {
                         var pcData = branchData[matchedPcKey];
+                        var games = pcData.Games || {};
 
-                        // 🫀 CHECK HEARTBEAT — is the PC truly online?
+                        // 🫀 CHECK LAST SYNC — is the PC truly online?
                         var isOnline = false;
-                        var heartbeat = pcData.Heartbeat;
-                        if (heartbeat && heartbeat.lastSeen) {
-                            var lastSeen = new Date(heartbeat.lastSeen);
-                            var ageSeconds = (now - lastSeen) / 1000;
-                            // Online = heartbeat within last 2 minutes (120 seconds)
-                            // Loop runs every 12-20s, so 120s gives plenty of buffer
-                            isOnline = (ageSeconds < 120);
+                        
+                        // Hanapin ang pinaka-latest na LastSync sa kahit anong game/task (lalo na ang UNIVERSAL_CHECK)
+                        var latestSyncDate = null;
+                        Object.values(games).forEach(function(g) {
+                            if (g && g.LastSync) {
+                                // LastSync is "2026-05-23 20:20:00" format in PS, convert to parsable format
+                                var syncStr = g.LastSync.replace(' ', 'T');
+                                var d = new Date(syncStr);
+                                if (!latestSyncDate || d > latestSyncDate) latestSyncDate = d;
+                            }
+                        });
+
+                        if (latestSyncDate) {
+                            var ageSeconds = (now - latestSyncDate) / 1000;
+                            // Online = may nag-sync within the last 3 minutes (180 seconds)
+                            isOnline = (ageSeconds < 180 && ageSeconds > -180);
                         }
 
                         if (isOnline) {
                             // 🟢 ACTIVE = PC is online AND has a Running/Active game session
-                            var games = pcData.Games || {};
                             var hasActiveSession = Object.values(games).some(function(g) {
                                 if (!g || typeof g !== 'object') return false;
                                 var s = (g.Status || '').toLowerCase();
@@ -2584,7 +2593,7 @@ function isRestricted(branch) {
                             });
                             status = hasActiveSession ? 'iu' : 'av';
                         }
-                        // else: stays 'of' — PC is in Firebase but heartbeat is old = truly offline
+                        // else: stays 'of' — PC is in Firebase but sync is old = truly offline
                     }
                 }
 
@@ -2605,6 +2614,13 @@ function isRestricted(branch) {
             if (iuEl) iuEl.textContent = online;
             if (ofEl) ofEl.textContent = offline;
         }
+
+        // Auto-refresh the floor map every 15 seconds to catch PCs that went offline
+        setInterval(function() {
+            if (document.getElementById('floorMapModal').style.display === 'flex') {
+                updateFloorMap();
+            }
+        }, 15000);
 
 
 
