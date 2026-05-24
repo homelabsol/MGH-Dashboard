@@ -1363,13 +1363,24 @@
         async function verifyAccess() {
             const u = document.getElementById('loginUser').value.trim();
             const p = document.getElementById('loginPass').value.trim();
-            if(!u || !p) return alert("Paki-fill up lahat ng login details!");
-
             const btn = document.getElementById('btnLogin');
+            
+            if(!u || !p) {
+                btn.innerText = "FAILED: Fill up details!";
+                setTimeout(() => btn.innerText = "AUTHENTICATE ACCESS", 3000);
+                return;
+            }
+
             btn.innerText = "VERIFYING DATABASE...";
             
+            // Timeout promise fallback for mobile browsers (Messenger Webview)
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Request Timed Out")), 15000)
+            );
+
             try {
-                const res = await fetch(`${GAS_URL}?action=LOGIN&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
+                const fetchPromise = fetch(`${GAS_URL}?action=LOGIN&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
+                const res = await Promise.race([fetchPromise, timeoutPromise]);
                 const data = await res.json();
 
                 if (data.success) {
@@ -1429,12 +1440,12 @@
                     
                     startFirebaseListener();
                 } else {
-                    alert("ACCESS DENIED: " + data.message);
-                    btn.innerText = "AUTHENTICATE ACCESS";
+                    btn.innerText = "ACCESS DENIED";
+                    setTimeout(() => btn.innerText = "AUTHENTICATE ACCESS", 3000);
                 }
             } catch (e) {
-                alert("Hindi maka-konekta sa Database. I-check ang GAS_URL mo kung updated ba ang deployment.");
-                btn.innerText = "AUTHENTICATE ACCESS";
+                btn.innerText = "CONNECTION ERROR!";
+                setTimeout(() => btn.innerText = "AUTHENTICATE ACCESS", 3000);
             }
         }
 
