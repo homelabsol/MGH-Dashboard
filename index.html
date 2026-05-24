@@ -717,6 +717,10 @@
                     <span class="btn-label">Online Games</span>
                 </button>
                 <div class="admin-divider">System Management</div>
+                <button class="grid-btn" style="--hover-border: #fca5a5;" onclick="openFloorMapEditorModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #e11d48;"><i data-lucide="layout-grid" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">Edit Floor Map</span>
+                </button>
                 <button class="grid-btn" style="--hover-border: #fde68a;" onclick="openStorageModal()">
                     <div class="btn-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #d97706;"><i data-lucide="hard-drive" style="width:22px; height:22px;"></i></div>
                     <span class="btn-label">Free Storage</span>
@@ -751,6 +755,28 @@
                     <span class="btn-label">Remote Restart</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- FLOOR MAP EDITOR MODAL -->
+    <div id="floorMapEditorModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 600px;">
+            <span class="modal-close" onclick="document.getElementById('floorMapEditorModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #be185d, #e11d48); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(190,24,93,0.3);">
+                    <i data-lucide="layout-grid" style="color: #fce7f3; width: 24px; height: 24px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 20px; letter-spacing: -0.3px;">Floor Map Editor</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Type your custom layout separated by commas.</p>
+            </div>
+            
+            <label style="font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; display:block;">Select Branch:</label>
+            <select id="fmeBranchSelector" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1; margin-bottom: 15px;"></select>
+            
+            <label style="font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; display:block;">Layout Text (Numbers, EMPTY, DOOR, CASHIER, CR, VIP):</label>
+            <textarea id="fmeLayoutText" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1; min-height: 150px; font-family: monospace; line-height: 1.5; resize: vertical;" placeholder="1,2,3,4,5&#10;EMPTY,DOOR,EMPTY,CASHIER,CR&#10;6,7,8,9,10"></textarea>
+
+            <button onclick="saveFloorMapConfig()" class="btn-authenticate" style="margin-top:15px; background: linear-gradient(135deg, #e11d48, #be185d);"><i data-lucide="save"></i> SAVE LAYOUT</button>
         </div>
     </div>
 
@@ -996,59 +1022,46 @@
                     <span class="fpm-pill of">⚫ <span id="fpmOf">40</span> Offline</span>
                 </div>
 
-                <!-- TWO SECTIONS SIDE BY SIDE -->
-                <div style="display:flex; gap:10px; align-items:flex-start;">
-
+                <!-- STATIC FLOOR MAP FOR MGH-CONCEPCION -->
+                <div id="staticConcepcionMap" style="display:none; gap:10px; align-items:flex-start;">
                     <!-- ===== MAIN ROOM (LEFT, LARGE) ===== -->
                     <div class="fpm-room" style="width:fit-content;">
                         <div class="fpm-room-lbl">🏠 Main Room — 30 units</div>
 
-                        <!-- Door at top-left -->
                         <div style="margin-bottom:8px;">
                             <span style="display:inline-flex; align-items:center; gap:4px; background:#1e293b; color:#fcd34d; border-radius:5px; padding:3px 10px; font-size:9px; font-weight:800; letter-spacing:0.5px;">🚪 DOOR / ENTRANCE</span>
                         </div>
 
-                        <!-- PC rows stacked top-to-bottom -->
                         <div style="display:flex; flex-direction:column; gap:3px;">
-                            <!-- ROW 1: PC11–16 (top row, nearest to door) -->
                             <div class="fpm-row">
-                                <div class="fpc of" id="fpc-11">11</div><div class="fpc of" id="fpc-12">12</div>
-                                <div class="fpc of" id="fpc-13">13</div><div class="fpc of" id="fpc-14">14</div>
-                                <div class="fpc of" id="fpc-15">15</div><div class="fpc of" id="fpc-16">16</div>
+                                <div class="fpc of" id="fpc-c-11">11</div><div class="fpc of" id="fpc-c-12">12</div>
+                                <div class="fpc of" id="fpc-c-13">13</div><div class="fpc of" id="fpc-c-14">14</div>
+                                <div class="fpc of" id="fpc-c-15">15</div><div class="fpc of" id="fpc-c-16">16</div>
                             </div>
-
-                            <!-- GAP between row 1 and back-to-back group -->
                             <div style="height:10px;"></div>
-
-                            <!-- BACK-TO-BACK GROUP 1: rows face each other -->
                             <div class="fpm-row">
-                                <div class="fpc of" id="fpc-22">22</div><div class="fpc of" id="fpc-21">21</div>
-                                <div class="fpc of" id="fpc-20">20</div><div class="fpc of" id="fpc-19">19</div>
-                                <div class="fpc of" id="fpc-18">18</div><div class="fpc of" id="fpc-17">17</div>
+                                <div class="fpc of" id="fpc-c-22">22</div><div class="fpc of" id="fpc-c-21">21</div>
+                                <div class="fpc of" id="fpc-c-20">20</div><div class="fpc of" id="fpc-c-19">19</div>
+                                <div class="fpc of" id="fpc-c-18">18</div><div class="fpc of" id="fpc-c-17">17</div>
                             </div>
                             <div class="fpm-row">
-                                <div class="fpc of" id="fpc-23">23</div><div class="fpc of" id="fpc-24">24</div>
-                                <div class="fpc of" id="fpc-25">25</div><div class="fpc of" id="fpc-26">26</div>
-                                <div class="fpc of" id="fpc-27">27</div><div class="fpc of" id="fpc-28">28</div>
+                                <div class="fpc of" id="fpc-c-23">23</div><div class="fpc of" id="fpc-c-24">24</div>
+                                <div class="fpc of" id="fpc-c-25">25</div><div class="fpc of" id="fpc-c-26">26</div>
+                                <div class="fpc of" id="fpc-c-27">27</div><div class="fpc of" id="fpc-c-28">28</div>
                             </div>
-
-                            <!-- GAP between groups -->
                             <div style="height:10px;"></div>
-
-                            <!-- BACK-TO-BACK GROUP 2 -->
                             <div class="fpm-row">
-                                <div class="fpc of" id="fpc-34">34</div><div class="fpc of" id="fpc-33">33</div>
-                                <div class="fpc of" id="fpc-32">32</div><div class="fpc of" id="fpc-31">31</div>
-                                <div class="fpc of" id="fpc-30">30</div><div class="fpc of" id="fpc-29">29</div>
+                                <div class="fpc of" id="fpc-c-34">34</div><div class="fpc of" id="fpc-c-33">33</div>
+                                <div class="fpc of" id="fpc-c-32">32</div><div class="fpc of" id="fpc-c-31">31</div>
+                                <div class="fpc of" id="fpc-c-30">30</div><div class="fpc of" id="fpc-c-29">29</div>
                             </div>
                             <div class="fpm-row">
-                                <div class="fpc of" id="fpc-35">35</div><div class="fpc of" id="fpc-36">36</div>
-                                <div class="fpc of" id="fpc-37">37</div><div class="fpc of" id="fpc-38">38</div>
-                                <div class="fpc of" id="fpc-39">39</div><div class="fpc of" id="fpc-40">40</div>
+                                <div class="fpc of" id="fpc-c-35">35</div><div class="fpc of" id="fpc-c-36">36</div>
+                                <div class="fpc of" id="fpc-c-37">37</div><div class="fpc of" id="fpc-c-38">38</div>
+                                <div class="fpc of" id="fpc-c-39">39</div><div class="fpc of" id="fpc-c-40">40</div>
                             </div>
                         </div>
 
-                        <!-- FACILITIES at BOTTOM (horizontal) -->
                         <div style="display:flex; gap:4px; margin-top:14px;">
                             <div class="fpm-fac office" style="flex:1; height:28px;">Office</div>
                             <div class="fpm-fac cr" style="flex:1; height:28px;">C.R</div>
@@ -1057,46 +1070,38 @@
                         </div>
                     </div>
 
-                    <!-- ===== RIGHT SECTION (VIP area, beside main room) ===== -->
+                    <!-- ===== RIGHT SECTION (VIP area) ===== -->
                     <div class="fpm-room" style="display:flex; flex-direction:column; gap:8px;">
-
-                        <!-- Waiting Area at TOP -->
                         <div class="fpm-waiting" style="min-height:70px;">🪑<br>Waiting<br>Area</div>
-
-                        <!-- Door connector from main room -->
                         <div style="border-top:2px dashed #cbd5e1; padding-top:5px; text-align:center;">
                             <span style="font-size:8px; font-weight:800; color:#64748b; background:#f1f5f9; border-radius:4px; padding:2px 6px;">🚪 Door</span>
                         </div>
-
-                        <!-- VIP AREA: ALL PCs 1-10 -->
                         <div style="background:linear-gradient(135deg,#faf5ff,#ede9fe); border:2px solid #c4b5fd; border-radius:8px; padding:8px;">
                             <div style="font-size:8px; font-weight:800; color:#7c3aed; letter-spacing:0.5px; margin-bottom:5px; text-align:center;">⭐ VIP AREA</div>
                             <div style="display:flex; gap:4px; align-items:flex-end;">
-                                <!-- PCs 5–10 (left column) -->
                                 <div style="display:flex; flex-direction:column; gap:3px;">
-                                    <div class="fpc of" id="fpc-5">5</div>
-                                    <div class="fpc of" id="fpc-6">6</div>
-                                    <div class="fpc of" id="fpc-7">7</div>
-                                    <div class="fpc of" id="fpc-8">8</div>
-                                    <div class="fpc of" id="fpc-9">9</div>
-                                    <div class="fpc of" id="fpc-10">10</div>
+                                    <div class="fpc of" id="fpc-c-5">5</div><div class="fpc of" id="fpc-c-6">6</div>
+                                    <div class="fpc of" id="fpc-c-7">7</div><div class="fpc of" id="fpc-c-8">8</div>
+                                    <div class="fpc of" id="fpc-c-9">9</div><div class="fpc of" id="fpc-c-10">10</div>
                                 </div>
-                                <!-- PCs 1–4 (right column) -->
                                 <div style="display:flex; flex-direction:column; gap:3px;">
-                                    <div class="fpc of" id="fpc-1">1</div>
-                                    <div class="fpc of" id="fpc-2">2</div>
-                                    <div class="fpc of" id="fpc-3">3</div>
-                                    <div class="fpc of" id="fpc-4">4</div>
+                                    <div class="fpc of" id="fpc-c-1">1</div><div class="fpc of" id="fpc-c-2">2</div>
+                                    <div class="fpc of" id="fpc-c-3">3</div><div class="fpc of" id="fpc-c-4">4</div>
                                 </div>
-                                <!-- C.R on the far right -->
                                 <div style="align-self:flex-end; margin-left:4px;">
                                     <span class="fpm-cr-tag">C.R</span>
                                 </div>
                             </div>
                         </div>
-
                     </div>
+                </div>
 
+                <!-- TWO SECTIONS SIDE BY SIDE (DYNAMIC) -->
+                <div id="dynamicFloorMapWrapper" style="display:flex; justify-content: center; width: 100%;">
+                    <!-- DYNAMIC FLOOR MAP CONTAINER -->
+                    <div id="dynamicFloorMapContainer" style="display:flex; flex-direction:column; gap:10px; align-items:center; padding-top: 10px; padding-bottom: 20px; overflow-x: auto; max-width: 100%;">
+                        <!-- Auto-generated content goes here -->
+                    </div>
                 </div><!-- end two-section layout -->
             </div>
         </div>
@@ -2525,10 +2530,9 @@ function isRestricted(branch) {
 
         window.updateFloorMap = function() {
             var active = 0, online = 0, offline = 0;
-            var allPcNums = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
-                             21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
+            var allPcNums = [];
 
-            // 🎯 Find the target branch for MGH-Concepcion floor map
+            // ?? Find the target branch for the floor map
             var targetBranch = null;
             if (globalSnapshot) {
                 Object.keys(globalSnapshot).forEach(function(b) {
@@ -2541,12 +2545,100 @@ function isRestricted(branch) {
                 if (!targetBranch && activeBranch !== 'ALL' && globalSnapshot[activeBranch]) {
                     targetBranch = activeBranch;
                 }
+                if (!targetBranch && activeBranch === 'ALL' && Object.keys(globalSnapshot).length > 0) {
+                    targetBranch = Object.keys(globalSnapshot)[0];
+                }
+            }
+
+            // Update title
+            var titleEl = document.querySelector('.fpm-title');
+            if (titleEl) titleEl.textContent = targetBranch || "Unknown Branch";
+
+            var isConcepcion = false;
+            if (targetBranch) {
+                var clean = targetBranch.replace(/[^a-z0-9]/gi,'').toLowerCase();
+                isConcepcion = (clean === 'mghconcepcion' || clean === 'concepcion');
+            }
+
+            var staticMap = document.getElementById('staticConcepcionMap');
+            var dynamicWrapper = document.getElementById('dynamicFloorMapWrapper');
+            var container = document.getElementById('dynamicFloorMapContainer');
+            var branchData = (targetBranch && globalSnapshot) ? globalSnapshot[targetBranch] : {};
+
+            if (isConcepcion) {
+                if (staticMap) staticMap.style.display = 'flex';
+                if (dynamicWrapper) dynamicWrapper.style.display = 'none';
+                
+                allPcNums = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                             21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
+            } else {
+                if (staticMap) staticMap.style.display = 'none';
+                if (dynamicWrapper) dynamicWrapper.style.display = 'flex';
+                
+                // DYNAMIC LAYOUT GENERATION
+                var layoutConfig = branchData.FloorMapConfig;
+                var layoutHtml = '';
+
+                if (layoutConfig && layoutConfig.trim() !== "") {
+                    var rows = layoutConfig.split('\n');
+                    rows.forEach(function(row) {
+                        if (row.trim() === "") return;
+                        var cells = row.split(',');
+                        var rowHtml = '<div style="display:flex; gap:6px; justify-content:center; margin-bottom: 2px;">';
+                        
+                        cells.forEach(function(cell) {
+                            var c = cell.trim().toUpperCase();
+                            if (c === "EMPTY" || c === "BLANK") {
+                                rowHtml += '<div style="width: 44px; height: 38px;"></div>';
+                            } else if (c === "DOOR" || c === "ENTRANCE") {
+                                rowHtml += '<div style="width: 44px; height: 38px; display:flex; align-items:center; justify-content:center; background:#475569; color:#fff; border-radius:6px; font-size:10px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">🚪</div>';
+                            } else if (c === "CASHIER") {
+                                rowHtml += '<div style="width: 44px; height: 38px; display:flex; align-items:center; justify-content:center; background:#b45309; color:#fff; border-radius:6px; font-size:8px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">₱</div>';
+                            } else if (c === "CR" || c === "C.R") {
+                                rowHtml += '<div style="width: 44px; height: 38px; display:flex; align-items:center; justify-content:center; background:#7c3aed; color:#fff; border-radius:6px; font-size:9px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">C.R</div>';
+                            } else if (c === "VIP") {
+                                rowHtml += '<div style="width: 44px; height: 38px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#c026d3,#9333ea); color:#fff; border-radius:6px; font-size:9px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">⭐</div>';
+                            } else {
+                                var num = parseInt(c, 10);
+                                if (!isNaN(num)) {
+                                    allPcNums.push(num);
+                                    rowHtml += '<div class="fpc of" id="fpc-' + num + '">' + num + '</div>';
+                                } else if (c !== "") {
+                                    rowHtml += '<div style="width: 44px; height: 38px; display:flex; align-items:center; justify-content:center; background:#e2e8f0; color:#334155; border-radius:6px; font-size:8px; font-weight:bold; text-align:center;">' + c.substring(0,5) + '</div>';
+                                }
+                            }
+                        });
+                        rowHtml += '</div>';
+                        layoutHtml += rowHtml;
+                    });
+                } else {
+                    var pcKeys = Object.keys(branchData).filter(k => k.toLowerCase().startsWith('pc'));
+                    var maxPc = 0;
+                    pcKeys.forEach(function(k) {
+                        var num = parseInt(k.replace(/[^0-9]/g, ''), 10);
+                        if (!isNaN(num) && num > maxPc) maxPc = num;
+                    });
+                    
+                    if (maxPc === 0) maxPc = 40;
+                    layoutHtml += '<div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size:12px; color:#94a3b8; text-align:center; margin-bottom: 15px;">No Custom Layout Set.<br>Using Auto-Generated Grid.</div>';
+                    var cols = 10;
+                    var html = '';
+                    for (var i = 1; i <= maxPc; i++) {
+                        allPcNums.push(i);
+                        if (i % cols === 1) html += '<div style="display:flex; gap:6px; justify-content:center; margin-bottom: 6px;">';
+                        html += '<div class="fpc of" id="fpc-' + i + '">' + i + '</div>';
+                        if (i % cols === 0 || i === maxPc) html += '</div>';
+                    }
+                    layoutHtml += html;
+                }
+                if (container) container.innerHTML = layoutHtml;
             }
 
             var now = new Date();
 
             allPcNums.forEach(function(num) {
-                var el = document.getElementById('fpc-' + num);
+                var elId = isConcepcion ? 'fpc-c-' + num : 'fpc-' + num;
+                var el = document.getElementById(elId);
                 if (!el) return;
 
                 var status = 'of'; // default: offline
@@ -2631,6 +2723,54 @@ function isRestricted(branch) {
             document.getElementById('restartModal').style.display = 'flex';
             populateDropdown('rstPcSelector');
             if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        window.openFloorMapEditorModal = function() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('floorMapEditorModal').style.display = 'flex';
+            
+            var sel = document.getElementById('fmeBranchSelector');
+            sel.innerHTML = "";
+            if (globalSnapshot) {
+                Object.keys(globalSnapshot).forEach(function(b) {
+                    var opt = document.createElement('option');
+                    opt.value = b;
+                    opt.textContent = b;
+                    if (activeBranch !== 'ALL' && b === activeBranch) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            }
+            
+            // Load existing
+            sel.onchange = function() {
+                var b = sel.value;
+                if (globalSnapshot && globalSnapshot[b] && globalSnapshot[b].FloorMapConfig) {
+                    document.getElementById('fmeLayoutText').value = globalSnapshot[b].FloorMapConfig;
+                } else {
+                    document.getElementById('fmeLayoutText').value = "";
+                }
+            };
+            if (sel.options.length > 0) sel.onchange();
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        window.saveFloorMapConfig = function() {
+            var b = document.getElementById('fmeBranchSelector').value;
+            var text = document.getElementById('fmeLayoutText').value;
+            if (!b) return alert("Pumili ng branch!");
+            
+            if (isRestricted(b)) return showToast('🔒 Owner accounts lamang ang pwede mag-edit ng map!', 'warning');
+
+            firebase.database().ref('Branches/' + b + '/FloorMapConfig').set(text).then(function() {
+                showToast("Floor Map Layout Saved!", "success");
+                document.getElementById('floorMapEditorModal').style.display = 'none';
+                document.getElementById('adminModal').style.display = 'flex';
+                // Trigger refresh if map is open
+                updateFloorMap();
+            }).catch(function(err) {
+                showToast("Error: " + err.message, "error");
+            });
         }
 
         window.sendRestartCommand = function() {
