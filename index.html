@@ -527,8 +527,15 @@
             </div>
 
             <div class="table-container">
-                <div class="sync-status">
-                    <div class="sync-dot"></div><span id="status">LIVE FIREBASE SYNC ACTIVE</span>
+                <div class="sync-status" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="btnFilterNeedsUpdate" onclick="setStatusFilter('NEEDS_UPDATE')" style="padding: 6px 12px; font-size: 11px; font-weight: 800; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.15); color: #ef4444; cursor: pointer; transition: 0.2s;">🚨 NEEDS UPDATE (0)</button>
+                        <button id="btnFilterActiveGames" onclick="setStatusFilter('ACTIVE_GAMES')" style="padding: 6px 12px; font-size: 11px; font-weight: 800; border-radius: 6px; border: 1px solid #3b82f6; background: rgba(59,130,246,0.15); color: #3b82f6; cursor: pointer; transition: 0.2s; opacity: 0.5;">🎮 ACTIVE GAMES (0)</button>
+                        <button id="btnFilterAll" onclick="setStatusFilter('ALL')" style="padding: 6px 12px; font-size: 11px; font-weight: 800; border-radius: 6px; border: 1px solid #64748b; background: rgba(100,116,139,0.15); color: #64748b; cursor: pointer; transition: 0.2s; opacity: 0.5;">✔️ ALL</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <div class="sync-dot"></div><span id="status">LIVE FIREBASE SYNC ACTIVE</span>
+                    </div>
                 </div>
                 <table>
                     <thead><tr><th>Branch</th><th>Workstation</th><th>Game Title</th><th>App Status</th><th>Update Status</th><th>Last Sync</th><th>Action</th></tr></thead>
@@ -1097,6 +1104,91 @@
                     </div>
                 </div>
 
+                <!-- STATIC FLOOR MAP FOR MGH-PARANG -->
+                <div id="staticParangMap" style="display:none; gap:10px; align-items:flex-start; justify-content:center;">
+                    
+                    <!-- LEFT COLUMN (MAIN GRID + VIP AREA) -->
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        
+                        <!-- LEFT MAIN GRID (1-30) -->
+                        <div class="fpm-room" style="width:fit-content; position:relative;">
+                            <div style="display:flex; justify-content:space-around; margin-bottom:10px;">
+                                <span style="font-size:8px; font-weight:800; color:#94a3b8; background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:4px;">SOFA</span>
+                                <span style="font-size:8px; font-weight:800; color:#94a3b8; background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:4px;">🚪 DOOR</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                <div class="fpm-row">
+                                    <div class="fpc of" id="fpc-p-1">1</div><div class="fpc of" id="fpc-p-2">2</div><div class="fpc of" id="fpc-p-3">3</div><div class="fpc of" id="fpc-p-4">4</div><div class="fpc of" id="fpc-p-5">5</div>
+                                </div>
+                                <div class="fpm-row">
+                                    <div class="fpc of" id="fpc-p-6">6</div><div class="fpc of" id="fpc-p-7">7</div><div class="fpc of" id="fpc-p-8">8</div><div class="fpc of" id="fpc-p-9">9</div><div class="fpc of" id="fpc-p-10">10</div>
+                                </div>
+                                <div class="fpm-row">
+                                    <div class="fpc of" id="fpc-p-11">11</div><div class="fpc of" id="fpc-p-12">12</div><div class="fpc of" id="fpc-p-13">13</div><div class="fpc of" id="fpc-p-14">14</div><div class="fpc of" id="fpc-p-15">15</div>
+                                </div>
+                                <div class="fpm-row">
+                                    <div class="fpc of" id="fpc-p-16">16</div><div class="fpc of" id="fpc-p-17">17</div><div class="fpc of" id="fpc-p-18">18</div><div class="fpc of" id="fpc-p-19">19</div><div class="fpc of" id="fpc-p-20">20</div>
+                                </div>
+                                <div class="fpm-row">
+                                    <div class="fpc of" id="fpc-p-21">21</div><div class="fpc of" id="fpc-p-22">22</div><div class="fpc of" id="fpc-p-23">23</div><div class="fpc of" id="fpc-p-24">24</div><div class="fpc of" id="fpc-p-25">25</div>
+                                </div>
+                                <div class="fpm-row">
+                                    <div class="fpc of" id="fpc-p-26">26</div><div class="fpc of" id="fpc-p-27">27</div><div class="fpc of" id="fpc-p-28">28</div><div class="fpc of" id="fpc-p-29">29</div><div class="fpc of" id="fpc-p-30">30</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIP BOX (41-54) -->
+                        <div style="background:linear-gradient(135deg,#faf5ff,#ede9fe); border:2px solid #c4b5fd; border-radius:8px; padding:10px;">
+                            <div style="font-size:9px; font-weight:800; color:#7c3aed; letter-spacing:1px; margin-bottom:8px; text-align:center;">⭐ VIP AREA</div>
+                            <div style="display:flex; gap:6px;">
+                                <!-- Col 1 -->
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <div class="fpc of" id="fpc-p-53">53</div>
+                                    <div class="fpc of" id="fpc-p-47">47</div>
+                                    <div class="fpc of" id="fpc-p-48">48</div>
+                                    <div class="fpc of" id="fpc-p-49">49</div>
+                                    <div class="fpc of" id="fpc-p-50">50</div>
+                                    <div class="fpc of" id="fpc-p-51">51</div>
+                                    <div class="fpc of" id="fpc-p-52">52</div>
+                                </div>
+                                <!-- Col 2 -->
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <div class="fpc of" id="fpc-p-54">54</div>
+                                </div>
+                                <!-- Col 3 -->
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <!-- Ang DOOR ay ginawan ko ng height at lapad para pumantay ang alignment sa PCs sa kaliwa -->
+                                    <div style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:800; color:#fff; background:#475569; border-radius:6px; text-align:center; box-sizing:border-box;">🚪</div>
+                                    <div class="fpc of" id="fpc-p-41">41</div>
+                                    <div class="fpc of" id="fpc-p-42">42</div>
+                                    <div class="fpc of" id="fpc-p-43">43</div>
+                                    <div class="fpc of" id="fpc-p-44">44</div>
+                                    <div class="fpc of" id="fpc-p-45">45</div>
+                                    <div class="fpc of" id="fpc-p-46">46</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT COLUMN (31-40) - ONE CONTINUOUS BOX -->
+                    <div class="fpm-room" style="display:flex; flex-direction:column; gap:6px; align-items:center; height:fit-content;">
+                        <span style="font-size:8px; font-weight:800; color:#94a3b8; background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:4px; margin-bottom:4px;">AIRCO</span>
+                        <div class="fpc of" id="fpc-p-31">31</div>
+                        <div class="fpc of" id="fpc-p-32">32</div>
+                        <div class="fpc of" id="fpc-p-33">33</div>
+                        <div class="fpc of" id="fpc-p-34">34</div>
+                        <div class="fpc of" id="fpc-p-35">35</div>
+                        <div class="fpc of" id="fpc-p-36">36</div>
+                        <div class="fpc of" id="fpc-p-37">37</div>
+                        <div class="fpc of" id="fpc-p-38">38</div>
+                        <div class="fpc of" id="fpc-p-39">39</div>
+                        <div class="fpc of" id="fpc-p-40">40</div>
+                    </div>
+
+                </div>
+
                 <!-- TWO SECTIONS SIDE BY SIDE (DYNAMIC) -->
                 <div id="dynamicFloorMapWrapper" style="display:flex; justify-content: center; width: 100%;">
                     <!-- DYNAMIC FLOOR MAP CONTAINER -->
@@ -1353,6 +1445,7 @@
 
         let activeBranch = "ALL";
         let currentFilter = "ALL";
+        let currentStatusFilter = "NEEDS_UPDATE"; 
         let globalSnapshot = null;
         let pcListCache = []; 
         let currentUserRole = "OWNER"; 
@@ -1401,6 +1494,7 @@
                 const data = await res.json();
 
                 if (data.success) {
+                    window.branchTypesMap = data.branchTypes || {};
                     currentUserRole = data.role.toUpperCase(); 
                     currentClientName = data.client.toUpperCase(); 
                     
@@ -1973,11 +2067,26 @@ function renderUI() {
             let tableHtml = "";
             let storageHtml = "";
             let storageCount = 0;
-            let filtersHtml = `<button class='pc-filter-btn ${currentFilter === "ALL" ? "active" : ""}' onclick='setPcFilter("ALL")'>ALL UNITS</button>`;
-            
+            let currentBType = window.branchTypesMap && window.branchTypesMap[activeBranch.toUpperCase()] ? window.branchTypesMap[activeBranch.toUpperCase()] : "PISONET";
             let upCount = 0; let pndCount = 0;
+            let countNeedsUpdateStats = 0;
+            let countActiveStats = 0;
+            let countAllStats = 0;
             let uniquePCs = new Set();
             pcListCache = []; 
+            
+            // Auto-fallback to Dropdown if there are too many PCs in ALL UNITS view
+            if (activeBranch === "ALL" && currentBType === "PISONET" && Object.keys(globalSnapshot).length > 2) {
+                currentBType = "DISKLESS"; 
+            }
+
+            let filtersHtml = "";
+            if (currentBType === "DISKLESS") {
+                filtersHtml += `<select class="login-input" style="width: 150px; background: #1e293b; color: white; border-color: rgba(255,255,255,0.1); font-size: 13px; font-weight: 700; padding: 10px; min-height: 40px;" onchange="setPcFilter(this.value)">`;
+                filtersHtml += `<option value="ALL" ${currentFilter === "ALL" ? "selected" : ""}>ALL UNITS</option>`;
+            } else {
+                filtersHtml += `<button class='pc-filter-btn ${currentFilter === "ALL" ? "active" : ""}' onclick='setPcFilter("ALL")'>ALL UNITS</button>`;
+            }
 
             const hiddenTasks = ["UNIVERSAL_CHECK", "STORAGE_CLEANER", "MARTEC", "SYSTEM_UPDATE", "SYSTEM_BACKUP", "SYSTEM_RENAME"];
             let isOwner = (currentUserRole === "OWNER");
@@ -2053,8 +2162,40 @@ function renderUI() {
                                      }
                                 }
                             }
-                            continue; 
                         }
+
+                        // 🟢 FRONTEND FILTER: ONLINE GAMES ONLY
+                        // I-filter natin sa Dashboard para ito lang ang makita mo, 
+                        // pero hindi natin gagalawin ang backend scripts para safe sa Vanguard!
+                        const onlineGamesList = [
+                            "Roblox", "FiveM", "Genshin Impact", "Crossfire PH", 
+                            "Valorant", "League of Legends", "Dota 2", "Farlight 84",
+                            "Battle.net", "Steam", "Epic Games", "Riot Client", "Remote Access"
+                        ];
+                        
+                        let isOnlineGame = false;
+                        for(let i=0; i < onlineGamesList.length; i++) {
+                            if (gameName.toLowerCase().includes(onlineGamesList[i].toLowerCase())) {
+                                isOnlineGame = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!isOnlineGame && gameName !== "UNIVERSAL_CHECK" && gameName !== "SYSTEM_UPDATE" && gameName !== "SYSTEM_RESTART" && gameName !== "SYSTEM_RENAME") continue;
+
+                        // STATUS FILTERING LOGIC
+                        let upStatText = info.UpdateInfo || info.Status || "";
+                        let appStatText = info.Status || "";
+                        let upperStat = upStatText.toString().toUpperCase() + " " + appStatText.toString().toUpperCase();
+                        
+                        let isNeedsUpdate = upperStat.includes("NEW VERSION") || upperStat.includes("PENDING") || upperStat.includes("ERROR") || upperStat.includes("FAILED");
+                        let isActiveGame = upperStat.includes("UPDATING / RUNNING") || upperStat.includes("RUNNING");
+                        countAllStats++;
+                        if (isNeedsUpdate) countNeedsUpdateStats++;
+                        if (isActiveGame) countActiveStats++;
+
+                        if (currentStatusFilter === "NEEDS_UPDATE" && !isNeedsUpdate) continue;
+                        if (currentStatusFilter === "ACTIVE_GAMES" && !isActiveGame) continue;
 
                         // 🟢 AUTO-HIDE REMOTE ACCESS KAPAG COMPLETE NA
                         if (gameName === "Remote Access" && (info.Status.includes("Ready") || info.Status.includes("SUCCESS"))) {
@@ -2123,13 +2264,25 @@ function renderUI() {
                 filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("${pc}")'>${pc}</button>`; 
             });
 
+            // 🟢 Toggles
+            let toggleHtml = `<div style="margin-bottom:15px; display:flex; gap:10px;">
+                <button id="btnFilterNeedsUpdate" class="pc-filter-btn ${currentStatusFilter === 'NEEDS_UPDATE' ? 'active' : ''}" onclick="setStatusFilter('NEEDS_UPDATE')">🚨 NEEDS UPDATE (${countNeedsUpdateStats})</button>
+                <button id="btnFilterActiveGames" class="pc-filter-btn ${currentStatusFilter === 'ACTIVE_GAMES' ? 'active' : ''}" onclick="setStatusFilter('ACTIVE_GAMES')">🎮 ACTIVE GAMES (${countActiveStats})</button>
+                <button id="btnFilterAll" class="pc-filter-btn ${currentStatusFilter === 'ALL' ? 'active' : ''}" onclick="setStatusFilter('ALL')">✔️ ALL (${countAllStats})</button>
+            </div>`;
+
             document.getElementById("tableBody").innerHTML = tableHtml || "<tr><td colspan='7' style='text-align:center; padding:30px; font-weight:bold; color:#64748b;'>Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.</td></tr>";
             document.getElementById("serverHealth").innerHTML = storageHtml || "<div style='color:#64748b; font-size:12px; width:100%;'>No Disk Data</div>";
             var scEl = document.getElementById('serverCount');
             if (scEl) scEl.textContent = storageCount > 0 ? storageCount + ' drives' : '';
-            document.getElementById("pcFilterContainer").innerHTML = filtersHtml;
+            document.getElementById("pcFilterContainer").innerHTML = toggleHtml + filtersHtml;
             document.getElementById("countUp").innerText = upCount;
             document.getElementById("countDown").innerText = pndCount;
+        }
+
+        window.setStatusFilter = function(filter) {
+            currentStatusFilter = filter;
+            renderUI();
         }
 
         function formatBytes(bytes) {
@@ -2591,24 +2744,37 @@ function isRestricted(branch) {
             if (titleEl) titleEl.textContent = targetBranch || "Unknown Branch";
 
             var isConcepcion = false;
+            var isParang = false;
             if (targetBranch) {
                 var clean = targetBranch.replace(/[^a-z0-9]/gi,'').toLowerCase();
                 isConcepcion = (clean === 'mghconcepcion' || clean === 'concepcion');
+                isParang = (clean === 'mghparang' || clean === 'parang');
             }
 
-            var staticMap = document.getElementById('staticConcepcionMap');
+            var staticConcepcionMap = document.getElementById('staticConcepcionMap');
+            var staticParangMap = document.getElementById('staticParangMap');
             var dynamicWrapper = document.getElementById('dynamicFloorMapWrapper');
             var container = document.getElementById('dynamicFloorMapContainer');
             var branchData = (targetBranch && globalSnapshot) ? globalSnapshot[targetBranch] : {};
 
             if (isConcepcion) {
-                if (staticMap) staticMap.style.display = 'flex';
+                if (staticConcepcionMap) staticConcepcionMap.style.display = 'flex';
+                if (staticParangMap) staticParangMap.style.display = 'none';
                 if (dynamicWrapper) dynamicWrapper.style.display = 'none';
                 
                 allPcNums = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
                              21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
+            } else if (isParang) {
+                if (staticConcepcionMap) staticConcepcionMap.style.display = 'none';
+                if (staticParangMap) staticParangMap.style.display = 'flex';
+                if (dynamicWrapper) dynamicWrapper.style.display = 'none';
+                
+                allPcNums = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                             21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
+                             41,42,43,44,45,46,47,48,49,50,51,52,53,54];
             } else {
-                if (staticMap) staticMap.style.display = 'none';
+                if (staticConcepcionMap) staticConcepcionMap.style.display = 'none';
+                if (staticParangMap) staticParangMap.style.display = 'none';
                 if (dynamicWrapper) dynamicWrapper.style.display = 'flex';
                 
                 // DYNAMIC LAYOUT GENERATION
