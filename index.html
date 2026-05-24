@@ -1371,16 +1371,33 @@
                 return;
             }
 
-            btn.innerText = "VERIFYING DATABASE...";
+            let timeLeft = 15;
+            btn.innerText = `VERIFYING (${timeLeft}s)...`;
             
-            // Timeout promise fallback for mobile browsers (Messenger Webview)
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Request Timed Out")), 15000)
-            );
+            // UI Countdown Timer
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    if (btn.innerText.includes("VERIFYING")) {
+                        btn.innerText = `VERIFYING (${timeLeft}s)...`;
+                    }
+                }
+            }, 1000);
+
+            // Fetch Controller for explicit abort
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+            }, 15000);
 
             try {
-                const fetchPromise = fetch(`${GAS_URL}?action=LOGIN&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
-                const res = await Promise.race([fetchPromise, timeoutPromise]);
+                const res = await fetch(`${GAS_URL}?action=LOGIN&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`, {
+                    signal: controller.signal
+                });
+                
+                clearInterval(countdownInterval);
+                clearTimeout(timeoutId);
+                
                 const data = await res.json();
 
                 if (data.success) {
@@ -1444,8 +1461,15 @@
                     setTimeout(() => btn.innerText = "AUTHENTICATE ACCESS", 3000);
                 }
             } catch (e) {
-                btn.innerText = "CONNECTION ERROR!";
-                setTimeout(() => btn.innerText = "AUTHENTICATE ACCESS", 3000);
+                clearInterval(countdownInterval);
+                clearTimeout(timeoutId);
+                
+                if (e.name === 'AbortError') {
+                    btn.innerText = "ERR: TIMEOUT (Blocked by Network/ISP)";
+                } else {
+                    btn.innerText = "ERR: " + e.message.substring(0, 20);
+                }
+                setTimeout(() => btn.innerText = "AUTHENTICATE ACCESS", 6000);
             }
         }
 
