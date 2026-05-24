@@ -205,11 +205,11 @@
             /* --- GLOBAL TOUCH & UX --- */
             html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; overflow-x: hidden; }
             body { padding-bottom: env(safe-area-inset-bottom, 0); display: block !important; overflow-x: hidden !important; width: 100%; }
-            #dashboardContent { width: 100% !important; overflow-x: hidden; padding: 10px !important; }
+            #dashboardContent { width: 100%; overflow-x: hidden; padding: 10px; }
             button, select, input { font-size: 16px !important; } /* Prevents iOS zoom */
 
             /* --- LOGIN PAGE --- */
-            #loginPage { display: block !important; min-height: 100vh; width: 100%; }
+            #loginPage { min-height: 100vh; width: 100%; }
             .login-left { max-width: 100%; width: 100%; border-right: none; padding: 30px 20px; display: flex; align-items: center; min-height: 100vh; }
             .login-right { display: none !important; }
             .login-input { padding: 16px; min-height: 48px; }
