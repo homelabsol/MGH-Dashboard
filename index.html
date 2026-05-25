@@ -46,21 +46,11 @@
         .pc-filter-btn:hover { background: rgba(255,255,255,0.15); color: white; }
         .pc-filter-btn.active { background: var(--primary); color: white; border-color: var(--primary-hover); box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
 
-        /* 🎛️ DASHBOARD HEADER BUTTONS */
-        .action-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 15px; width: 100%; }
-        .action-btn { padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid transparent; width: 100%; box-sizing: border-box; text-transform: uppercase; letter-spacing: 0.5px; }
-        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+        /* 🚀 DASHBOARD HEADER BUTTONS */
+        .action-btn-grid { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 10px; }
+        .action-btn { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); color: #cbd5e1; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; transition: all 0.2s ease; width: 100%; box-sizing: border-box; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .action-btn:hover { background: rgba(51, 65, 85, 0.8); border-color: rgba(255, 255, 255, 0.15); color: #ffffff; transform: translateY(-1px); }
         .action-btn:active { transform: translateY(0); }
-        .admin-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #f8fafc; }
-        .admin-btn:hover { background: rgba(255,255,255,0.15); }
-        .support-btn { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.3); color: #ddd6fe; }
-        .support-btn:hover { background: rgba(139,92,246,0.25); }
-        .setup-btn { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: #d1fae5; }
-        .setup-btn:hover { background: rgba(16,185,129,0.25); }
-        .map-btn { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: #fef3c7; }
-        .map-btn:hover { background: rgba(251,191,36,0.25); }
-        .reserve-btn { background: rgba(236,72,153,0.15); border-color: rgba(236,72,153,0.3); color: #fbcfe8; }
-        .reserve-btn:hover { background: rgba(236,72,153,0.25); }
 
         /* 🏢 ENTERPRISE ADMIN TOOLS */
         .admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -506,23 +496,7 @@
                     <h1 class="app-title">SHOP MASTER CONSOLE</h1>
                     <select id="globalBranchSelect" class="branch-selector" onchange="changeGlobalBranch(this.value)"></select>
                     <div id="userRoleDisplay" style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 5px;"></div>
-                    
-                    <div class="action-btn-grid">
-                        <button class="action-btn admin-btn" onclick="document.getElementById('adminModal').style.display='flex'">
-                            <span style="font-size:14px;">⚙️</span> Admin Tools
-                        </button>
-                        <button class="action-btn support-btn" id="btnSupportList" onclick="openSupportList()">
-                            <span style="font-size:14px;">📋</span> Support List
-                        </button>
-                        <button class="action-btn setup-btn" onclick="wizReset(); document.getElementById('setupWizardModal').style.display='flex';">
-                            <span style="font-size:14px;">📖</span> Setup Guide
-                        </button>
-                        <button class="action-btn map-btn" onclick="openFloorMap()">
-                            <span style="font-size:14px;">🗺️</span> Floor Map
-                        </button>
-                    </div>
-                    
-                    <div id="pcFilterContainer" class="pc-filters-container"></div>
+                    <div id="pcFilterContainer" class="pc-filters-container" style="margin-top: 15px;"></div>
                 </div>
 
                 <div style="flex: 2 1 400px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.06);">
@@ -537,18 +511,29 @@
                     <button onclick="location.reload()" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; padding:10px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-bottom:5px;">
                         <span style="font-size:16px;">🚪</span> LOGOUT
                     </button>
-                    <div class="stat-box success"><div class="stat-value" id="countUp">0</div><div class="stat-label">Updated</div></div>
-                    <div class="stat-box danger"><div class="stat-value" id="countDown">0</div><div class="stat-label">Pending</div></div>
+                    <div class="stat-box success" style="display:none;"><div class="stat-value" id="countUp">0</div><div class="stat-label">Updated</div></div>
+                    <div class="stat-box danger" style="display:none;"><div class="stat-value" id="countDown">0</div><div class="stat-label">Pending</div></div>
+                    
+                    <div class="action-btn-grid">
+                        <button class="action-btn" onclick="document.getElementById('adminModal').style.display='flex'">
+                            <span style="font-size:14px;">⚙️</span> Admin Tools
+                        </button>
+                        <button class="action-btn" id="btnSupportList" onclick="openSupportList()">
+                            <span style="font-size:14px;">📋</span> Support List
+                        </button>
+                        <button class="action-btn" onclick="wizReset(); document.getElementById('setupWizardModal').style.display='flex';">
+                            <span style="font-size:14px;">📖</span> Setup Guide
+                        </button>
+                        <button class="action-btn" onclick="openFloorMap()">
+                            <span style="font-size:14px;">🗺️</span> Floor Map
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div class="table-container">
                 <div class="sync-status" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button id="btnFilterNeedsUpdate" onclick="setStatusFilter('NEEDS_UPDATE')" style="padding: 6px 12px; font-size: 11px; font-weight: 800; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.15); color: #ef4444; cursor: pointer; transition: 0.2s;">🚨 NEEDS UPDATE (0)</button>
-                        <button id="btnFilterActiveGames" onclick="setStatusFilter('ACTIVE_GAMES')" style="padding: 6px 12px; font-size: 11px; font-weight: 800; border-radius: 6px; border: 1px solid #3b82f6; background: rgba(59,130,246,0.15); color: #3b82f6; cursor: pointer; transition: 0.2s; opacity: 0.5;">🎮 ACTIVE GAMES (0)</button>
-                        <button id="btnFilterAll" onclick="setStatusFilter('ALL')" style="padding: 6px 12px; font-size: 11px; font-weight: 800; border-radius: 6px; border: 1px solid #64748b; background: rgba(100,116,139,0.15); color: #64748b; cursor: pointer; transition: 0.2s; opacity: 0.5;">✔️ ALL</button>
-                    </div>
+
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <div class="sync-dot"></div><span id="status">LIVE FIREBASE SYNC ACTIVE</span>
                     </div>
@@ -1464,7 +1449,7 @@
 
         let activeBranch = "ALL";
         let currentFilter = "ALL";
-        let currentStatusFilter = "NEEDS_UPDATE"; 
+        let currentStatusFilter = "ALL"; 
         let globalSnapshot = null;
         let pcListCache = []; 
         let currentUserRole = "OWNER"; 
@@ -2183,31 +2168,41 @@ function renderUI() {
                             }
                         }
 
-                        // 🟢 FRONTEND FILTER: ONLINE GAMES ONLY
-                        // I-filter natin sa Dashboard para ito lang ang makita mo, 
-                        // pero hindi natin gagalawin ang backend scripts para safe sa Vanguard!
-                        const onlineGamesList = [
-                            "Roblox", "FiveM", "Genshin Impact", "Crossfire PH", 
-                            "Valorant", "League of Legends", "Dota 2", "Farlight 84",
-                            "Battle.net", "Steam", "Epic Games", "Riot Client", "Remote Access"
-                        ];
-                        
+                        // ?? FRONTEND FILTER: ONLINE GAMES ONLY
+                        // Check based on the new standardized folder layout (C:\Games\Online Games\ etc)
                         let isOnlineGame = false;
-                        for(let i=0; i < onlineGamesList.length; i++) {
-                            if (gameName.toLowerCase().includes(onlineGamesList[i].toLowerCase())) {
-                                isOnlineGame = true;
-                                break;
+                        let lc = (info.LaunchCmd || "").toLowerCase();
+                        
+                        if (lc.includes("\\online games\\") || lc.includes("/online games/") || lc.includes("steam://") || lc.includes("riot:") || lc.includes("battlenet://")) {
+                            isOnlineGame = true;
+                        } 
+                        // Fallback: System tasks that must always be shown
+                        else if (["universal_check", "system_update", "system_restart", "system_rename", "remote access"].includes(gameName.toLowerCase())) {
+                            isOnlineGame = true;
+                        }
+                        // Fallback: Explicitly known clients that use custom launch commands (e.g., battlenet://)
+                        else {
+                            const onlineGamesList = [
+                                "Roblox", "FiveM", "Genshin Impact", "Crossfire PH", 
+                                "Valorant", "League of Legends", "Dota 2", "Farlight 84",
+                                "Battle.net", "Steam", "Epic Games", "Riot Client"
+                            ];
+                            for(let i=0; i < onlineGamesList.length; i++) {
+                                if (gameName.toLowerCase().includes(onlineGamesList[i].toLowerCase())) {
+                                    isOnlineGame = true;
+                                    break;
+                                }
                             }
                         }
                         
-                        if (!isOnlineGame && gameName !== "UNIVERSAL_CHECK" && gameName !== "SYSTEM_UPDATE" && gameName !== "SYSTEM_RESTART" && gameName !== "SYSTEM_RENAME") continue;
+                        if (!isOnlineGame) continue;
 
                         // STATUS FILTERING LOGIC
                         let upStatText = info.UpdateInfo || info.Status || "";
                         let appStatText = info.Status || "";
                         let upperStat = upStatText.toString().toUpperCase() + " " + appStatText.toString().toUpperCase();
                         
-                        let isNeedsUpdate = upperStat.includes("NEW VERSION") || upperStat.includes("PENDING") || upperStat.includes("ERROR") || upperStat.includes("FAILED");
+                        let isNeedsUpdate = upperStat.includes("NEW VERSION") || upperStat.includes("PENDING") || upperStat.includes("ERROR") || upperStat.includes("FAILED") || upperStat.includes("FORCE UPDATE") || upperStat.includes("DOWNLOADING");
                         let isActiveGame = upperStat.includes("UPDATING / RUNNING") || upperStat.includes("RUNNING");
                         countAllStats++;
                         if (isNeedsUpdate) countNeedsUpdateStats++;
@@ -2287,7 +2282,6 @@ function renderUI() {
             let toggleHtml = `<div style="margin-bottom:15px; display:flex; gap:10px;">
                 <button id="btnFilterNeedsUpdate" class="pc-filter-btn ${currentStatusFilter === 'NEEDS_UPDATE' ? 'active' : ''}" onclick="setStatusFilter('NEEDS_UPDATE')">🚨 NEEDS UPDATE (${countNeedsUpdateStats})</button>
                 <button id="btnFilterActiveGames" class="pc-filter-btn ${currentStatusFilter === 'ACTIVE_GAMES' ? 'active' : ''}" onclick="setStatusFilter('ACTIVE_GAMES')">🎮 ACTIVE GAMES (${countActiveStats})</button>
-                <button id="btnFilterAll" class="pc-filter-btn ${currentStatusFilter === 'ALL' ? 'active' : ''}" onclick="setStatusFilter('ALL')">✔️ ALL (${countAllStats})</button>
             </div>`;
 
             document.getElementById("tableBody").innerHTML = tableHtml || "<tr><td colspan='7' style='text-align:center; padding:30px; font-weight:bold; color:#64748b;'>Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.</td></tr>";
@@ -2300,7 +2294,11 @@ function renderUI() {
         }
 
         window.setStatusFilter = function(filter) {
-            currentStatusFilter = filter;
+            if (currentStatusFilter === filter) {
+                currentStatusFilter = "ALL"; // Toggle off if clicked again
+            } else {
+                currentStatusFilter = filter;
+            }
             renderUI();
         }
 
