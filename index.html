@@ -42,8 +42,8 @@
         select.branch-selector { margin-top:8px; padding:8px 12px; border-radius:8px; border:2px solid #2563eb; background:#eff6ff; color:#1d4ed8; font-weight:800; outline:none; font-size:14px; cursor:pointer; box-shadow:0 4px 10px rgba(37,99,235,0.2); }
         
         .pc-filters-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
-        .pc-filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .pc-filter-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+        .pc-filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 10px 16px; min-height: 38px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+        .pc-filter-btn:hover { background: rgba(255,255,255,0.15); color: white; transform: translateY(-1px); }
         .pc-filter-btn.active { background: var(--primary); color: white; border-color: var(--primary-hover); box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
 
         /* 🚀 DASHBOARD HEADER BUTTONS */
@@ -527,6 +527,9 @@
                         <button class="action-btn" onclick="openFloorMap()">
                             <span style="font-size:14px;">🗺️</span> Floor Map
                         </button>
+                        <button class="action-btn" onclick="openFloorMapEditorModal()">
+                            <span style="font-size:14px;">✏️</span> Edit Floor Map
+                        </button>
                     </div>
                 </div>
             </div>
@@ -726,10 +729,7 @@
                     <span class="btn-label">Online Games</span>
                 </button>
                 <div class="admin-divider">System Management</div>
-                <button class="grid-btn" style="--hover-border: #fca5a5;" onclick="openFloorMapEditorModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #e11d48;"><i data-lucide="layout-grid" style="width:22px; height:22px;"></i></div>
-                    <span class="btn-label">Edit Floor Map</span>
-                </button>
+
                 <button class="grid-btn" style="--hover-border: #fde68a;" onclick="openStorageModal()">
                     <div class="btn-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #d97706;"><i data-lucide="hard-drive" style="width:22px; height:22px;"></i></div>
                     <span class="btn-label">Free Storage</span>
@@ -770,7 +770,7 @@
     <!-- FLOOR MAP EDITOR MODAL -->
     <div id="floorMapEditorModal" class="modal-overlay">
         <div class="modal-card" style="max-width: 600px;">
-            <span class="modal-close" onclick="document.getElementById('floorMapEditorModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <span class="modal-close" onclick="document.getElementById('floorMapEditorModal').style.display='none';">&times;</span>
             <div style="text-align: center; margin-bottom: 20px;">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #be185d, #e11d48); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(190,24,93,0.3);">
                     <i data-lucide="layout-grid" style="color: #fce7f3; width: 24px; height: 24px;"></i>
@@ -3004,7 +3004,6 @@ function isRestricted(branch) {
             firebase.database().ref('Branches/' + b + '/FloorMapConfig').set(text).then(function() {
                 showToast("Floor Map Layout Saved!", "success");
                 document.getElementById('floorMapEditorModal').style.display = 'none';
-                document.getElementById('adminModal').style.display = 'flex';
                 // Trigger refresh if map is open
                 updateFloorMap();
             }).catch(function(err) {
