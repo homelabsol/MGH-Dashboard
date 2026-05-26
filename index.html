@@ -210,9 +210,9 @@
 
             /* --- GLOBAL TOUCH & UX --- */
             html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; overflow-x: hidden; }
-            body { padding-bottom: env(safe-area-inset-bottom, 0); display: block !important; overflow-x: hidden !important; width: 100%; }
+            body { padding-bottom: 72px; display: block !important; overflow-x: hidden !important; width: 100%; }
             #dashboardContent { width: 100%; overflow-x: hidden; padding: 10px; }
-            button, select, input { font-size: 16px !important; } /* Prevents iOS zoom */
+            button, select, input { font-size: 16px !important; }
 
             /* --- LOGIN PAGE --- */
             #loginPage { min-height: 100vh; width: 100%; }
@@ -222,17 +222,85 @@
             .btn-authenticate { min-height: 52px; font-size: 15px !important; }
 
             /* --- DASHBOARD HEADER --- */
-            .container { padding: 10px !important; }
-            .header-card { flex-direction: column; padding: 16px !important; gap: 16px; }
+            .container { padding: 8px !important; }
+            .header-card { flex-direction: column; padding: 14px !important; gap: 12px; }
             .header-card > div { flex: 1 1 100% !important; min-width: 0; width: 100%; box-sizing: border-box; }
-            .app-title { font-size: 22px !important; }
+            .app-title { font-size: 20px !important; margin-bottom: 4px !important; }
+            .brand-subtitle { font-size: 9px !important; }
             .branch-selector { width: 100%; font-size: 15px !important; min-height: 48px; }
-            .stats-container { flex-direction: row !important; gap: 8px; }
-            .stat-box { flex: 1; padding: 10px 8px !important; min-width: 0 !important; }
-            .stat-value { font-size: 20px !important; }
-            .stat-label { font-size: 9px !important; }
-            #pcFilterContainer { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap !important; }
-            .pc-filter-btn { flex-shrink: 0; min-height: 40px; font-size: 12px !important; }
+
+            /* --- STORAGE CLUSTER: Compact grid --- */
+            .header-card > div:nth-child(2) { 
+                padding: 10px !important; 
+                border-radius: 10px !important;
+            }
+            .header-card > div:nth-child(2) #serverHealth {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+                gap: 4px !important;
+            }
+
+            /* --- SIDEBAR → FIXED BOTTOM BAR --- */
+            .stats-container { 
+                position: fixed !important; 
+                bottom: 0; left: 0; right: 0; 
+                flex-direction: row !important; 
+                gap: 0 !important; 
+                z-index: 9998; 
+                background: rgba(15, 23, 42, 0.97) !important;
+                backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(255,255,255,0.1);
+                padding: 0 !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                justify-content: stretch !important;
+                flex: none !important;
+            }
+            .stats-container .stat-box { display: none !important; }
+            .stats-container > button:first-child { 
+                flex: 1; 
+                margin: 0 !important; 
+                border-radius: 0 !important; 
+                border: none !important;
+                min-height: 56px;
+                font-size: 11px !important;
+                padding: 6px 4px !important;
+                flex-direction: column;
+                gap: 2px !important;
+                background: rgba(239,68,68,0.1) !important;
+            }
+            .action-btn-grid { 
+                display: flex !important; 
+                flex-direction: row !important; 
+                gap: 0 !important;
+                width: auto !important;
+                margin: 0 !important;
+                flex: 5;
+            }
+            .action-btn { 
+                flex: 1 !important; 
+                flex-direction: column !important; 
+                justify-content: center !important; 
+                align-items: center !important;
+                padding: 6px 2px !important; 
+                border-radius: 0 !important; 
+                border: none !important;
+                border-left: 1px solid rgba(255,255,255,0.06) !important;
+                font-size: 9px !important; 
+                letter-spacing: 0 !important;
+                text-transform: none !important;
+                min-height: 56px;
+                gap: 3px !important;
+                box-shadow: none !important;
+                background: transparent !important;
+            }
+            .action-btn span:first-child { font-size: 18px !important; }
+            .action-btn:hover { transform: none !important; }
+
+            /* --- FILTER BUTTONS --- */
+            #statusFilterContainer { margin-top: 10px !important; }
+            #statusFilterContainer > div { gap: 6px !important; }
+            #pcFilterContainer { margin-top: 8px !important; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap !important; }
+            .pc-filter-btn { flex-shrink: 0; min-height: 38px; font-size: 12px !important; padding: 8px 14px !important; }
 
             /* --- DATA TABLE → CARD VIEW --- */
             .table-container { padding: 10px !important; border-radius: 12px; }
@@ -243,19 +311,12 @@
             tr:hover td { background: transparent; }
             td { display: inline-flex; align-items: center; padding: 0 !important; border: none !important; white-space: normal !important; font-size: 13px !important; background: transparent !important; }
 
-            /* Branch tag */
             td:nth-child(1) { order: 1; font-size: 10px !important; }
-            /* PC Name - prominent */
             td:nth-child(2) { order: 2; width: 100%; font-size: 15px !important; font-weight: 800 !important; }
-            /* Game Title */
             td:nth-child(3) { order: 3; width: 100%; }
-            /* App Status badge */
             td:nth-child(4) { order: 5; }
-            /* Update Status badge */
             td:nth-child(5) { order: 6; }
-            /* Last Sync */
             td:nth-child(6) { order: 4; font-size: 11px !important; color: #94a3b8; margin-left: auto; }
-            /* Action button */
             td:nth-child(7) { order: 7; width: 100%; margin-top: 4px; }
             td:nth-child(7) .btn-update { width: 100%; min-height: 42px; font-size: 12px !important; border-radius: 10px !important; padding: 10px !important; }
 
@@ -267,11 +328,9 @@
             .modal-card .btn-authenticate { min-height: 48px; }
             .modal-card .login-input, .modal-card .branch-selector { min-height: 48px; }
 
-            /* Shadow Defender modal - extra prominent */
             #shadowModal .btn-authenticate { padding: 18px; font-size: 16px !important; min-height: 56px; border-radius: 14px; }
             #shadowModal .login-input { font-size: 16px !important; padding: 16px; }
 
-            /* Admin & Diag grid - slightly bigger on mobile */
             .admin-grid { gap: 8px; }
             .grid-btn { padding: 14px 6px; }
             .grid-btn .btn-icon { width: 42px; height: 42px; }
@@ -292,14 +351,14 @@
             #supportListModal td:nth-child(7) { order: 7; width: 100%; margin-top: 4px; }
             .ticket-filter-btn { font-size: 11px !important; padding: 8px 12px; min-height: 40px; }
 
-            /* --- AI CHAT → FULLSCREEN --- */
+            /* --- AI CHAT (above bottom bar) --- */
             #ai-chat-window { width: 100% !important; height: 100% !important; bottom: 0 !important; right: 0 !important; border-radius: 0 !important; max-height: 100vh !important; }
-            #ai-btn { bottom: 16px !important; right: 16px !important; width: 52px; height: 52px; }
+            #ai-btn { bottom: 72px !important; right: 16px !important; width: 52px; height: 52px; }
             #ai-input { font-size: 16px !important; }
             #ai-send { width: 44px; height: 44px; }
 
-            /* --- TOAST (bottom on mobile) --- */
-            #toast-container { top: auto; bottom: 20px; right: 12px; left: 12px; }
+            /* --- TOAST (above bottom bar) --- */
+            #toast-container { top: auto; bottom: 80px; right: 12px; left: 12px; }
             .toast { max-width: 100%; min-width: 0; font-size: 13px; padding: 14px 18px; }
 
             /* --- STORAGE MODAL MOBILE --- */
@@ -310,6 +369,10 @@
             /* --- GAME LIBRARY MOBILE --- */
             .gl-grid { gap: 10px; }
             .gl-card { flex: 1 1 100% !important; padding: 16px; }
+
+            /* --- FLOOR MAP MOBILE --- */
+            .fpm-wrap { padding: 0 !important; }
+            .fpm-topbar { flex-direction: column; gap: 8px; }
         }
 
         /* 🎮 PISONET SETUP WIZARD */
@@ -496,6 +559,7 @@
                     <h1 class="app-title">SHOP MASTER CONSOLE</h1>
                     <select id="globalBranchSelect" class="branch-selector" onchange="changeGlobalBranch(this.value)"></select>
                     <div id="userRoleDisplay" style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 5px;"></div>
+                    <div id="statusFilterContainer" style="margin-top: 15px;"></div>
                     <div id="pcFilterContainer" class="pc-filters-container" style="margin-top: 15px;"></div>
                 </div>
 
@@ -2273,22 +2337,51 @@ function renderUI() {
 
             tableRows.forEach(row => { tableHtml += row.html; });
 
-            // 🟢 FIXED BUG: Inayos ko na rin ang pag-filter ng PC per button
-            Array.from(uniquePCs).forEach(pc => { 
-                filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("${pc}")'>${pc}</button>`; 
+            // 🟢 FIXED BUG: Inayos ko na rin ang pag-filter ng PC per button at Dropdown HTML
+            Array.from(uniquePCs).sort((a, b) => {
+                let numA = parseInt(a.replace(/\D/g, '')) || 0;
+                let numB = parseInt(b.replace(/\D/g, '')) || 0;
+                if (numA !== numB) return numA - numB;
+                return a.localeCompare(b);
+            }).forEach(pc => { 
+                if (currentBType === "DISKLESS") {
+                    filtersHtml += `<option value="${pc}" ${currentFilter === pc ? "selected" : ""}>${pc}</option>`;
+                } else {
+                    filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("${pc}")'>${pc}</button>`; 
+                }
             });
+            if (currentBType === "DISKLESS") {
+                filtersHtml += `</select>`;
+            }
 
             // 🟢 Toggles
-            let toggleHtml = `<div style="margin-bottom:15px; display:flex; gap:10px;">
+            let toggleHtml = `<div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <button id="btnFilterNeedsUpdate" class="pc-filter-btn ${currentStatusFilter === 'NEEDS_UPDATE' ? 'active' : ''}" onclick="setStatusFilter('NEEDS_UPDATE')">🚨 NEEDS UPDATE (${countNeedsUpdateStats})</button>
                 <button id="btnFilterActiveGames" class="pc-filter-btn ${currentStatusFilter === 'ACTIVE_GAMES' ? 'active' : ''}" onclick="setStatusFilter('ACTIVE_GAMES')">🎮 ACTIVE GAMES (${countActiveStats})</button>
             </div>`;
 
             document.getElementById("tableBody").innerHTML = tableHtml || "<tr><td colspan='7' style='text-align:center; padding:30px; font-weight:bold; color:#64748b;'>Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.</td></tr>";
+            
             document.getElementById("serverHealth").innerHTML = storageHtml || "<div style='color:#64748b; font-size:12px; width:100%;'>No Disk Data</div>";
             var scEl = document.getElementById('serverCount');
             if (scEl) scEl.textContent = storageCount > 0 ? storageCount + ' drives' : '';
-            document.getElementById("pcFilterContainer").innerHTML = toggleHtml + filtersHtml;
+
+            let structKey = `${currentFilter}|${currentStatusFilter}|${Array.from(uniquePCs).sort().join(",")}|${currentBType}`;
+            let pcContainer = document.getElementById("pcFilterContainer");
+            let statusContainer = document.getElementById("statusFilterContainer");
+            
+            if (window.lastPcStructKey !== structKey || !pcContainer.innerHTML.trim() || !statusContainer.innerHTML.trim()) {
+                statusContainer.innerHTML = toggleHtml;
+                pcContainer.innerHTML = filtersHtml;
+                window.lastPcStructKey = structKey;
+            } else {
+                let btnUpd = document.getElementById("btnFilterNeedsUpdate");
+                if (btnUpd) btnUpd.innerText = `🚨 NEEDS UPDATE (${countNeedsUpdateStats})`;
+                
+                let btnAct = document.getElementById("btnFilterActiveGames");
+                if (btnAct) btnAct.innerText = `🎮 ACTIVE GAMES (${countActiveStats})`;
+            }
+            
             document.getElementById("countUp").innerText = upCount;
             document.getElementById("countDown").innerText = pndCount;
         }
