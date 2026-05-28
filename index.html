@@ -8,6 +8,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
     <style>
@@ -148,6 +149,10 @@
         .ticket-filter-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .ticket-filter-btn:hover { background: #e2e8f0; }
         .ticket-filter-btn.active { background: #2563eb; color: white; border-color: #1d4ed8; box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
+        /* RESERVED SEATS TABS */
+        .rs-tab { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .rs-tab:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+        .rs-tab.active { background: #2563eb; color: white; border-color: #1d4ed8; box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
 
         /* 🤖 A.I. CHAT WIDGET STYLES */
         #ai-btn { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; border: none; border-radius: 50%; width: 65px; height: 65px; font-size: 30px; cursor: pointer; box-shadow: 0 10px 25px rgba(37,99,235,0.4); z-index: 10001; transition: 0.3s; display: none; align-items: center; justify-content: center; }
@@ -502,7 +507,7 @@
         .fpm-dot.av { background:#10b981; } .fpm-dot.iu { background:#ef4444; } .fpm-dot.of { background:#94a3b8; }
         .fpm-pills { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
         .fpm-pill { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:800; }
-        .fpm-pill.av { background:#dcfce7; color:#15803d; } .fpm-pill.iu { background:#fee2e2; color:#dc2626; } .fpm-pill.of { background:#f1f5f9; color:#64748b; }
+        .fpm-pill.av { background:#fee2e2; color:#dc2626; } .fpm-pill.iu { background:#dcfce7; color:#15803d; } .fpm-pill.of { background:#f1f5f9; color:#64748b; }
         .fpm-room { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px; }
         .fpm-room-lbl { font-size:10px; font-weight:800; color:#64748b; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
         .fpm-main-inner { display:flex; gap:8px; align-items:flex-start; }
@@ -519,10 +524,11 @@
         /* 🟢 ACTIVE = someone is currently playing */
         .fpc.iu { background:#dcfce7; color:#15803d; border-color:#4ade80; box-shadow:0 0 6px rgba(74,222,128,0.5); animation:fpcPulse 2s infinite; }
         /* 🔵 ONLINE = PC is on but idle */
-        .fpc.av { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
+        .fpc.av { background:#fee2e2; color:#b91c1c; border-color:#fca5a5; animation:fpcPulseRed 2s infinite; }
         /* ⚫ OFFLINE = no connection */
         .fpc.of { background:#f1f5f9; color:#94a3b8; border-color:#e2e8f0; }
         @keyframes fpcPulse { 0%,100% { box-shadow:0 0 6px rgba(74,222,128,0.4); } 50% { box-shadow:0 0 14px rgba(74,222,128,0.9); } }
+        @keyframes fpcPulseRed { 0%,100% { box-shadow:0 0 6px rgba(239,68,68,0.4); } 50% { box-shadow:0 0 14px rgba(239,68,68,0.9); } }
         .fpm-door-tag { font-size:8px; font-weight:800; color:#64748b; background:#e2e8f0; border-radius:4px; padding:2px 5px; writing-mode:vertical-rl; align-self:center; flex-shrink:0; }
         .fpm-connector { text-align:center; font-size:10px; font-weight:700; color:#94a3b8; padding:2px 0 4px; }
         .fpm-bottom-inner { display:flex; gap:12px; align-items:flex-start; }
@@ -530,7 +536,7 @@
         .fpm-row { display:flex; gap:3px; }
         .fpm-waiting { background:linear-gradient(135deg,#eff6ff,#dbeafe); border:2px dashed #bfdbfe; border-radius:8px; font-size:11px; font-weight:800; color:#1d4ed8; display:flex; align-items:center; justify-content:center; flex:1; min-height:68px; text-align:center; padding:8px; min-width:80px; }
         .fpm-cr-tag { font-size:8px; font-weight:800; background:#7c3aed; color:white; border-radius:5px; padding:3px 7px; text-transform:uppercase; display:inline-block; margin-top:5px; }
-        .fpm-dot.av { background:#3b82f6; }
+        .fpm-dot.av { background:#ef4444; }
         .fpm-dot.iu { background:#22c55e; }
         .fpm-dot.of { background:#94a3b8; }
     </style>
@@ -594,6 +600,9 @@
                         <button class="action-btn" onclick="openFloorMapEditorModal()">
                             <span style="font-size:14px;">✏️</span> Edit Floor Map
                         </button>
+                        <button class="action-btn" onclick="openReservedSeats()" id="btnReservedSeats">
+                            <span style="font-size:14px;">📅</span> Reserved Seats
+                        </button>
                     </div>
                 </div>
             </div>
@@ -608,6 +617,44 @@
                 <table>
                     <thead><tr><th>Branch</th><th>Workstation</th><th>Game Title</th><th>App Status</th><th>Update Status</th><th>Last Sync</th><th>Action</th></tr></thead>
                     <tbody id="tableBody"><tr><td colspan="7" style="text-align:center;">Waiting for Firebase connection...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📅 RESERVED SEATS MODAL -->
+    <div id="reservedSeatsModal" class="modal-overlay">
+        <div class="modal-card xlarge" style="max-width:900px;">
+            <span class="modal-close" onclick="document.getElementById('reservedSeatsModal').style.display='none'">&times;</span>
+            <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div style="font-size:10px; color:#64748b; font-weight:800; letter-spacing:1.5px; margin-bottom:4px;">📅 SEAT RESERVATIONS</div>
+                    <div style="font-size:20px; font-weight:800;">Reserved Seats</div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <span id="rsBadgeTotal" style="background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#60a5fa; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700;">0 Total</span>
+                    <span id="rsBadgeActive" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#34d399; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700;">0 Active</span>
+                </div>
+            </div>
+            <!-- Filter tabs -->
+            <div style="display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;">
+                <button class="rs-tab active" id="rsTabAll" onclick="filterReservations('all')">All</button>
+                <button class="rs-tab" id="rsTabConfirmed" onclick="filterReservations('confirmed')">✅ Confirmed</button>
+                <button class="rs-tab" id="rsTabPending" onclick="filterReservations('pending')">⏳ Pending</button>
+                <button class="rs-tab" id="rsTabExpired" onclick="filterReservations('expired')">⏰ Expired / Cancelled</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">RESERVATION ID</th>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">CUSTOMER</th>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">PC</th>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">DATE & TIME</th>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">DURATION</th>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">STATUS</th>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">ACTION</th>
+                    </tr></thead>
+                    <tbody id="rsTableBody"><tr><td colspan="7" style="text-align:center; padding:30px; color:#64748b;">Loading reservations...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -1071,6 +1118,33 @@
     <!-- 🎮 PISONET SETUP WIZARD -->
     <!-- 🗺️ FLOOR MAP MODAL -->
     <div id="floorMapModal" class="modal-overlay">
+        <!-- 📋 RESERVATIONS SLIDE-IN PANEL -->
+        <div id="reservationsPanel" style="
+            position:fixed; top:0; right:-420px; width:420px; max-width:95vw;
+            height:100vh; background:#0f172a; border-left:1px solid #1e293b;
+            z-index:9999; transition:right 0.3s ease; overflow-y:auto;
+            display:flex; flex-direction:column;
+        ">
+            <div style="padding:16px 20px; background:#1e293b; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                <div>
+                    <div style="font-size:10px; color:#64748b; font-weight:700; letter-spacing:1px;">ADMIN PANEL</div>
+                    <div style="font-size:16px; font-weight:800; color:#f1f5f9;">🎟️ Pending Reservations</div>
+                </div>
+                <button onclick="closeReservationsPanel()" style="background:#ef4444; color:white; border:none; border-radius:6px; width:28px; height:28px; font-size:15px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+            <div style="padding:12px 16px; background:#1e293b; border-bottom:1px solid #334155; flex-shrink:0;">
+                <select id="resBranchFilter" onchange="loadReservations()" style="width:100%; background:#0f172a; color:#f1f5f9; border:1px solid #334155; border-radius:6px; padding:8px 10px; font-size:12px; font-weight:700;">
+                    <option value="ALL">All Branches</option>
+                    <option value="MGH-Parang">MGH-Parang</option>
+                    <option value="MGH-Concepcion">MGH-Concepcion</option>
+                </select>
+            </div>
+            <div id="reservationsList" style="flex:1; padding:12px 16px; overflow-y:auto;">
+                <div style="text-align:center; color:#64748b; padding:40px 20px; font-size:13px;">Loading reservations...</div>
+            </div>
+        </div>
+
+
         <div class="modal-card" style="max-width:860px; width:auto; max-height:92vh; overflow-y:auto; padding:16px;">
             <div class="fpm-wrap">
                 <!-- Header -->
@@ -1092,10 +1166,10 @@
                 <div class="fpm-pills" style="align-items: center; justify-content: space-between; width: 100%;">
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
                         <span class="fpm-pill iu">🟢 <span id="fpmAv">0</span> Active</span>
-                        <span class="fpm-pill av">🔵 <span id="fpmIu">0</span> Reserve</span>
+                        <span class="fpm-pill av">🔴 <span id="fpmIu">0</span> Reserve</span>
                         <span class="fpm-pill of">⚫ <span id="fpmOf">40</span> Offline</span>
                     </div>
-                    <button onclick="alert('Online Reservation System coming soon!')" style="background:#3b82f6; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 4px 10px rgba(59,130,246,0.3); transition:transform 0.2s; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🎟️ Reserve PC</button>
+                    <button onclick="openReservationsPanel()" id="btnOpenReservations" style="background:#3b82f6; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:800; cursor:pointer; box-shadow:0 4px 10px rgba(59,130,246,0.3); transition:transform 0.2s; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🎟️ Reserve PC <span id="pendingBadge" style="display:none; background:#ef4444; color:white; border-radius:10px; padding:1px 6px; font-size:10px;">0</span></button>
                 </div>
 
                 <!-- STATIC FLOOR MAP FOR MGH-CONCEPCION -->
@@ -1596,7 +1670,6 @@
                         if(storageDiv) storageDiv.style.display = "none";
                         if(pcTableDiv) pcTableDiv.style.display = "none";
                         if(upStat) upStat.style.display = "none";
-                        if(downStat) downStat.style.display = "none";
                         if(branchSelect) branchSelect.style.display = "none";
                         document.getElementById('pcFilterContainer').style.display = "none";
 
@@ -1615,6 +1688,19 @@
                         supportBtn.disabled = false;
                         supportBtn.innerHTML = `<span style="font-size: 16px !important; margin: 0;">📋</span> Support List`;
                         setInterval(checkOpenTicketsAndAlert, 180000); 
+                    }
+
+                    // 🛑 DISABLE RESERVED SEATS FOR ADMIN & TECHNICIAN
+                    if (currentUserRole === "ADMIN" || currentUserRole === "TECHNICIAN") {
+                        var rsBtn = document.getElementById('btnReservedSeats');
+                        if (rsBtn) {
+                            rsBtn.disabled = true;
+                            rsBtn.style.opacity = "0.5";
+                            rsBtn.style.cursor = "not-allowed";
+                            rsBtn.onclick = function() {
+                                alert("🛑 Restricted Access: Only Owners and Managers can access Reserved Seats.");
+                            };
+                        }
                     }
                     
                     startFirebaseListener();
@@ -2823,10 +2909,140 @@ function isRestricted(branch) {
         // 🔄 REMOTE RESTART MODULE
         // ==========================================
         // ==========================================
+        // 📅 RESERVED SEATS MODULE
+        // ==========================================
+        var rsAllData  = [];
+        var rsFilter   = 'all';
+
+        // Listen to all reservations globally so the floor map can use it
+        firebase.database().ref('Reservations').on('value', function(snap) {
+            rsAllData = [];
+            var data = snap.val() || {};
+            Object.keys(data).forEach(function(branch) {
+                Object.keys(data[branch]).forEach(function(rid) {
+                    rsAllData.push(Object.assign({ _branch: branch, _rid: rid }, data[branch][rid]));
+                });
+            });
+            // Auto-cancel expired
+            var now = new Date();
+            var hasUpdates = false;
+            rsAllData.forEach(function(r) {
+                if (r.status === 'confirmed' || r.status === 'pending') {
+                    var start = new Date(r.date + 'T' + r.timeStart);
+                    var expireAt = new Date(start.getTime() + 10 * 60 * 1000); // 10 mins grace period
+                    if (now > expireAt && now > start) {
+                        firebase.database().ref('Reservations/' + r._branch + '/' + r._rid + '/status').set('expired');
+                        r.status = 'expired';
+                        hasUpdates = true;
+                    }
+                }
+            });
+            
+            if (document.getElementById('reservedSeatsModal').style.display === 'flex') {
+                renderReservationsTable();
+            }
+            if (document.getElementById('floorMapModal').style.display === 'flex') {
+                updateFloorMap();
+            }
+        });
+
+        window.openReservedSeats = function() {
+            document.getElementById('reservedSeatsModal').style.display = 'flex';
+            filterReservations('all');
+        };
+
+        window.filterReservations = function(filter) {
+            rsFilter = filter;
+            ['All','Confirmed','Pending','Expired'].forEach(function(t) {
+                var el = document.getElementById('rsTab' + t);
+                if (el) el.classList.toggle('active', t.toLowerCase() === filter || (filter === 'all' && t === 'All'));
+            });
+            renderReservationsTable();
+        };
+
+        function renderReservationsTable() {
+            var now = new Date();
+            var filtered = rsAllData.filter(function(r) {
+                // Auto-check expiry: 10 mins after start time with no show
+                if (r.status === 'confirmed' || r.status === 'pending') {
+                    var start = new Date(r.date + 'T' + r.timeStart);
+                    var expireAt = new Date(start.getTime() + 10 * 60 * 1000);
+                    if (now > expireAt && now > start) {
+                        // Mark as expired in Firebase
+                        firebase.database().ref('Reservations/' + r._branch + '/' + r._rid + '/status').set('expired');
+                        r.status = 'expired';
+                    }
+                }
+                if (rsFilter === 'all') return true;
+                if (rsFilter === 'expired') return r.status === 'expired' || r.status === 'cancelled';
+                return r.status === rsFilter;
+            });
+
+            // Sort newest first
+            filtered.sort(function(a, b) { return (b.createdAt || '') > (a.createdAt || '') ? 1 : -1; });
+
+            var total  = rsAllData.length;
+            var active = rsAllData.filter(function(r) { return r.status === 'confirmed' || r.status === 'pending'; }).length;
+            document.getElementById('rsBadgeTotal').textContent  = total + ' Total';
+            document.getElementById('rsBadgeActive').textContent = active + ' Active';
+
+            if (filtered.length === 0) {
+                document.getElementById('rsTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#64748b;">No reservations found.</td></tr>';
+                return;
+            }
+
+            var statusColors = {
+                confirmed: 'background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3)',
+                pending:   'background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)',
+                cancelled: 'background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)',
+                expired:   'background:rgba(100,116,139,0.15);color:#94a3b8;border:1px solid rgba(100,116,139,0.3)'
+            };
+
+            var rows = filtered.map(function(r) {
+                var sc = statusColors[r.status] || statusColors.expired;
+                var fmt = function(d, ts) {
+                    if (!d) return '—';
+                    try { return new Date(d + 'T' + (ts||'12:00')).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); } catch(e) { return d; }
+                };
+                var canCancel = r.status === 'confirmed' || r.status === 'pending';
+                var actionBtns = '';
+                if (r.paymentProofUrl) {
+                    actionBtns += '<button onclick="viewReceipt(\'' + r.paymentProofUrl + '\')" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">🧾 Receipt</button>';
+                }
+                if (r.status === 'pending') {
+                    actionBtns += '<button onclick="approveReservation(\'' + r._branch + '\',\'' + r._rid + '\',\'' + (r.pcName||'') + '\',this)" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">✅ Confirm</button>';
+                }
+                if (canCancel) {
+                    actionBtns += '<button onclick="cancelReservation(\'' + r._branch + '\',\'' + r._rid + '\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;display:block;width:100%;">✖ Cancel</button>';
+                }
+                if (!actionBtns) actionBtns = '<span style="color:#475569;font-size:11px;">—</span>';
+
+                return '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">' +
+                    '<td style="padding:12px;font-size:12px;font-weight:800;color:#60a5fa;">' + (r.reservationId||r._rid) + '</td>' +
+                    '<td style="padding:12px;"><div style="font-size:13px;font-weight:700;">' + (r.customerName||'—') + '</div><div style="font-size:11px;color:#64748b;">' + (r.customerEmail||'') + '</div></td>' +
+                    '<td style="padding:12px;font-size:13px;font-weight:700;">' + (r.pcName||'—') + '</td>' +
+                    '<td style="padding:12px;"><div style="font-size:13px;font-weight:700;">' + fmt(r.date) + '</div><div style="font-size:11px;color:#64748b;">' + (r.timeStart||'') + ' – ' + (r.timeEnd||'') + '</div></td>' +
+                    '<td style="padding:12px;font-size:13px;">' + (r.duration||'—') + ' hr' + (r.duration > 1 ? 's' : '') + '</td>' +
+                    '<td style="padding:12px;"><span style="' + sc + ';padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;">' + (r.status||'—').toUpperCase() + '</span></td>' +
+                    '<td style="padding:12px;min-width:110px;">' + actionBtns + '</td>' +
+                    '</tr>';
+            }).join('');
+            document.getElementById('rsTableBody').innerHTML = rows;
+        }
+
+        window.cancelReservation = function(branch, rid) {
+            if (!confirm('Cancel this reservation?')) return;
+            firebase.database().ref('Reservations/' + branch + '/' + rid + '/status').set('cancelled')
+                .then(function() { showToast('✅ Reservation cancelled.', 'success'); })
+                .catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+        };
+
+        // ==========================================
         // 🗺️ FLOOR MAP MODULE
         // ==========================================
         window.openFloorMap = function() {
             document.getElementById('floorMapModal').style.display = 'flex';
+
             updateFloorMap();
         }
 
@@ -3006,22 +3222,49 @@ function isRestricted(branch) {
                         if (latestSyncDate) {
                             var ageSeconds = (now - latestSyncDate) / 1000;
                             // Online = may nag-sync within the last 3 minutes (180 seconds)
-                            isOnline = (ageSeconds < 180 && ageSeconds > -180);
+                            if (ageSeconds < 180 && ageSeconds > -180) {
+                                status = 'iu';
+                            }
                         }
-
-                        if (isOnline) {
-                            // ?? Kapag buhay/naka-ON ang PC, ACTIVE (Green) agad ito.
-                            // Ang 'av' (Blue / Reserve) ay itatabi natin para sa future Reservation System.
-                            status = 'iu';
-                        }
-                        // else: stays 'of' — PC is in Firebase but sync is old = truly offline
                     }
+                }
+
+                // 🔴 CHECK RESERVATION STATUS (Independent of whether PC is online or offline)
+                var expectedPcName = "";
+                if (typeof num === 'string' && num.startsWith('v')) {
+                    expectedPcName = "VIP-" + num.substring(1);
+                } else {
+                    expectedPcName = "PC-" + num;
+                }
+
+                var reservedBy = "";
+                var isReserved = rsAllData.some(function(r) {
+                    if (r.status === 'cancelled' || r.status === 'expired') return false;
+                    // r.pcName might be "VIP-2" or "PC-3"
+                    if (String(r.pcName).toUpperCase() !== expectedPcName.toUpperCase()) return false;
+                    var start = new Date(r.date + 'T' + r.timeStart);
+                    var end   = new Date(start.getTime() + r.duration * 60 * 60 * 1000);
+                    if (now < end) {
+                        reservedBy = r.customerName + " (" + r.timeStart + ")";
+                        return true;
+                    }
+                    return false;
+                });
+
+                if (isReserved) {
+                    status = 'av'; // RED (Reserve/Avail)
                 }
 
                 el.className = 'fpc ' + status;
                 el.title = status === 'iu' ? 'PC' + num + ': ACTIVE (playing)' :
-                           status === 'av' ? 'PC' + num + ': RESERVE (idle)' :
+                           status === 'av' ? 'PC' + num + ': RESERVED by ' + reservedBy :
                                             'PC' + num + ': OFFLINE';
+                
+                if (status === 'av') {
+                    el.setAttribute('onclick', "alert('This PC is RESERVED by: " + reservedBy + "')");
+                } else {
+                    el.removeAttribute('onclick');
+                }
 
                 if (status === 'iu') active++;
                 else if (status === 'av') online++;
@@ -3339,6 +3582,181 @@ function isRestricted(branch) {
 
     </script>   
 
+    <!-- ─── RESERVATIONS PANEL SCRIPT ─── -->
+    <script>
+        let resUnsubscribe = null;
+
+        function openReservationsPanel() {
+            document.getElementById('reservationsPanel').style.right = '0';
+            loadReservations();
+        }
+
+        function closeReservationsPanel() {
+            document.getElementById('reservationsPanel').style.right = '-420px';
+            if (resUnsubscribe) { resUnsubscribe(); resUnsubscribe = null; }
+        }
+
+        function loadReservations() {
+            const branch = document.getElementById('resBranchFilter').value;
+            const listEl = document.getElementById('reservationsList');
+            listEl.innerHTML = '<div style="text-align:center;color:#64748b;padding:40px 20px;font-size:13px;">⏳ Loading...</div>';
+
+            if (resUnsubscribe) { resUnsubscribe(); resUnsubscribe = null; }
+
+            const branchesToCheck = (branch === 'ALL') ? ['MGH-Parang', 'MGH-Concepcion'] : [branch];
+            let allReservations = {};
+
+            branchesToCheck.forEach(br => {
+                const ref = db.ref('Reservations/' + br);
+                const handler = ref.on('value', snap => {
+                    if (snap.exists()) {
+                        const data = snap.val();
+                        Object.entries(data).forEach(([id, r]) => {
+                            allReservations[id] = r;
+                        });
+                    } else {
+                        // Remove branch entries if empty
+                        Object.keys(allReservations).forEach(id => {
+                            if (allReservations[id].branch === br) delete allReservations[id];
+                        });
+                    }
+                    renderReservations(allReservations);
+                });
+                resUnsubscribe = () => ref.off('value', handler);
+            });
+        }
+
+        function renderReservations(allReservations) {
+            const listEl = document.getElementById('reservationsList');
+            const pending = Object.values(allReservations).filter(r => r.status === 'pending');
+            const confirmed = Object.values(allReservations).filter(r => r.status === 'confirmed');
+            const all = [...pending, ...confirmed].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            // Update badge
+            const badge = document.getElementById('pendingBadge');
+            if (pending.length > 0) {
+                badge.textContent = pending.length;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (all.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center;color:#64748b;padding:40px 20px;font-size:13px;">✅ No reservations found.</div>';
+                return;
+            }
+
+            listEl.innerHTML = all.map(r => {
+                const isPending = r.status === 'pending';
+                const methodIcons = { gcash: '💸 GCash', maya: '💜 Maya', bpi: '🏦 BPI' };
+                const statusColor = isPending ? '#f59e0b' : '#10b981';
+                const statusLabel = isPending ? '⏳ Pending' : '✅ Confirmed';
+
+                return `
+                <div style="background:#1e293b; border-radius:10px; padding:14px; margin-bottom:10px; border-left:3px solid ${statusColor};">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                        <div>
+                            <div style="font-size:13px; font-weight:800; color:#f1f5f9;">${r.customerName || r.customerEmail}</div>
+                            <div style="font-size:10px; color:#64748b; margin-top:1px;">${r.reservationId} · ${r.branch}</div>
+                        </div>
+                        <span style="font-size:10px; font-weight:700; color:${statusColor}; background:${statusColor}20; padding:3px 8px; border-radius:20px; white-space:nowrap;">${statusLabel}</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:10px;">
+                        <div style="font-size:11px; color:#94a3b8;">🖥️ <strong style="color:#f1f5f9;">${r.pcName}</strong></div>
+                        <div style="font-size:11px; color:#94a3b8;">📅 <strong style="color:#f1f5f9;">${r.date}</strong></div>
+                        <div style="font-size:11px; color:#94a3b8;">⏰ <strong style="color:#f1f5f9;">${r.timeStart} – ${r.timeEnd}</strong></div>
+                        <div style="font-size:11px; color:#94a3b8;">💳 <strong style="color:#f1f5f9;">${methodIcons[r.paymentMethod] || r.paymentMethod || 'N/A'}</strong></div>
+                    </div>
+
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        ${r.paymentProofUrl ? `<button onclick="viewReceipt('${r.paymentProofUrl}')" style="flex:1; background:#334155; color:#f1f5f9; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">🧾 View Receipt</button>` : '<div style="flex:1; font-size:10px; color:#64748b; padding:7px 0;">No receipt uploaded</div>'}
+                        ${isPending ? `
+                        <button onclick="approveReservation('${r.branch}', '${r.reservationId}', '${r.pcName}', this)" style="flex:1; background:#10b981; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">✅ Confirm Payment</button>
+                        <button onclick="rejectReservation('${r.branch}', '${r.reservationId}', this)" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">✖</button>
+                        ` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function approveReservation(branch, reservId, pcName, btn) {
+            btn.textContent = 'Confirming...';
+            btn.disabled = true;
+            try {
+                await db.ref('Reservations/' + branch + '/' + reservId).update({ status: 'confirmed' });
+                showAdminToast('✅ ' + reservId + ' confirmed! ' + pcName + ' is now Reserved.');
+            } catch(e) {
+                showAdminToast('❌ Error: ' + e.message);
+                btn.textContent = '✅ Confirm Payment';
+                btn.disabled = false;
+            }
+        }
+
+        async function rejectReservation(branch, reservId, btn) {
+            if (!confirm('Reject and delete reservation ' + reservId + '?')) return;
+            btn.textContent = '...';
+            btn.disabled = true;
+            try {
+                await db.ref('Reservations/' + branch + '/' + reservId).remove();
+                showAdminToast('🗑️ ' + reservId + ' rejected and removed.');
+            } catch(e) {
+                showAdminToast('❌ Error: ' + e.message);
+                btn.textContent = '✖';
+                btn.disabled = false;
+            }
+        }
+
+        function viewReceipt(url) {
+            document.getElementById('receiptImg').src = url;
+            const overlay = document.getElementById('receiptOverlay');
+            overlay.style.display = 'flex';
+        }
+
+        function closeReceiptViewer() {
+            document.getElementById('receiptOverlay').style.display = 'none';
+            document.getElementById('receiptImg').src = '';
+        }
+
+        function showAdminToast(msg) {
+            let t = document.getElementById('adminToast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'adminToast';
+                t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid #334155;color:#f1f5f9;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 3500);
+        }
+
+        // Auto-watch pending count on page load
+        db.ref('Reservations').on('value', snap => {
+            if (!snap.exists()) return;
+            let count = 0;
+            snap.forEach(branch => {
+                branch.forEach(res => {
+                    if (res.val().status === 'pending') count++;
+                });
+            });
+            const badge = document.getElementById('pendingBadge');
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'inline-block' : 'none';
+            }
+        });
+    </script>
+
 <script>if(typeof lucide!=='undefined')lucide.createIcons();</script>
+<!-- Receipt Viewer Overlay (global - works from any page) -->
+<div id="receiptOverlay" onclick="closeReceiptViewer()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; flex-direction:column;">
+    <div style="position:relative; max-width:90vw; max-height:85vh;" onclick="event.stopPropagation()">
+        <div style="text-align:center; color:#94a3b8; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:10px;">PAYMENT RECEIPT — Click outside to close</div>
+        <img id="receiptImg" src="" style="max-width:90vw; max-height:80vh; border-radius:12px; object-fit:contain; display:block; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+        <button onclick="closeReceiptViewer()" style="position:absolute; top:-14px; right:-14px; background:#ef4444; color:white; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; font-weight:900; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;">✕</button>
+    </div>
+</div>
+
 </body>
 </html>
