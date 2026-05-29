@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <style>
         :root {
@@ -563,7 +564,10 @@
                 <div style="flex: 1 1 300px;">
                     <div class="brand-subtitle">⚡ POWERED BY MARVS (FIREBASE)</div>
                     <h1 class="app-title">SHOP MASTER CONSOLE</h1>
-                    <select id="globalBranchSelect" class="branch-selector" onchange="changeGlobalBranch(this.value)"></select>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <select id="globalBranchSelect" class="branch-selector" onchange="changeGlobalBranch(this.value)" style="margin-top: 0;"></select>
+                        <button onclick="forceRefreshBranch()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 8px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 16px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='white';" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#cbd5e1';" title="Force Refresh/Deep Scan sa buong Branch">🔄</button>
+                    </div>
                     <div id="userRoleDisplay" style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 5px;"></div>
                     <div id="statusFilterContainer" style="margin-top: 15px;"></div>
                     <div id="pcFilterContainer" class="pc-filters-container" style="margin-top: 15px;"></div>
@@ -2095,6 +2099,45 @@ Customer Question: `;
             }).catch(e => alert("Firebase Error: " + e.message));
         }
 
+        window.forceRefreshBranch = function() {
+            if (!globalSnapshot || activeBranch === "NONE") return alert("Pumili muna ng branch.");
+            const branchData = globalSnapshot[activeBranch];
+            if (!branchData) return;
+            
+            let pcs = Object.keys(branchData).filter(p => p !== "FloorMapConfig" && p !== "ServerStatus");
+            if (pcs.length === 0) return alert("Walang PC sa branch na ito.");
+            
+            if (!confirm(`Sigurado ka bang gusto mong piliting mag-re-scan (Deep Scan) ang LAHAT ng ${pcs.length} PC sa ${activeBranch}?\n\nMaaaring tumagal ito ng ilang segundo bago mag-update ang dashboard at ma-reset ang lahat ng checks.`)) return;
+            
+            // Ipakita ang progress bar overlay
+            let overlay = document.getElementById('globalRefreshProgressOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'globalRefreshProgressOverlay';
+                overlay.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); z-index:99999; flex-direction:column; justify-content:center; align-items:center; backdrop-filter:blur(4px);';
+                overlay.innerHTML = `
+                   <div style="background:white; padding:35px; border-radius:20px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.5); width:320px; box-sizing:border-box;">
+                       <h3 style="margin:0; color:#1e293b; font-size:18px; font-weight:900;">🔄 DEEP SCANNING...</h3>
+                       <p style="margin:12px 0 20px; color:#64748b; font-size:13px; line-height:1.4;">Inuutusan ang lahat ng ${pcs.length} PC na mag-scan. Mangyaring maghintay...</p>
+                       <div class="progress-wrapper" style="margin-top:0;"><div class="progress-bar"></div></div>
+                   </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+            overlay.style.display = 'flex';
+            
+            pcs.forEach(pc => {
+                window.sendFirebaseCommand(activeBranch, pc, "SYSTEM_UPDATE", "FORCE_DEEP_SCAN", false);
+            });
+            
+            // Auto-hide after 8 seconds (sapat na oras para mag-reply ang mga PC)
+            setTimeout(() => {
+                if (document.getElementById('globalRefreshProgressOverlay')) {
+                    document.getElementById('globalRefreshProgressOverlay').style.display = 'none';
+                }
+            }, 8000);
+        }
+
         function startFirebaseListener() {
             db.ref('Branches').on('value', (snapshot) => {
                 globalSnapshot = snapshot.val();
@@ -2296,11 +2339,12 @@ function renderUI() {
                         const color = isCrit ? "#ef4444" : (isWarn ? "#f59e0b" : "#10b981");
 
                         if (cleanGame.includes("DISK:")) {
+                            if (currentFilter !== "ALL" && currentFilter !== pc) continue;
                             const driveLetter = cleanGame.replace("DISK: ", "");
-                            
                             storageHtml += `
-                                <div style='background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid ${color}; padding: 8px 10px; border-radius: 6px; display:flex; flex-direction:column; gap:2px;'>
-                                    <span style='font-size: 9px; font-weight: 700; color: #64748b; text-transform:uppercase; letter-spacing:0.5px;'>${pc}</span>
+                                <div style='background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid ${color}; padding: 8px 10px; border-radius: 6px; display:flex; flex-direction:column; gap:2px; position:relative; min-width: 120px;'>
+                                    <button onclick="if(confirm('Sigurado ka bang buburahin ang record ng ${driveLetter} drive na ito sa ${pc}?')) { firebase.database().ref('Branches/${branch}/${pc}/Games/${gameName}').remove(); }" style="position:absolute; top:4px; right:4px; background:none; border:none; cursor:pointer; color:#ef4444; font-size:12px; padding:0;" title="Burahin itong lumang disk">🗑️</button>
+                                    <span style='font-size: 9px; font-weight: 700; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; padding-right:15px;'>${pc}</span>
                                     <div style='display:flex; justify-content:space-between; align-items:baseline;'>
                                         <span style='font-size: 10px; font-weight: 800; color: #cbd5e1;'>${driveLetter}</span>
                                         <span style='font-size: 11px; font-weight: 800; color: ${color};'>${info.UpdateInfo || info.Status}</span>
@@ -3684,8 +3728,33 @@ function isRestricted(branch) {
 
         function renderReservations(allReservations) {
             const listEl = document.getElementById('reservationsList');
-            const pending = Object.values(allReservations).filter(r => r.status === 'pending');
-            const confirmed = Object.values(allReservations).filter(r => r.status === 'confirmed');
+            
+            const pending = [];
+            const confirmed = [];
+            const now = new Date();
+
+            Object.values(allReservations).forEach(r => {
+                try {
+                    const start = new Date(r.date + 'T' + r.timeStart);
+                    const end = new Date(start.getTime() + (r.duration * 60 * 60 * 1000));
+                    
+                    // Kung confirmed tapos tapos na yung oras, auto-remove sa database para hindi tambak
+                    if (r.status === 'confirmed' && now > end) {
+                        db.ref('Reservations/' + r.branch + '/' + r.reservationId).remove();
+                        return; // Skip rendering
+                    }
+                    
+                    // Kung pending tapos 30 mins na nakalipas sa start time at di pa nag-a-arrive, auto-remove din
+                    if (r.status === 'pending' && now > new Date(start.getTime() + (30 * 60 * 1000))) {
+                        db.ref('Reservations/' + r.branch + '/' + r.reservationId).remove();
+                        return;
+                    }
+                    
+                    if (r.status === 'pending') pending.push(r);
+                    if (r.status === 'confirmed') confirmed.push(r);
+                } catch(e) { }
+            });
+
             const all = [...pending, ...confirmed].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             // Update badge
@@ -3713,40 +3782,79 @@ function isRestricted(branch) {
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
                         <div>
                             <div style="font-size:13px; font-weight:800; color:#f1f5f9;">${r.customerName || r.customerEmail}</div>
-                            <div style="font-size:10px; color:#64748b; margin-top:1px;">${r.reservationId} · ${r.branch}</div>
+                            <div style="font-size:10px; color:#64748b; margin-top:1px;">${r.reservationId} — ${r.branch}</div>
                         </div>
                         <span style="font-size:10px; font-weight:700; color:${statusColor}; background:${statusColor}20; padding:3px 8px; border-radius:20px; white-space:nowrap;">${statusLabel}</span>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:10px;">
-                        <div style="font-size:11px; color:#94a3b8;">🖥️ <strong style="color:#f1f5f9;">${r.pcName}</strong></div>
-                        <div style="font-size:11px; color:#94a3b8;">📅 <strong style="color:#f1f5f9;">${r.date}</strong></div>
-                        <div style="font-size:11px; color:#94a3b8;">⏰ <strong style="color:#f1f5f9;">${r.timeStart} – ${r.timeEnd}</strong></div>
-                        <div style="font-size:11px; color:#94a3b8;">💳 <strong style="color:#f1f5f9;">${methodIcons[r.paymentMethod] || r.paymentMethod || 'N/A'}</strong></div>
-                        <div style="font-size:11px; color:#94a3b8; grid-column:span 2;">💰 Amount: <strong style="color:#10b981;">₱${parseFloat(r.totalAmount || 0).toFixed(2)}</strong></div>
-                        ${r.mghCardNumber ? `<div style="font-size:11px; color:#94a3b8; grid-column:span 2;">⭐ Card: <strong style="color:#a78bfa;">${r.mghCardNumber}</strong></div>` : ''}
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; font-size:11px; margin-bottom:12px;">
+                        <div style="background:rgba(255,255,255,0.02); padding:6px; border-radius:6px;">
+                            <span style="color:#64748b;">PC No:</span><br>
+                            <span style="color:#e2e8f0; font-weight:700; font-size:12px;">${r.pcName}</span>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02); padding:6px; border-radius:6px;">
+                            <span style="color:#64748b;">Duration:</span><br>
+                            <span style="color:#e2e8f0; font-weight:700; font-size:12px;">${r.duration} Hour(s)</span>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02); padding:6px; border-radius:6px; grid-column: span 2;">
+                            <span style="color:#64748b;">Schedule:</span><br>
+                            <span style="color:#38bdf8; font-weight:700; font-size:12px;">${r.date} @ ${r.timeStart}</span>
+                        </div>
+                        ${r.pondoAccount ? `
+                        <div style="background:rgba(245,158,11,0.05); padding:6px; border-radius:6px; grid-column: span 2; border:1px dashed rgba(245,158,11,0.3);">
+                            <span style="color:#fcd34d;">Pondo Account:</span> <span style="color:#f1f5f9; font-weight:700;">${r.pondoAccount}</span><br>
+                            <span style="color:#fcd34d;">Pondo Password:</span> <span style="color:#f1f5f9; font-weight:700;">${r.pondoPassword || '(None)'}</span>
+                        </div>
+                        ` : ''}
                     </div>
 
+                    ${r.paymentProofUrl ? `
+                    <div style="margin-bottom:12px;">
+                        <button onclick="window.open('${r.paymentProofUrl}', '_blank')" style="width:100%; background:rgba(37,99,235,0.1); color:#60a5fa; border:1px solid rgba(37,99,235,0.3); border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">
+                            📄 View Receipt (1-Hr Advance)
+                        </button>
+                    </div>
+                    ` : ''}
+
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                        ${r.paymentProofUrl ? `<button onclick="viewReceipt('${r.paymentProofUrl}')" style="flex:1; background:#334155; color:#f1f5f9; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">🧾 View Receipt</button>` : '<div style="flex:1; font-size:10px; color:#64748b; padding:7px 0;">No receipt uploaded</div>'}
                         ${isPending ? `
-                        <button onclick="approveReservation('${r.branch}', '${r.reservationId}', '${r.pcName}', this)" style="flex:1; background:#10b981; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">✅ Confirm Payment</button>
-                        <button onclick="rejectReservation('${r.branch}', '${r.reservationId}', this)" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">✖</button>
-                        ` : ''}
+                        <button onclick="approveReservation('${r.branch}', '${r.reservationId}', '${r.pcName}', '${r.customerEmail}', '${r.customerName || 'Customer'}', '${r.date}', '${r.timeStart}', '${r.duration}', this)" style="flex:1; background:#10b981; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">✅ Confirm Payment & Send Email</button>
+                        <button onclick="rejectReservation('${r.branch}', '${r.reservationId}', this)" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">❌</button>
+                        ` : `
+                        <button onclick="rejectReservation('${r.branch}', '${r.reservationId}', this)" style="flex:1; background:#ef4444; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">🗑️ Remove from List</button>
+                        `}
                     </div>
                 </div>`;
             }).join('');
         }
 
-        async function approveReservation(branch, reservId, pcName, btn) {
-            btn.textContent = 'Confirming...';
+        async function approveReservation(branch, reservId, pcName, email, cName, rDate, rTime, rDur, btn) {
+            btn.textContent = 'Confirming & Sending...';
             btn.disabled = true;
             try {
+                // Update DB
                 await db.ref('Reservations/' + branch + '/' + reservId).update({ status: 'confirmed' });
-                showAdminToast('✅ ' + reservId + ' confirmed! ' + pcName + ' is now Reserved.');
+                
+                // Initialize EmailJS
+                emailjs.init("KDjqRkC9LAE_zCkS-");
+
+                // Send email
+                await emailjs.send("service_egxgm2n", "template_u5mud85", {
+                    email: email,
+                    customerName: cName,
+                    reservationId: reservId,
+                    branch: branch,
+                    pcName: pcName,
+                    date: rDate,
+                    timeStart: rTime,
+                    duration: rDur
+                });
+
+                showAdminToast('✅ ' + reservId + ' confirmed! Email sent to customer.');
             } catch(e) {
-                showAdminToast('❌ Error: ' + e.message);
-                btn.textContent = '✅ Confirm Payment';
+                console.error(e);
+                showAdminToast('❌ Error: ' + (e.text || e.message));
+                btn.textContent = '✅ Confirm Payment & Send Email';
                 btn.disabled = false;
             }
         }
