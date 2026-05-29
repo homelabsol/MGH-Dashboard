@@ -651,6 +651,7 @@
                         <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">PC</th>
                         <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">DATE & TIME</th>
                         <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">DURATION</th>
+                        <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">AMOUNT</th>
                         <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">STATUS</th>
                         <th style="text-align:left; padding:8px 12px; font-size:10px; color:#64748b; font-weight:800; letter-spacing:1px;">ACTION</th>
                     </tr></thead>
@@ -2076,12 +2077,21 @@ Customer Question: `;
         function changeGlobalBranch(val) { activeBranch = val; currentFilter = "ALL"; renderUI(); }
         function setPcFilter(pcName) { currentFilter = pcName; renderUI(); }
 
-        window.sendFirebaseCommand = function(branch, pc, appTarget, commandStr) {
+        window.sendFirebaseCommand = function(branch, pc, appTarget, commandStr, isGameCmd = false) {
             const safeTarget = appTarget.replace(/[\.\#\$\[\]\/]/g, '_');
             db.ref(`Branches/${branch}/${pc}/Inbox/${safeTarget}`).set({
                 command: commandStr,
                 timestamp: new Date().toISOString(),
                 status: "Pending"
+            }).then(() => {
+                // 🟢 AUTO-REFRESH UI PARA REALTIME ANG STATUS SA DASHBOARD
+                if (isGameCmd) {
+                    db.ref(`Branches/${branch}/${pc}/Games/${safeTarget}`).update({
+                        Status: "Updating / Running",
+                        UpdateInfo: "Command Sent... Waiting for PC",
+                        LastSync: new Date().toLocaleString('en-US', { hour12: false })
+                    });
+                }
             }).catch(e => alert("Firebase Error: " + e.message));
         }
 
@@ -2378,8 +2388,13 @@ function renderUI() {
                         if (isUpdateReq) pndCount++; else upCount++;
 
                         let actionBtn = `<button class='btn-update btn-updated' disabled>✓ Updated</button>`;
-                        if (isUpdateReq) {
-                            actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE')">⚡ Force Update</button>`;
+                        
+                        let isError = (info.UpdateInfo && info.UpdateInfo.includes("ERROR")) || (info.Status && info.Status.includes("Failed"));
+                        
+                        if (isError) {
+                            actionBtn = `<button class='btn-update' style='background:#ef4444; color:white;' onclick="if(confirm('I-reset at burahin ang error na ito para sa ${cleanGame}?')) { firebase.database().ref('Branches/${branch}/${pc}/Games/${gameName}').remove(); }">🗑️ Reset Error</button>`;
+                        } else if (isUpdateReq) {
+                            actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE', true)">⚡ Force Update</button>`;
                         } else if (isBusy) {
                             actionBtn = `<button class='btn-update btn-busy' disabled>⏳ Busy...</button>`;
                         }
@@ -2399,7 +2414,10 @@ function renderUI() {
                         let rowHtml = `
                             <tr>
                                 <td><span class='branch-tag'>${branch}</span></td>
-                                <td><span class='pc-name'>${pc}</span></td>
+                                <td>
+                                    <span class='pc-name'>${pc}</span>
+                                    <button onclick="deletePcNode('${branch}', '${pc}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;margin-left:8px;padding:0;" title="Burahin itong PC na ito">🗑️</button>
+                                </td>
                                 <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="${cleanGame}">
                                     <span class='game-name'>${cleanGame}</span>
                                 </td>
@@ -2436,8 +2454,23 @@ function renderUI() {
                     filtersHtml += `<button class='pc-filter-btn ${currentFilter === pc ? "active" : ""}' onclick='setPcFilter("${pc}")'>${pc}</button>`; 
                 }
             });
+            
             if (currentBType === "DISKLESS") {
                 filtersHtml += `</select>`;
+            }
+
+            // Global delete PC node function
+            if (!window.deletePcNode) {
+                window.deletePcNode = function(branch, pc) {
+                    if (confirm(`Sigurado ka bang buburahin ang lahat ng records ng ${pc} sa ${branch}?\n\n(Pindutin ang OK kung lumang pangalan na ito at wala na sa shop)`)) {
+                        firebase.database().ref(`Branches/${branch}/${pc}`).remove().then(() => {
+                            showToast(`Burado na ang ${pc}!`, 'success');
+                            window.setPcFilter("ALL");
+                        }).catch(e => {
+                            showToast(`Error: ${e.message}`, 'error');
+                        });
+                    }
+                };
             }
 
             // 🟢 Toggles
@@ -2446,7 +2479,14 @@ function renderUI() {
                 <button id="btnFilterActiveGames" class="pc-filter-btn ${currentStatusFilter === 'ACTIVE_GAMES' ? 'active' : ''}" onclick="setStatusFilter('ACTIVE_GAMES')">🎮 ACTIVE GAMES (${countActiveStats})</button>
             </div>`;
 
-            document.getElementById("tableBody").innerHTML = tableHtml || "<tr><td colspan='7' style='text-align:center; padding:30px; font-weight:bold; color:#64748b;'>Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.</td></tr>";
+            let emptyText = "Walang nakitang data sa napiling Branch. Siguraduhing tumatakbo ang Agent.";
+            if (currentStatusFilter === 'NEEDS_UPDATE') {
+                emptyText = "✅ Updated ang Lahat ng Games sa Branch na ito!";
+            } else if (currentStatusFilter === 'ACTIVE_GAMES') {
+                emptyText = "💤 Walang naglalaro o walang active na games sa ngayon.";
+            }
+
+            document.getElementById("tableBody").innerHTML = tableHtml || `<tr><td colspan='7' style='text-align:center; padding:40px; font-weight:800; color:#94a3b8; font-size:14px; letter-spacing:0.5px;'>${emptyText}</td></tr>`;
             
             document.getElementById("serverHealth").innerHTML = storageHtml || "<div style='color:#64748b; font-size:12px; width:100%;'>No Disk Data</div>";
             var scEl = document.getElementById('serverCount');
@@ -2987,7 +3027,7 @@ function isRestricted(branch) {
             document.getElementById('rsBadgeActive').textContent = active + ' Active';
 
             if (filtered.length === 0) {
-                document.getElementById('rsTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#64748b;">No reservations found.</td></tr>';
+                document.getElementById('rsTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#64748b;">No reservations found.</td></tr>';
                 return;
             }
 
@@ -3023,6 +3063,7 @@ function isRestricted(branch) {
                     '<td style="padding:12px;font-size:13px;font-weight:700;">' + (r.pcName||'—') + '</td>' +
                     '<td style="padding:12px;"><div style="font-size:13px;font-weight:700;">' + fmt(r.date) + '</div><div style="font-size:11px;color:#64748b;">' + (r.timeStart||'') + ' – ' + (r.timeEnd||'') + '</div></td>' +
                     '<td style="padding:12px;font-size:13px;">' + (r.duration||'—') + ' hr' + (r.duration > 1 ? 's' : '') + '</td>' +
+                    '<td style="padding:12px;"><div style="font-size:13px;font-weight:800;color:#10b981;">₱' + parseFloat(r.totalAmount || 0).toFixed(2) + '</div>' + (r.mghCardNumber ? '<div style="font-size:10px;color:#a78bfa;font-weight:700;">⭐ ' + r.mghCardNumber + '</div>' : '') + '</td>' +
                     '<td style="padding:12px;"><span style="' + sc + ';padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;">' + (r.status||'—').toUpperCase() + '</span></td>' +
                     '<td style="padding:12px;min-width:110px;">' + actionBtns + '</td>' +
                     '</tr>';
@@ -3682,6 +3723,8 @@ function isRestricted(branch) {
                         <div style="font-size:11px; color:#94a3b8;">📅 <strong style="color:#f1f5f9;">${r.date}</strong></div>
                         <div style="font-size:11px; color:#94a3b8;">⏰ <strong style="color:#f1f5f9;">${r.timeStart} – ${r.timeEnd}</strong></div>
                         <div style="font-size:11px; color:#94a3b8;">💳 <strong style="color:#f1f5f9;">${methodIcons[r.paymentMethod] || r.paymentMethod || 'N/A'}</strong></div>
+                        <div style="font-size:11px; color:#94a3b8; grid-column:span 2;">💰 Amount: <strong style="color:#10b981;">₱${parseFloat(r.totalAmount || 0).toFixed(2)}</strong></div>
+                        ${r.mghCardNumber ? `<div style="font-size:11px; color:#94a3b8; grid-column:span 2;">⭐ Card: <strong style="color:#a78bfa;">${r.mghCardNumber}</strong></div>` : ''}
                     </div>
 
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
