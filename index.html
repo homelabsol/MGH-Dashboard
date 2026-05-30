@@ -630,7 +630,7 @@
     <div id="reservedSeatsModal" class="modal-overlay">
         <div class="modal-card xlarge" style="max-width:900px;">
             <span class="modal-close" onclick="document.getElementById('reservedSeatsModal').style.display='none'">&times;</span>
-            <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; padding-right: 40px;">
                 <div>
                     <div style="font-size:10px; color:#64748b; font-weight:800; letter-spacing:1.5px; margin-bottom:4px;">📅 SEAT RESERVATIONS</div>
                     <div style="font-size:20px; font-weight:800;">Reserved Seats</div>
@@ -1133,7 +1133,7 @@
             <div style="padding:16px 20px; background:#1e293b; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
                 <div>
                     <div style="font-size:10px; color:#64748b; font-weight:700; letter-spacing:1px;">ADMIN PANEL</div>
-                    <div style="font-size:16px; font-weight:800; color:#f1f5f9;">🎟️ Pending Reservations</div>
+                    <div style="font-size:16px; font-weight:800; color:#f1f5f9;">📋 Confirmed Reservations</div>
                 </div>
                 <button onclick="closeReservationsPanel()" style="background:#ef4444; color:white; border:none; border-radius:6px; width:28px; height:28px; font-size:15px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
             </div>
@@ -3010,6 +3010,7 @@ function isRestricted(branch) {
             // Auto-cancel expired
             var now = new Date();
             var hasUpdates = false;
+            var oneDayMs = 24 * 60 * 60 * 1000; // 1 day in milliseconds
             rsAllData.forEach(function(r) {
                 if (r.status === 'confirmed' || r.status === 'pending') {
                     var start = new Date(r.date + 'T' + r.timeStart);
@@ -3018,6 +3019,15 @@ function isRestricted(branch) {
                         firebase.database().ref('Reservations/' + r._branch + '/' + r._rid + '/status').set('expired');
                         r.status = 'expired';
                         hasUpdates = true;
+                    }
+                }
+
+                // Auto-delete expired or cancelled reservations older than 1 day
+                if (r.status === 'expired' || r.status === 'cancelled') {
+                    // Use createdAt or date to determine age
+                    var refDate = r.createdAt ? new Date(r.createdAt) : (r.date ? new Date(r.date + 'T23:59:59') : null);
+                    if (refDate && (now - refDate) > oneDayMs) {
+                        firebase.database().ref('Reservations/' + r._branch + '/' + r._rid).remove();
                     }
                 }
             });
@@ -3330,8 +3340,9 @@ function isRestricted(branch) {
                     // r.pcName might be "VIP-2" or "PC-3"
                     if (String(r.pcName).toUpperCase() !== expectedPcName.toUpperCase()) return false;
                     var start = new Date(r.date + 'T' + r.timeStart);
+                    var startMinus1Hr = new Date(start.getTime() - (60 * 60 * 1000));
                     var end   = new Date(start.getTime() + r.duration * 60 * 60 * 1000);
-                    if (now < end) {
+                    if (now >= startMinus1Hr && now < end) {
                         reservedBy = r.customerName + " (" + r.timeStart + ")";
                         resIcon = r.icon || "";
                         return true;
@@ -3715,7 +3726,6 @@ function isRestricted(branch) {
                             allReservations[id] = r;
                         });
                     } else {
-                        // Remove branch entries if empty
                         Object.keys(allReservations).forEach(id => {
                             if (allReservations[id].branch === br) delete allReservations[id];
                         });
@@ -3744,20 +3754,16 @@ function isRestricted(branch) {
                         return; // Skip rendering
                     }
                     
-                    // Kung pending tapos 30 mins na nakalipas sa start time at di pa nag-a-arrive, auto-remove din
-                    if (r.status === 'pending' && now > new Date(start.getTime() + (30 * 60 * 1000))) {
-                        db.ref('Reservations/' + r.branch + '/' + r.reservationId).remove();
-                        return;
-                    }
-                    
+                    // Only show pending and confirmed in this panel
                     if (r.status === 'pending') pending.push(r);
                     if (r.status === 'confirmed') confirmed.push(r);
                 } catch(e) { }
             });
 
-            const all = [...pending, ...confirmed].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+            // Show confirmed first, then pending below
+            const all = [...confirmed, ...pending].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-            // Update badge
+            // Update badge - only show if pending exists
             const badge = document.getElementById('pendingBadge');
             if (pending.length > 0) {
                 badge.textContent = pending.length;
@@ -3767,13 +3773,12 @@ function isRestricted(branch) {
             }
 
             if (all.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center;color:#64748b;padding:40px 20px;font-size:13px;">✅ No reservations found.</div>';
+                listEl.innerHTML = '<div style="text-align:center;color:#64748b;padding:40px 20px;font-size:13px;">✅ Walang active na reservations.</div>';
                 return;
             }
 
             listEl.innerHTML = all.map(r => {
                 const isPending = r.status === 'pending';
-                const methodIcons = { gcash: '💸 GCash', maya: '💜 Maya', bpi: '🏦 BPI' };
                 const statusColor = isPending ? '#f59e0b' : '#10b981';
                 const statusLabel = isPending ? '⏳ Pending' : '✅ Confirmed';
 
@@ -3808,22 +3813,12 @@ function isRestricted(branch) {
                         ` : ''}
                     </div>
 
-                    ${r.paymentProofUrl ? `
-                    <div style="margin-bottom:12px;">
-                        <button onclick="window.open('${r.paymentProofUrl}', '_blank')" style="width:100%; background:rgba(37,99,235,0.1); color:#60a5fa; border:1px solid rgba(37,99,235,0.3); border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">
-                            📄 View Receipt (1-Hr Advance)
-                        </button>
+
+                    ${isPending ? `
+                    <div style="display:flex; gap:6px; margin-top:4px;">
+                        <button onclick="approveReservation('${r.branch}', '${r.reservationId}', '${r.pcName}', '${r.customerEmail}', '${r.customerName || 'Customer'}', '${r.date}', '${r.timeStart}', '${r.duration}', this)" style="flex:1; background:#10b981; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">✅ Confirm Payment &amp; Send Email</button>
                     </div>
                     ` : ''}
-
-                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                        ${isPending ? `
-                        <button onclick="approveReservation('${r.branch}', '${r.reservationId}', '${r.pcName}', '${r.customerEmail}', '${r.customerName || 'Customer'}', '${r.date}', '${r.timeStart}', '${r.duration}', this)" style="flex:1; background:#10b981; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">✅ Confirm Payment & Send Email</button>
-                        <button onclick="rejectReservation('${r.branch}', '${r.reservationId}', this)" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">❌</button>
-                        ` : `
-                        <button onclick="rejectReservation('${r.branch}', '${r.reservationId}', this)" style="flex:1; background:#ef4444; color:white; border:none; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:700; cursor:pointer;">🗑️ Remove from List</button>
-                        `}
-                    </div>
                 </div>`;
             }).join('');
         }
