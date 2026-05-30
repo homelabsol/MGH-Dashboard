@@ -3094,7 +3094,7 @@ function isRestricted(branch) {
                     actionBtns += '<button onclick="viewReceipt(\'' + r.paymentProofUrl + '\')" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">🧾 Receipt</button>';
                 }
                 if (r.status === 'pending') {
-                    actionBtns += '<button onclick="approveReservation(\'' + r._branch + '\',\'' + r._rid + '\',\'' + (r.pcName||'') + '\',this)" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">✅ Confirm</button>';
+                    actionBtns += `<button onclick="approveReservation('${r._branch}', '${r._rid}', '${r.pcName||''}', '${r.customerEmail||''}', '${r.customerName||'Customer'}', '${r.date||''}', '${r.timeStart||''}', '${r.duration||''}', this)" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">✅ Confirm</button>`;
                 }
                 if (canCancel) {
                     actionBtns += '<button onclick="cancelReservation(\'' + r._branch + '\',\'' + r._rid + '\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;display:block;width:100%;">✖ Cancel</button>';
