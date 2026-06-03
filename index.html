@@ -875,11 +875,59 @@
                     <div class="btn-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669;"><i data-lucide="shield" style="width:22px; height:22px;"></i></div>
                     <span class="btn-label">Shadow Defender</span>
                 </button>
+                <button class="grid-btn span-full" style="--hover-border: #fbbf24;" onclick="openReformatModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #d97706;"><i data-lucide="hard-drive-upload" style="width:22px; height:22px;"></i></div>
+                    <span class="btn-label">🖥️ 1-Click Reformat</span>
+                </button>
                 <button class="grid-btn span-full" style="--hover-border: #fca5a5;" onclick="openRestartModal()">
                     <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #dc2626;"><i data-lucide="power" style="width:22px; height:22px;"></i></div>
                     <span class="btn-label">Remote Restart</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- 1-CLICK REFORMAT MODAL -->
+    <div id="reformatModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 500px;">
+            <span class="modal-close" onclick="document.getElementById('reformatModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #92400e, #d97706); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(217,119,6,0.3);">
+                    <i data-lucide="hard-drive-upload" style="color: #fef3c7; width: 26px; height: 26px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 22px; letter-spacing: -0.5px;">🖥️ 1-Click Reformat</h2>
+                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Send reformat command to selected PC via WinPE USB</p>
+            </div>
+
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
+                <p style="margin:0; font-size: 12px; color: #92400e; font-weight: 700; line-height: 1.6;">
+                    ⚠️ <strong>BABALA:</strong> Ang command na ito ay magre-reformat ng PC at mag-i-install ng bagong Windows mula sa Google Drive image. Siguraduhin na naka-boot na sa WinPE USB ang target na PC bago i-send ang command.
+                </p>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase; display:block; margin-bottom:6px;">Select Target PC</label>
+                <select id="reformatPcSelect" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1; padding:12px; font-size:14px;">
+                    <option value="">-- Pumili ng PC --</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase; display:block; margin-bottom:6px;">Windows Version</label>
+                <select id="reformatOsSelect" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1; padding:12px; font-size:14px;">
+                    <option value="WIN10">Windows 10 Ghost Spectre</option>
+                    <option value="WIN11">Windows 11 Ghost Spectre</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase; display:block; margin-bottom:6px;">Confirmation</label>
+                <input type="text" id="reformatConfirmInput" class="login-input" placeholder='I-type ang "REFORMAT" para kumpirmahin' style="background:white; color:#dc2626; font-weight:800; border-color:#fca5a5; padding:12px; font-size:14px;">
+            </div>
+
+            <button onclick="sendReformatCommand()" class="btn-authenticate" style="background: linear-gradient(135deg, #d97706, #92400e); width:100%;">
+                🚀 SEND REFORMAT COMMAND
+            </button>
         </div>
     </div>
 
@@ -1252,7 +1300,7 @@
                 </div>
 
                 <!-- STATIC FLOOR MAP FOR MGH-PARANG -->
-                <div id="staticParangMap" style="display:none; gap:10px; align-items:flex-start; justify-content:center; flex-wrap:wrap; overflow-x:auto; max-width:100%; padding:20px; background:transparent; border:1px solid transparent; border-radius:12px; margin: 0 auto;">
+                <div id="staticParangMap" style="display:none; gap:10px; align-items:flex-start; justify-content:center; overflow-x:auto; max-width:100%; padding:20px; background:transparent; border:1px solid transparent; border-radius:12px; margin: 0 auto;">
                     
                     <!-- LEFT COLUMN (MAIN GRID + VIP AREA) -->
                     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -1320,19 +1368,20 @@
                     </div>
 
                     <!-- RIGHT COLUMN (31-40) - ONE CONTINUOUS BOX -->
-                    <div class="fpm-room" style="display:flex; flex-direction:column; gap:6px; align-items:center; height:fit-content;">
-                        <div class="fpm-room-lbl" style="text-align:center; margin-bottom:8px;">❄️ Aircon Zone (31-40)</div>
-                        <span style="font-size:9px; font-weight:800; color:#60a5fa; background:rgba(59,130,246,0.1); padding:4px 10px; border-radius:6px; margin-bottom:6px; letter-spacing:0.5px;">❄️ AC UNIT</span>
-                        <div class="fpc of" id="fpc-p-31">31</div>
-                        <div class="fpc of" id="fpc-p-32">32</div>
-                        <div class="fpc of" id="fpc-p-33">33</div>
-                        <div class="fpc of" id="fpc-p-34">34</div>
-                        <div class="fpc of" id="fpc-p-35">35</div>
-                        <div class="fpc of" id="fpc-p-36">36</div>
-                        <div class="fpc of" id="fpc-p-37">37</div>
-                        <div class="fpc of" id="fpc-p-38">38</div>
-                        <div class="fpc of" id="fpc-p-39">39</div>
-                        <div class="fpc of" id="fpc-p-40">40</div>
+                    <div class="fpm-room" style="width:fit-content; position:relative; height:fit-content;">
+                        <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+                            <div class="fpc" style="visibility:hidden; pointer-events:none;"></div>
+                            <div class="fpc of" id="fpc-p-31">31</div>
+                            <div class="fpc of" id="fpc-p-32">32</div>
+                            <div class="fpc of" id="fpc-p-33">33</div>
+                            <div class="fpc of" id="fpc-p-34">34</div>
+                            <div class="fpc of" id="fpc-p-35">35</div>
+                            <div class="fpc of" id="fpc-p-36">36</div>
+                            <div class="fpc of" id="fpc-p-37">37</div>
+                            <div class="fpc of" id="fpc-p-38">38</div>
+                            <div class="fpc of" id="fpc-p-39">39</div>
+                            <div class="fpc of" id="fpc-p-40">40</div>
+                        </div>
                     </div>
 
                 </div>
@@ -2441,7 +2490,10 @@ function renderUI() {
                         } else if (isUpdateReq) {
                             actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE', true)">⚡ Force Update</button>`;
                         } else if (isBusy) {
-                            actionBtn = `<button class='btn-update btn-busy' disabled>⏳ Busy...</button>`;
+                            actionBtn = `<div style="display:flex; align-items:center; justify-content:flex-end; gap:4px;">
+                                            <button class='btn-update btn-busy' disabled>⏳ Busy...</button>
+                                            <button onclick="if(confirm('I-reset ang stuck update na ito para sa ${cleanGame}?')) { firebase.database().ref('Branches/${branch}/${pc}/Games/${gameName}').update({Status: 'Reset', UpdateInfo: 'Cancelled by Admin'}); }" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px;padding:2px;" title="Reset Stuck Update">✖️</button>
+                                         </div>`;
                         }
 
                         // 🟢 PRIORITY SCORING PARA LAGING NASA TAAS ANG MAY PROBLEMA
@@ -3410,6 +3462,38 @@ function isRestricted(branch) {
             document.getElementById('restartModal').style.display = 'flex';
             populateDropdown('rstPcSelector');
             if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // ==========================================
+        // 🖥️ 1-CLICK REFORMAT
+        // ==========================================
+        window.openReformatModal = function() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('reformatModal').style.display = 'flex';
+            document.getElementById('reformatConfirmInput').value = '';
+            populateDropdown('reformatPcSelect');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        window.sendReformatCommand = function() {
+            const selVal = document.getElementById('reformatPcSelect').value;
+            const osVer = document.getElementById('reformatOsSelect').value;
+            const confirm = document.getElementById('reformatConfirmInput').value.trim().toUpperCase();
+
+            if (!selVal) return showToast('⚠️ Pumili muna ng target PC!', 'warning');
+            if (confirm !== 'REFORMAT') return showToast('⚠️ I-type ang "REFORMAT" para kumpirmahin!', 'warning');
+
+            const branch = selVal.split('|||')[0];
+            const pc = selVal.split('|||')[1];
+
+            if (isRestricted(branch)) return showToast('🔒 Restricted: Owner Access Only!', 'error');
+
+            if (!window.confirm(`⚠️ LAST WARNING!\n\nSigurado ka bang gusto mong mag-REFORMAT si ${pc}?\n\nWindows Version: ${osVer === 'WIN10' ? 'Windows 10 Ghost Spectre' : 'Windows 11 Ghost Spectre'}\n\nSiguraduhin na naka-boot na sa WinPE USB ang PC bago mag-proceed!`)) return;
+
+            sendFirebaseCommand(branch, pc, 'SYSTEM_REFORMAT', `REFORMAT|${osVer}`);
+            showToast(`🚀 Reformat command sent to ${pc}!`, 'success');
+            document.getElementById('reformatModal').style.display = 'none';
+            document.getElementById('reformatConfirmInput').value = '';
         }
 
         window.openFloorMapEditorModal = function() {
