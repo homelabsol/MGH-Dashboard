@@ -58,19 +58,25 @@
         .action-btn:hover { background: rgba(51, 65, 85, 0.8); border-color: rgba(255, 255, 255, 0.15); color: #ffffff; transform: translateY(-1px); }
         .action-btn:active { transform: translateY(0); }
 
-        /* 🏢 ENTERPRISE ADMIN TOOLS */
-        .admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .admin-divider { grid-column: 1/-1; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #94a3b8; padding: 12px 2px 4px; border-top: 1px solid #f1f5f9; }
+        /* 🏢 ENTERPRISE ADMIN TOOLS - COMPACT */
+        .admin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .admin-divider { grid-column: 1/-1; font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #94a3b8; padding: 8px 2px 3px; margin-top: 2px; border-top: 1px solid #f1f5f9; }
         .admin-divider:first-child { border-top: none; padding-top: 0; }
-        .grid-btn { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; align-items: center; padding: 18px 8px; gap: 10px; position: relative; width: 100%; }
-        .grid-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1); border-color: var(--hover-border, #cbd5e1); }
-        .grid-btn:active { transform: translateY(0) scale(0.97); box-shadow: none; }
-        .grid-btn .btn-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .grid-btn { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s cubic-bezier(.34,1.56,.64,1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 6px 8px; gap: 5px; border-color: var(--hover-border, #e2e8f0); position: relative; }
+        .grid-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px -5px rgba(0,0,0,0.12); border-color: var(--hover-border, #93c5fd); }
+        .grid-btn:active { transform: translateY(0) scale(0.96); box-shadow: none; }
+        .grid-btn .btn-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; flex-shrink: 0; }
         .grid-btn:hover .btn-icon { transform: scale(1.1) rotate(-5deg); }
-        .grid-btn .btn-label { font-size: 11.5px; font-weight: 700; color: #475569; letter-spacing: 0.1px; }
-        .grid-btn.span-full { grid-column: 1/-1; flex-direction: row; justify-content: center; padding: 14px 20px; gap: 14px; background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%); border-color: #a7f3d0; }
-        .grid-btn.span-full .btn-label { font-size: 13px; }
-        .grid-btn.span-full:hover { border-color: #6ee7b7; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); }
+        .grid-btn .btn-label { font-size: 9.5px; font-weight: 700; color: #475569; letter-spacing: 0.1px; text-align: center; line-height: 1.2; }
+        .grid-btn.span-2 { grid-column: span 2; flex-direction: row; justify-content: center; padding: 10px 14px; gap: 10px; }
+        .grid-btn.span-2 .btn-label { font-size: 12px; text-align: left; }
+        .grid-btn.span-full { grid-column: 1/-1; flex-direction: row; justify-content: center; padding: 10px 14px; gap: 10px; }
+        .grid-btn.span-full .btn-label { font-size: 12px; }
+        .grid-btn.span-full:hover { border-color: #6ee7b7; background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); }
+        .grid-btn.danger-btn:hover { border-color: #fca5a5 !important; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); }
+        .grid-btn.install-btn { background: linear-gradient(135deg, #0f172a, #1e3a5f); border: none; }
+        .grid-btn.install-btn .btn-label { color: #e2e8f0; font-size: 11px; }
+        .grid-btn.install-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(15,23,42,0.4); }
 
         /* 🎨 ENTERPRISE MODAL CONSISTENCY */
         .modal-card { border-radius: 20px; }
@@ -548,7 +554,7 @@
             <div style="width: 100%; text-align: center;">
                 <div class="logo-sub-login">⚡ MGH SECURE CONSOLE</div>
                 <h1 style="margin: 0; letter-spacing: -1px; color: white;">SHOP MASTER</h1>
-                <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">Firebase Live Access</p>
+                <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">Cloud Live Access</p>
                 <input type="text" id="loginUser" class="login-input" placeholder="Invoice Number" style="margin-bottom: 10px;">
                 <input type="password" id="loginPass" class="login-input" placeholder="Client Name" style="margin-top: 0;">
                 <button class="btn-authenticate" id="btnLogin" onclick="verifyAccess()">AUTHENTICATE ACCESS</button>
@@ -561,7 +567,7 @@
         <div class="container">
             <div class="header-card">
                 <div style="flex: 1 1 300px;">
-                    <div class="brand-subtitle">⚡ POWERED BY MARVS (FIREBASE)</div>
+                    <div class="brand-subtitle">⚡ POWERED BY MARVS</div>
                     <h1 class="app-title">SHOP MASTER CONSOLE</h1>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <select id="globalBranchSelect" class="branch-selector" onchange="changeGlobalBranch(this.value)" style="margin-top: 0;"></select>
@@ -615,12 +621,12 @@
                 <div class="sync-status" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
 
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <div class="sync-dot"></div><span id="status">LIVE FIREBASE SYNC ACTIVE</span>
+                        <div class="sync-dot"></div><span id="status">LIVE CLOUD SYNC ACTIVE</span>
                     </div>
                 </div>
                 <table>
                     <thead><tr><th>Branch</th><th>Workstation</th><th>Game Title</th><th>App Status</th><th>Update Status</th><th>Last Sync</th><th>Action</th></tr></thead>
-                    <tbody id="tableBody"><tr><td colspan="7" style="text-align:center;">Waiting for Firebase connection...</td></tr></tbody>
+                    <tbody id="tableBody"><tr><td colspan="7" style="text-align:center;">Waiting for data...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -826,68 +832,139 @@
                 <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Manage your shop infrastructure</p>
             </div>
             <div class="admin-grid">
-                <div class="admin-divider">Account & License</div>
+                <div class="admin-divider">Account &amp; License</div>
                 <button class="grid-btn" style="--hover-border: #bfdbfe;" onclick="openCreateAccModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="user-plus" style="width:22px; height:22px;"></i></div>
-                    <span class="btn-label">Create Account</span>
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="user-plus" style="width:18px; height:18px;"></i></div>
+                    <span class="btn-label">Create Acc.</span>
                 </button>
                 <button class="grid-btn" style="--hover-border: #e9d5ff;" onclick="openMartecModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #faf5ff, #ede9fe); color: #7c3aed;"><i data-lucide="key-round" style="width:22px; height:22px;"></i></div>
-                    <span class="btn-label">Martec License</span>
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #faf5ff, #ede9fe); color: #7c3aed;"><i data-lucide="key-round" style="width:18px; height:18px;"></i></div>
+                    <span class="btn-label">Martec Lic.</span>
                 </button>
+                <button class="grid-btn" style="--hover-border: #e9d5ff;" onclick="openGenericModal('SYSTEM_UPDATE', 'ACTIVATE_OS', '🪟 OS/OFFICE ACT.')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #faf5ff, #ede9fe); color: #7c3aed;"><i data-lucide="monitor" style="width:18px; height:18px;"></i></div>
+                    <span class="btn-label">OS/Office</span>
+                </button>
+                <button class="grid-btn" style="--hover-border: #fecdd3;" onclick="openDiagModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #e11d48;"><i data-lucide="stethoscope" style="width:18px; height:18px;"></i></div>
+                    <span class="btn-label">Win Diag</span>
+                </button>
+
                 <div class="admin-divider">Game Library</div>
-                <button class="grid-btn" style="--hover-border: #99f6e4;" onclick="openGameLib('OFFLINE')">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); color: #0d9488;"><i data-lucide="gamepad-2" style="width:22px; height:22px;"></i></div>
+                <button class="grid-btn span-2" style="--hover-border: #99f6e4;" onclick="openGameLib('OFFLINE')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); color: #0d9488;"><i data-lucide="gamepad-2" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">Offline Games</span>
                 </button>
-                <button class="grid-btn" style="--hover-border: #99f6e4;" onclick="openGameLib('ONLINE')">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); color: #0d9488;"><i data-lucide="globe" style="width:22px; height:22px;"></i></div>
+                <button class="grid-btn span-2" style="--hover-border: #99f6e4;" onclick="openGameLib('ONLINE')">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1); color: #0d9488;"><i data-lucide="globe" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">Online Games</span>
                 </button>
-                <div class="admin-divider">System Management</div>
 
+                <div class="admin-divider">System Management</div>
                 <button class="grid-btn" style="--hover-border: #fde68a;" onclick="openStorageModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #d97706;"><i data-lucide="hard-drive" style="width:22px; height:22px;"></i></div>
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #d97706;"><i data-lucide="hard-drive" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">Free Storage</span>
                 </button>
                 <button class="grid-btn" style="--hover-border: #a7f3d0;" onclick="openGenericModal('SYSTEM_UPDATE', 'AUTO_UPDATE_DRIVERS', '🛠️ AUTO DRIVERS')">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669;"><i data-lucide="wrench" style="width:22px; height:22px;"></i></div>
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669;"><i data-lucide="wrench" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">Auto Drivers</span>
                 </button>
                 <button class="grid-btn" style="--hover-border: #bfdbfe;" onclick="openGenericModal('SYSTEM_RENAME', 'RENAME_PC|NEW_NAME', '🏷️ RENAME PC')">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="pen-line" style="width:22px; height:22px;"></i></div>
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="pen-line" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">Rename PC</span>
                 </button>
                 <button class="grid-btn" style="--hover-border: #bfdbfe;" onclick="openGenericModal('SYSTEM_BACKUP', 'BACKUP_ICAFE', '💾 ICAFE BACKUP')">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="save" style="width:22px; height:22px;"></i></div>
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;"><i data-lucide="save" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">ICafe Backup</span>
                 </button>
-                <div class="admin-divider">Diagnostics & Security</div>
-                <button class="grid-btn" style="--hover-border: #e9d5ff;" onclick="openGenericModal('SYSTEM_UPDATE', 'ACTIVATE_OS', '🪟 OS/OFFICE ACT.')">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #faf5ff, #ede9fe); color: #7c3aed;"><i data-lucide="monitor" style="width:22px; height:22px;"></i></div>
-                    <span class="btn-label">OS/Office Act.</span>
-                </button>
-                <button class="grid-btn" style="--hover-border: #fecdd3;" onclick="openDiagModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #e11d48;"><i data-lucide="stethoscope" style="width:22px; height:22px;"></i></div>
-                    <span class="btn-label">Windows Diag</span>
-                </button>
+
+                <div class="admin-divider">Security</div>
                 <button class="grid-btn span-full" style="--hover-border: #6ee7b7;" onclick="openShadowModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669;"><i data-lucide="shield" style="width:22px; height:22px;"></i></div>
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669;"><i data-lucide="shield" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">Shadow Defender</span>
                 </button>
-                <button class="grid-btn span-full" style="--hover-border: #fbbf24;" onclick="openReformatModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #d97706;"><i data-lucide="hard-drive-upload" style="width:22px; height:22px;"></i></div>
-                    <span class="btn-label">🖥️ 1-Click Reformat</span>
+
+                <div class="admin-divider">Automated Install</div>
+                <button class="grid-btn span-2 install-btn" onclick="openReformatModal()">
+                    <div class="btn-icon" style="background: rgba(255,255,255,0.12); color: #fbbf24;"><i data-lucide="hard-drive-upload" style="width:18px; height:18px;"></i></div>
+                    <span class="btn-label">🖥️ 1-Click Reformat &amp; Install</span>
                 </button>
-                <button class="grid-btn span-full" style="--hover-border: #fca5a5;" onclick="openRestartModal()">
-                    <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #dc2626;"><i data-lucide="power" style="width:22px; height:22px;"></i></div>
+                <button class="grid-btn span-2 install-btn" onclick="openSetupRecoveryModal()">
+                    <div class="btn-icon" style="background: rgba(255,255,255,0.12); color: #67e8f9;"><i data-lucide="shield-check" style="width:18px; height:18px;"></i></div>
+                    <span class="btn-label">⚙️ Setup Auto Recovery</span>
+                </button>
+
+                <div class="admin-divider">Remote Actions</div>
+                <button class="grid-btn span-full danger-btn" style="--hover-border: #fca5a5;" onclick="openRestartModal()">
+                    <div class="btn-icon" style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); color: #dc2626;"><i data-lucide="power" style="width:18px; height:18px;"></i></div>
                     <span class="btn-label">Remote Restart</span>
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- NO RECOVERY WARNING MODAL -->
+    <div id="noRecoveryWarningModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 460px;">
+            <span class="modal-close" onclick="document.getElementById('noRecoveryWarningModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(220,38,38,0.35);">
+                    <i data-lucide="shield-x" style="color: #fecaca; width: 28px; height: 28px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#dc2626; font-size: 20px; letter-spacing: -0.5px;">⚠️ Walang Recovery Partition!</h2>
+                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Hindi ma-proceed ang 1-Click Reformat</p>
+            </div>
+
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+                <p style="margin:0 0 8px 0; font-size: 13px; color: #991b1b; font-weight: 700;">
+                    Ang PC na ito (<span id="noRecoveryTargetPc" style="color:#dc2626;"></span>) ay <strong>hindi pa naka-setup ang MGH Recovery Partition.</strong>
+                </p>
+                <p style="margin:0; font-size: 12px; color: #7f1d1d; line-height: 1.7;">
+                    Kailangan muna ng Recovery Partition para makapag-reformat nang walang USB. Sundin ang mga steps sa ibaba:
+                </p>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+                <p style="margin:0 0 10px 0; font-size: 11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Paano mag-setup ng Recovery:</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                        <div style="width:24px; height:24px; background:linear-gradient(135deg,#0f172a,#1e3a5f); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="color:#67e8f9; font-size:11px; font-weight:800;">1</span>
+                        </div>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">Isara ang modal na ito at bumalik sa <strong>Admin Tools</strong>.</p>
+                    </div>
+                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                        <div style="width:24px; height:24px; background:linear-gradient(135deg,#0f172a,#1e3a5f); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="color:#67e8f9; font-size:11px; font-weight:800;">2</span>
+                        </div>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">I-click ang <strong>⚙️ Setup Auto Recovery</strong> button sa <em>Automated Install</em> group.</p>
+                    </div>
+                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                        <div style="width:24px; height:24px; background:linear-gradient(135deg,#0f172a,#1e3a5f); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="color:#67e8f9; font-size:11px; font-weight:800;">3</span>
+                        </div>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">Piliin ang parehong PC at i-send ang command. <strong>Hintayin mong matapos</strong> (makikita sa Dashboard).</p>
+                    </div>
+                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                        <div style="width:24px; height:24px; background:linear-gradient(135deg,#059669,#047857); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="color:#d1fae5; font-size:11px; font-weight:800;">✓</span>
+                        </div>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">Pagka-tapos, bumalik sa <strong>1-Click Reformat</strong> at subukan ulit!</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('noRecoveryWarningModal').style.display='none'; openSetupRecoveryModal();" class="btn-authenticate" style="background: linear-gradient(135deg, #0f172a, #1e3a5f); width:100%; margin-bottom:8px;">
+                ⚙️ I-Setup Ngayon ang Auto Recovery
+            </button>
+            <button onclick="document.getElementById('noRecoveryWarningModal').style.display='none'; document.getElementById('adminModal').style.display='flex';" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:12px; background:white; color:#64748b; font-weight:700; cursor:pointer; font-size:13px;">
+                Bumalik sa Admin Tools
+            </button>
+        </div>
+    </div>
+
     <!-- 1-CLICK REFORMAT MODAL -->
+
     <div id="reformatModal" class="modal-overlay">
         <div class="modal-card" style="max-width: 500px;">
             <span class="modal-close" onclick="document.getElementById('reformatModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
@@ -931,7 +1008,91 @@
         </div>
     </div>
 
-    <!-- FLOOR MAP EDITOR MODAL -->
+    <!-- RECOVERY ALREADY SET UP MODAL -->
+    <div id="recoveryAlreadySetupModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 460px;">
+            <span class="modal-close" onclick="document.getElementById('recoveryAlreadySetupModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #059669, #047857); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(5,150,105,0.35);">
+                    <i data-lucide="shield-check" style="color: #d1fae5; width: 28px; height: 28px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#059669; font-size: 20px; letter-spacing: -0.5px;">✅ Recovery Partition Ready Na!</h2>
+                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Naka-setup na ang MGH Recovery sa PC na ito</p>
+            </div>
+
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+                <p style="margin:0 0 6px 0; font-size: 13px; color: #166534; font-weight: 700;">
+                    Ang PC na <span id="alreadySetupTargetPc" style="color:#059669;"></span> ay <strong>may Recovery Partition na naka-setup!</strong>
+                </p>
+                <p style="margin:0; font-size: 12px; color: #166534; line-height: 1.7;">
+                    Hindi na kailangan mag-setup ulit. Ang Recovery Partition ay handa na para sa 1-Click Reformat.
+                </p>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+                <p style="margin:0 0 10px 0; font-size: 11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Ano ang pwede mong gawin:</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                        <div style="width:24px; height:24px; background:linear-gradient(135deg,#d97706,#92400e); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <i data-lucide="hard-drive-upload" style="color:#fef3c7; width:13px; height:13px;"></i>
+                        </div>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">I-click na ang <strong>🖥️ 1-Click Reformat &amp; Install</strong> para mag-reformat na ng PC na ito.</p>
+                    </div>
+                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                        <div style="width:24px; height:24px; background:linear-gradient(135deg,#dc2626,#991b1b); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <i data-lucide="refresh-cw" style="color:#fecaca; width:13px; height:13px;"></i>
+                        </div>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;"><strong>Kung gusto mong i-update</strong> ang Recovery Partition (bagong ISO), i-click ang button sa baba para i-override.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('recoveryAlreadySetupModal').style.display='none'; openReformatModal();" class="btn-authenticate" style="background: linear-gradient(135deg, #d97706, #92400e); width:100%; margin-bottom:8px;">
+                🖥️ Mag-1-Click Reformat na!
+            </button>
+            <button onclick="document.getElementById('recoveryAlreadySetupModal').style.display='none'; sendSetupRecoveryForce();" style="width:100%; padding:12px; border:1px solid #fecaca; border-radius:12px; background:#fff1f2; color:#dc2626; font-weight:700; cursor:pointer; font-size:12px;">
+                🔄 I-Override / Update ang Recovery Partition
+            </button>
+        </div>
+    </div>
+
+    <!-- SETUP AUTO RECOVERY MODAL -->
+    <div id="setupRecoveryModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 500px;">
+            <span class="modal-close" onclick="document.getElementById('setupRecoveryModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #0f172a, #1e3a5f); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(15,23,42,0.35);">
+                    <i data-lucide="shield-check" style="color: #67e8f9; width: 26px; height: 26px;"></i>
+                </div>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 22px; letter-spacing: -0.5px;">⚙️ Setup Auto Recovery</h2>
+                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Mag-install ng Recovery Partition sa isang PC para sa 1-Click Reformat</p>
+            </div>
+
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
+                <p style="margin:0; font-size: 12px; color: #1e40af; font-weight: 600; line-height: 1.8;">
+                    ℹ️ Ang command na ito ay <strong>awtomatikong mag-do-download</strong> ng mga sumusunod sa target PC:<br>
+                    📦 <strong>MGH_AutoRestore.iso</strong> — mula sa Google Drive<br>
+                    🔧 <strong>Setup-Recovery.exe</strong> — mula sa Google Drive<br><br>
+                    Ise-save sa <strong>C:\AutoRecovery\</strong> at awtomatikong mag-r-run sa background. <strong>Hindi makikita ng customer.</strong>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase; display:block; margin-bottom:6px;">Select Target PC</label>
+                <select id="setupRecoveryPcSelect" class="login-input" style="background:white; color:#1e293b; border-color:#cbd5e1; padding:12px; font-size:14px;">
+                    <option value="">-- Pumili ng PC --</option>
+                </select>
+            </div>
+
+            <button onclick="sendSetupRecoveryCommand()" class="btn-authenticate" style="background: linear-gradient(135deg, #0f172a, #1e3a5f); width:100%;">
+                ⚙️ SEND SETUP RECOVERY COMMAND
+            </button>
+        </div>
+    </div>
+
+
+
+
     <div id="floorMapEditorModal" class="modal-overlay">
         <div class="modal-card" style="max-width: 600px;">
             <span class="modal-close" onclick="document.getElementById('floorMapEditorModal').style.display='none';">&times;</span>
@@ -3488,13 +3649,91 @@ function isRestricted(branch) {
 
             if (isRestricted(branch)) return showToast('🔒 Restricted: Owner Access Only!', 'error');
 
-            if (!window.confirm(`⚠️ LAST WARNING!\n\nSigurado ka bang gusto mong mag-REFORMAT si ${pc}?\n\nWindows Version: ${osVer === 'WIN10' ? 'Windows 10 Ghost Spectre' : 'Windows 11 Ghost Spectre'}\n\nKusang magre-restart ang PC at papasok sa Recovery Partition/USB. Buburahin nito ang C: drive!`)) return;
+            // ✅ CHECK KUNG MAY RECOVERY PARTITION NA NAKA-SETUP
+            let recoveryReady = false;
+            try {
+                const pcData = globalSnapshot[branch][pc];
+                const recoveryNode = pcData && pcData.Games && pcData.Games['MGH_RECOVERY_STATUS'];
+                if (recoveryNode && recoveryNode.Status === 'Ready') recoveryReady = true;
+            } catch(e) { recoveryReady = false; }
+
+            if (!recoveryReady) {
+                // Walang Recovery — i-warn ang user at i-guide
+                document.getElementById('reformatModal').style.display = 'none';
+                document.getElementById('noRecoveryWarningModal').style.display = 'flex';
+                document.getElementById('noRecoveryTargetPc').textContent = pc;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+
+            if (!window.confirm(`⚠️ LAST WARNING!\n\nSigurado ka bang gusto mong mag-REFORMAT si ${pc}?\n\nWindows Version: ${osVer === 'WIN10' ? 'Windows 10 Ghost Spectre' : 'Windows 11 Ghost Spectre'}\n\nKusang magre-restart ang PC at papasok sa Recovery Partition. Buburahin nito ang C: drive!`)) return;
 
             sendFirebaseCommand(branch, pc, 'SYSTEM_REFORMAT', `REFORMAT|${osVer}`);
             showToast(`🚀 Reformat command sent to ${pc}!`, 'success');
             document.getElementById('reformatModal').style.display = 'none';
             document.getElementById('reformatConfirmInput').value = '';
         }
+
+
+        window.openSetupRecoveryModal = function() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('setupRecoveryModal').style.display = 'flex';
+            populateDropdown('setupRecoveryPcSelect');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // Shared function para i-actually send ang command (ginamit din ng Force override)
+        function doSendSetupRecovery(branch, pc) {
+            if (!window.confirm(`⚙️ SETUP AUTO RECOVERY\n\nMag-do-download ng MGH_AutoRestore.iso at Setup-Recovery.exe mula sa Google Drive si ${pc}.\n\nMagiging available ang 1-Click Reformat dito pagkatapos.\n\nItutuloy?`)) return;
+            sendFirebaseCommand(branch, pc, 'SYSTEM_UPDATE', 'SETUP_RECOVERY');
+            showToast(`⚙️ Setup Recovery command sent to ${pc}! Check mo ang Dashboard status.`, 'success');
+            document.getElementById('setupRecoveryModal').style.display = 'none';
+            document.getElementById('recoveryAlreadySetupModal').style.display = 'none';
+        }
+
+        window.sendSetupRecoveryCommand = function() {
+            const selVal = document.getElementById('setupRecoveryPcSelect').value;
+            if (!selVal) return showToast('⚠️ Pumili muna ng target PC!', 'warning');
+
+            const branch = selVal.split('|||')[0];
+            const pc = selVal.split('|||')[1];
+
+            if (isRestricted(branch)) return showToast('🔒 Restricted: Owner Access Only!', 'error');
+
+            // ✅ CHECK KUNG MAY RECOVERY NA NAKA-SETUP
+            let recoveryReady = false;
+            try {
+                const pcData = globalSnapshot[branch][pc];
+                const recoveryNode = pcData && pcData.Games && pcData.Games['MGH_RECOVERY_STATUS'];
+                if (recoveryNode && recoveryNode.Status === 'Ready') recoveryReady = true;
+            } catch(e) { recoveryReady = false; }
+
+            if (recoveryReady) {
+                // MAY RECOVERY NA — ipakita ang green info modal
+                document.getElementById('setupRecoveryModal').style.display = 'none';
+                document.getElementById('recoveryAlreadySetupModal').style.display = 'flex';
+                document.getElementById('alreadySetupTargetPc').textContent = pc;
+                // I-store ang selVal para magamit ng Force button
+                window._pendingRecoverySelVal = selVal;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+
+            // WALA PANG RECOVERY — proceed sa setup
+            doSendSetupRecovery(branch, pc);
+        }
+
+        // Override / Force update — tinatawag kapag pinindot ng user ang "I-Override" button
+        window.sendSetupRecoveryForce = function() {
+            if (!window._pendingRecoverySelVal) return;
+            const branch = window._pendingRecoverySelVal.split('|||')[0];
+            const pc = window._pendingRecoverySelVal.split('|||')[1];
+            doSendSetupRecovery(branch, pc);
+        }
+
+
+
+
 
         window.openFloorMapEditorModal = function() {
             document.getElementById('adminModal').style.display = 'none';
