@@ -891,7 +891,7 @@
                 </button>
                 <button class="grid-btn span-2 install-btn" onclick="openSetupRecoveryModal()">
                     <div class="btn-icon" style="background: rgba(255,255,255,0.12); color: #67e8f9;"><i data-lucide="shield-check" style="width:18px; height:18px;"></i></div>
-                    <span class="btn-label">⚙️ Setup Auto Recovery</span>
+                    <span class="btn-label">⚙️ Setup Auto Reinstall</span>
                 </button>
 
                 <div class="admin-divider">Remote Actions</div>
@@ -937,7 +937,7 @@
                         <div style="width:24px; height:24px; background:linear-gradient(135deg,#0f172a,#1e3a5f); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                             <span style="color:#67e8f9; font-size:11px; font-weight:800;">2</span>
                         </div>
-                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">I-click ang <strong>⚙️ Setup Auto Recovery</strong> button sa <em>Automated Install</em> group.</p>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">I-click ang <strong>⚙️ Generate Auto Reinstall</strong> button sa <em>Automated Install</em> group.</p>
                     </div>
                     <div style="display:flex; align-items:flex-start; gap:10px;">
                         <div style="width:24px; height:24px; background:linear-gradient(135deg,#0f172a,#1e3a5f); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -955,7 +955,7 @@
             </div>
 
             <button onclick="document.getElementById('noRecoveryWarningModal').style.display='none'; openSetupRecoveryModal();" class="btn-authenticate" style="background: linear-gradient(135deg, #0f172a, #1e3a5f); width:100%; margin-bottom:8px;">
-                ⚙️ I-Setup Ngayon ang Auto Recovery
+                ⚙️ I-Generate Ngayon ang Auto Reinstall
             </button>
             <button onclick="document.getElementById('noRecoveryWarningModal').style.display='none'; document.getElementById('adminModal').style.display='flex';" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:12px; background:white; color:#64748b; font-weight:700; cursor:pointer; font-size:13px;">
                 Bumalik sa Admin Tools
@@ -1056,7 +1056,7 @@
         </div>
     </div>
 
-    <!-- SETUP AUTO RECOVERY MODAL -->
+    <!-- GENERATE AUTO REINSTALL MODAL -->
     <div id="setupRecoveryModal" class="modal-overlay">
         <div class="modal-card" style="max-width: 500px;">
             <span class="modal-close" onclick="document.getElementById('setupRecoveryModal').style.display='none'; document.getElementById('adminModal').style.display='flex';">&times;</span>
@@ -1064,18 +1064,40 @@
                 <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #0f172a, #1e3a5f); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(15,23,42,0.35);">
                     <i data-lucide="shield-check" style="color: #67e8f9; width: 26px; height: 26px;"></i>
                 </div>
-                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 22px; letter-spacing: -0.5px;">⚙️ Setup Auto Recovery</h2>
-                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">Mag-install ng Recovery Partition sa isang PC para sa 1-Click Reformat</p>
+                <h2 style="margin:0; font-weight:800; color:#0f172a; font-size: 22px; letter-spacing: -0.5px;">⚙️ Generate Auto Reinstall</h2>
+                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500;">I-generate ang Auto Reinstall System sa isang PC para sa 1-Click Reformat</p>
+            </div>
+
+            <!-- SD ACTIVE WARNING -->
+            <div id="sdActiveWarning" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px; margin-bottom:18px;">
+                <p style="margin:0 0 10px 0; font-size:13px; color:#991b1b; font-weight:800;">🛡️ Shadow Defender ay ACTIVE sa PC na ito!</p>
+                <p style="margin:0 0 10px 0; font-size:12px; color:#7f1d1d; line-height:1.6;">Hindi mase-save ang changes kapag naka-ON ang Shadow Defender. I-disable muna bago mag-proceed.</p>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px; background:#dc2626; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:white; font-size:10px; font-weight:800;">1</span></div>
+                        <p style="margin:0; font-size:12px; color:#334155;">Isara ang modal na ito at pumunta sa <strong>Admin Tools</strong>.</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px; background:#dc2626; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:white; font-size:10px; font-weight:800;">2</span></div>
+                        <p style="margin:0; font-size:12px; color:#334155;">I-click ang <strong>🛡️ Shadow Defender</strong> button.</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px; background:#dc2626; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:white; font-size:10px; font-weight:800;">3</span></div>
+                        <p style="margin:0; font-size:12px; color:#334155;">Piliin ang parehong PC at i-click ang <strong>❌ DISABLE</strong>. Ilagay ang SD password at hintaying mag-restart.</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px; background:#059669; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:white; font-size:10px; font-weight:800;">✓</span></div>
+                        <p style="margin:0; font-size:12px; color:#334155;">Pagkatapos ng restart, bumalik dito at i-click ulit ang <strong>⚙️ Setup Auto Reinstall</strong>.</p>
+                    </div>
+                </div>
             </div>
 
             <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
                 <p style="margin:0; font-size: 12px; color: #1e40af; font-weight: 600; line-height: 1.8;">
-                    ℹ️ Ang command na ito ay <strong>awtomatikong mag-do-download</strong> ng mga sumusunod sa target PC:<br>
-                    📦 <strong>MGH_AutoRestore.iso</strong> — mula sa Google Drive<br>
-                    🔧 <strong>Setup-Recovery.exe</strong> — mula sa Google Drive<br><br>
-                    Ise-save sa <strong>C:\AutoRecovery\</strong> at awtomatikong mag-r-run sa background. <strong>Hindi makikita ng customer.</strong>
+                    ℹ️ Ang command na ito ay <strong>awtomatikong mag-ge-generate ng AutoReinstall Program.</strong>
                 </p>
             </div>
+
 
             <div style="margin-bottom: 18px;">
                 <label style="font-size:11px; font-weight:800; color:#64748b; text-transform: uppercase; display:block; margin-bottom:6px;">Select Target PC</label>
@@ -1085,7 +1107,7 @@
             </div>
 
             <button onclick="sendSetupRecoveryCommand()" class="btn-authenticate" style="background: linear-gradient(135deg, #0f172a, #1e3a5f); width:100%;">
-                ⚙️ SEND SETUP RECOVERY COMMAND
+                ⚙️ GENERATE AUTO REINSTALL
             </button>
         </div>
     </div>
@@ -1918,7 +1940,22 @@
                             };
                         }
                     }
-                    
+
+                    // 🛑 DISABLE CREATE ACCOUNT FOR TECHNICIAN, SHOP OWNER & ADMIN
+                    if (currentUserRole === "TECHNICIAN" || currentUserRole === "SHOP OWNER" || currentUserRole === "ADMIN") {
+                        var createAccBtn = document.querySelector('[onclick="openCreateAccModal()"]');
+                        if (createAccBtn) {
+                            createAccBtn.disabled = true;
+                            createAccBtn.style.opacity = "0.4";
+                            createAccBtn.style.cursor = "not-allowed";
+                            createAccBtn.style.filter = "grayscale(1)";
+                            createAccBtn.onclick = function(e) {
+                                e.stopPropagation();
+                                showToast("🔒 Restricted: Owner access only!", "error");
+                            };
+                        }
+                    }
+
                     startFirebaseListener();
                 } else {
                     btn.innerText = "ACCESS DENIED";
@@ -3675,16 +3712,42 @@ function isRestricted(branch) {
         }
 
 
-        window.openSetupRecoveryModal = function() {
+        window.openSetupRecoveryModal = function(preselectedVal) {
             document.getElementById('adminModal').style.display = 'none';
             document.getElementById('setupRecoveryModal').style.display = 'flex';
             populateDropdown('setupRecoveryPcSelect');
             if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // Auto-select PC if preselected
+            if (preselectedVal) {
+                document.getElementById('setupRecoveryPcSelect').value = preselectedVal;
+                checkSDStatusForModal(preselectedVal);
+            }
+        }
+
+        // Check SD status kapag pumili ng PC sa dropdown
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.id === 'setupRecoveryPcSelect') {
+                checkSDStatusForModal(e.target.value);
+            }
+        });
+
+        function checkSDStatusForModal(selVal) {
+            const warning = document.getElementById('sdActiveWarning');
+            if (!selVal || !warning) return;
+            const branch = selVal.split('|||')[0];
+            const pc = selVal.split('|||')[1];
+            try {
+                const pcData = globalSnapshot[branch][pc];
+                const sdNode = pcData && pcData.Games && pcData.Games['MGH_SD_STATUS'];
+                const sdActive = sdNode && sdNode.Status === 'Active';
+                warning.style.display = sdActive ? 'block' : 'none';
+            } catch(e) { warning.style.display = 'none'; }
         }
 
         // Shared function para i-actually send ang command (ginamit din ng Force override)
         function doSendSetupRecovery(branch, pc) {
-            if (!window.confirm(`⚙️ SETUP AUTO RECOVERY\n\nMag-do-download ng MGH_AutoRestore.iso at Setup-Recovery.exe mula sa Google Drive si ${pc}.\n\nMagiging available ang 1-Click Reformat dito pagkatapos.\n\nItutuloy?`)) return;
+            if (!window.confirm(`⚙️ SETUP AUTO RECOVERY\n\nMag-se-setup ng Recovery System sa ${pc}.\n\nGagana ito sa background — hindi makikita ng customer.\n\nItutuloy?`)) return;
             sendFirebaseCommand(branch, pc, 'SYSTEM_UPDATE', 'SETUP_RECOVERY');
             showToast(`⚙️ Setup Recovery command sent to ${pc}! Check mo ang Dashboard status.`, 'success');
             document.getElementById('setupRecoveryModal').style.display = 'none';
