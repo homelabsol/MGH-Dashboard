@@ -3687,14 +3687,15 @@ function isRestricted(branch) {
             if (isRestricted(branch)) return showToast('🔒 Restricted: Owner Access Only!', 'error');
 
             // ✅ CHECK KUNG MAY RECOVERY PARTITION NA NAKA-SETUP
-            let recoveryReady = false;
+            let recoveryStatus = null;
             try {
                 const pcData = globalSnapshot[branch][pc];
                 const recoveryNode = pcData && pcData.Games && pcData.Games['MGH_RECOVERY_STATUS'];
-                if (recoveryNode && recoveryNode.Status === 'Ready') recoveryReady = true;
-            } catch(e) { recoveryReady = false; }
+                if (recoveryNode) recoveryStatus = recoveryNode.Status; // 'Ready' or 'Not Setup' or null
+            } catch(e) { recoveryStatus = null; }
 
-            if (!recoveryReady) {
+            // Block ONLY if explicitly 'Not Setup' — kung walang data, i-allow (old Automation.exe)
+            if (recoveryStatus === 'Not Setup') {
                 // Walang Recovery — i-warn ang user at i-guide
                 document.getElementById('reformatModal').style.display = 'none';
                 document.getElementById('noRecoveryWarningModal').style.display = 'flex';
@@ -3764,14 +3765,15 @@ function isRestricted(branch) {
             if (isRestricted(branch)) return showToast('🔒 Restricted: Owner Access Only!', 'error');
 
             // ✅ CHECK KUNG MAY RECOVERY NA NAKA-SETUP
-            let recoveryReady = false;
+            // ✅ CHECK RECOVERY STATUS PARA SA SETUP AUTO REINSTALL
+            let recoveryStatus2 = null;
             try {
                 const pcData = globalSnapshot[branch][pc];
                 const recoveryNode = pcData && pcData.Games && pcData.Games['MGH_RECOVERY_STATUS'];
-                if (recoveryNode && recoveryNode.Status === 'Ready') recoveryReady = true;
-            } catch(e) { recoveryReady = false; }
+                if (recoveryNode) recoveryStatus2 = recoveryNode.Status;
+            } catch(e) { recoveryStatus2 = null; }
 
-            if (recoveryReady) {
+            if (recoveryStatus2 === 'Ready') {
                 // MAY RECOVERY NA — ipakita ang green info modal
                 document.getElementById('setupRecoveryModal').style.display = 'none';
                 document.getElementById('recoveryAlreadySetupModal').style.display = 'flex';
