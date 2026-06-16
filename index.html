@@ -1827,6 +1827,7 @@
         let currentFilter = "ALL";
         let currentStatusFilter = "NEEDS_UPDATE"; 
         let globalSnapshot = null;
+        let globalHeartbeats = null;
         let pcListCache = []; 
         let currentUserRole = "OWNER"; 
         let currentClientName = ""; 
@@ -2386,12 +2387,40 @@ Customer Question: `;
             }, 8000);
         }
 
+        function mergeHeartbeats() {
+            if (!globalSnapshot) globalSnapshot = {};
+            if (!globalHeartbeats) return;
+            for (let branch in globalHeartbeats) {
+                if (!globalSnapshot[branch]) globalSnapshot[branch] = {};
+                for (let pc in globalHeartbeats[branch]) {
+                    if (!globalSnapshot[branch][pc]) globalSnapshot[branch][pc] = { Games: {} };
+                    if (!globalSnapshot[branch][pc].Games) globalSnapshot[branch][pc].Games = {};
+                    globalSnapshot[branch][pc].Games["UNIVERSAL_CHECK"] = {
+                        Status: "Ready / Standby",
+                        UpdateInfo: "",
+                        LastSync: globalHeartbeats[branch][pc].LastSync || (new Date().toISOString()),
+                        GameTitle: "UNIVERSAL_CHECK"
+                    };
+                }
+            }
+        }
+
         function startFirebaseListener() {
             db.ref('Branches').on('value', (snapshot) => {
-                globalSnapshot = snapshot.val();
+                globalSnapshot = snapshot.val() || {};
+                mergeHeartbeats();
                 updateBranchDropdown();
                 renderUI();
-                // 🗺️ Auto-refresh floor map if it's open
+                if (document.getElementById('floorMapModal').style.display === 'flex') {
+                    updateFloorMap();
+                }
+            });
+
+            db.ref('Heartbeats').on('value', (snapshot) => {
+                globalHeartbeats = snapshot.val() || {};
+                mergeHeartbeats();
+                updateBranchDropdown();
+                renderUI();
                 if (document.getElementById('floorMapModal').style.display === 'flex') {
                     updateFloorMap();
                 }
@@ -3565,14 +3594,20 @@ function isRestricted(branch) {
                         
                         // Hanapin ang pinaka-latest na LastSync sa kahit anong game/task (lalo na ang UNIVERSAL_CHECK)
                         var latestSyncDate = null;
-                        Object.values(games).forEach(function(g) {
-                            if (g && g.LastSync) {
-                                // LastSync is "2026-05-23 20:20:00" format in PS, convert to parsable format
-                                var syncStr = g.LastSync.replace(' ', 'T');
-                                var d = new Date(syncStr);
-                                if (!latestSyncDate || d > latestSyncDate) latestSyncDate = d;
-                            }
-                        });
+                        
+                        if (globalHeartbeats && globalHeartbeats[targetBranch] && globalHeartbeats[targetBranch][matchedPcKey] && globalHeartbeats[targetBranch][matchedPcKey].LastSync) {
+                            var syncStr = globalHeartbeats[targetBranch][matchedPcKey].LastSync.replace(' ', 'T');
+                            latestSyncDate = new Date(syncStr);
+                        } else {
+                            Object.values(games).forEach(function(g) {
+                                if (g && g.LastSync) {
+                                    // LastSync is "2026-05-23 20:20:00" format in PS, convert to parsable format
+                                    var syncStr = g.LastSync.replace(' ', 'T');
+                                    var d = new Date(syncStr);
+                                    if (!latestSyncDate || d > latestSyncDate) latestSyncDate = d;
+                                }
+                            });
+                        }
 
                         if (latestSyncDate) {
                             var ageSeconds = (now - latestSyncDate) / 1000;
@@ -4219,7 +4254,7 @@ function isRestricted(branch) {
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #94a3b8; font-size: 11px;">Password</span>
-                                <span style="color: #f8fafc; font-weight: 700; font-size: 12px; font-family: monospace; letter-spacing: 1px; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${r.pondoPassword || '(None)'}</span>
+                                <span style="color: #f8fafc; font-weight: 700; font-size: 12px; font-family: monospace; letter-spacing: 1px; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${(globalCustomers[r.customerId] && globalCustomers[r.customerId].pondoPassword) || '(None)'}</span>
                             </div>
                         </div>
                         ` : ''}
@@ -4280,10 +4315,30 @@ function isRestricted(branch) {
             }
         }
 
-        function viewReceipt(url) {
-            document.getElementById('receiptImg').src = url;
+        async function viewReceipt(branch, rid, fallbackUrl) {
             const overlay = document.getElementById('receiptOverlay');
+            const img = document.getElementById('receiptImg');
+            img.src = '';
             overlay.style.display = 'flex';
+            
+            if (fallbackUrl) {
+                img.src = fallbackUrl;
+                return;
+            }
+            
+            try {
+                const snap = await db.ref('ReservationProofs/' + branch + '/' + rid).once('value');
+                const data = snap.val();
+                if (data && data.paymentProofUrl) {
+                    img.src = data.paymentProofUrl;
+                } else {
+                    alert('No payment proof found for this reservation.');
+                    closeReceiptViewer();
+                }
+            } catch(e) {
+                alert('Error loading receipt: ' + e.message);
+                closeReceiptViewer();
+            }
         }
 
         function closeReceiptViewer() {
