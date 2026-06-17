@@ -2623,6 +2623,16 @@ function renderUI() {
                         }
                     }
 
+                    // PRE-SCAN: Check if ANY game is currently downloading on this PC
+                    let isPcDownloading = false;
+                    for (let gName in games) {
+                        let gInfo = games[gName];
+                        if (gInfo.UpdateInfo && gInfo.UpdateInfo.includes("Downloading")) {
+                            isPcDownloading = true;
+                            break;
+                        }
+                    }
+
                     for (let gameName in games) {
                         const info = games[gameName];
                         const cleanGame = gameName.replace(/_/g, ".").replace(/Â/g, "");
@@ -2730,7 +2740,11 @@ function renderUI() {
                         if (isError) {
                             actionBtn = `<button class='btn-update' style='background:#ef4444; color:white;' onclick="if(confirm('I-reset at burahin ang error na ito para sa ${cleanGame}?')) { firebase.database().ref('Branches/${branch}/${pc}/Games/${gameName}').remove(); }">🗑️ Reset Error</button>`;
                         } else if (isUpdateReq) {
-                            actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE', true)">⚡ Force Update</button>`;
+                            if (isPcDownloading) {
+                                actionBtn = `<button class='btn-update' style='background:#94a3b8; color:white; cursor:not-allowed; opacity: 0.7;' title="May nag-u-update pang ibang laro sa PC na ito. Isa-isa lang.">⏳ Waiting...</button>`;
+                            } else {
+                                actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE', true)">⚡ Force Update</button>`;
+                            }
                         } else if (isBusy) {
                             actionBtn = `<div style="display:flex; align-items:center; justify-content:flex-end; gap:4px;">
                                             <button class='btn-update btn-busy' disabled>⏳ Busy...</button>
@@ -2745,9 +2759,33 @@ function renderUI() {
                         else if (isBusy) priorityScore = 2;   // 3rd Priority (Currently Downloading)
 
                         // 🌟 ENTERPRISE FIX: CLEAN UP STATUS TEXT
+                        // 🌟 ENTERPRISE FIX: CLEAN UP STATUS TEXT
                         let displayStatus = info.UpdateInfo || info.Status;
                         if (displayStatus && displayStatus.includes("New Version Available")) {
                             displayStatus = "New Version Update";
+                        }
+
+                        let progressHtml = "";
+                        if (displayStatus && displayStatus.includes("Downloading")) {
+                            let pctMatch = displayStatus.match(/\((\d+)%\)/);
+                            if (pctMatch) {
+                                // EXACT PROGRESS BAR (Steam)
+                                let pct = pctMatch[1];
+                                displayStatus = displayStatus.replace(/\(\d+%\)/, '').trim();
+                                progressHtml = `
+                                <div style="width: 100%; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-top: 6px; height: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <div style="width: ${pct}%; background: linear-gradient(90deg, #f59e0b, #fbbf24); height: 100%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <div style="font-size: 9px; color: #f59e0b; margin-top: 2px; font-weight: bold; letter-spacing: 0.5px;">PROGRESS: ${pct}%</div>`;
+                            } else {
+                                // INDETERMINATE PROGRESS BAR (Epic, EA, etc.)
+                                progressHtml = `
+                                <style>@keyframes indeterminate { 0% { left: -50%; } 100% { left: 100%; } }</style>
+                                <div style="width: 100%; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-top: 6px; height: 8px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+                                    <div style="position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(90deg, transparent, #f59e0b, transparent); animation: indeterminate 1.5s infinite linear;"></div>
+                                </div>
+                                <div style="font-size: 9px; color: #f59e0b; margin-top: 2px; font-weight: bold; letter-spacing: 0.5px;">BUSY DOWNLOADING...</div>`;
+                            }
                         }
 
                         let rowHtml = `
@@ -2761,7 +2799,10 @@ function renderUI() {
                                     <span class='game-name'>${cleanGame}</span>
                                 </td>
                                 <td><span style="font-weight: 600; color: #64748b; font-size: 11px;">${info.Status}</span></td>
-                                <td><span class='badge ${badgeClass}'>${displayStatus}</span></td>
+                                <td>
+                                    <span class='badge ${badgeClass}'>${displayStatus}</span>
+                                    ${progressHtml}
+                                </td>
                                 <td><span class='last-sync'>${info.LastSync || "Just now"}</span></td>
                                 <td style="text-align: right;">${actionBtn}</td>
                             </tr>
