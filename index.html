@@ -2610,7 +2610,31 @@ function renderUI() {
                     uniquePCs.add(pc);
                     pcListCache.push({ branch: branch, pc: pc });
 
+                    // 🟢 OFFLINE CHECKER (15 mins threshold)
+                    let pcLatestSync = null;
+                    const now = new Date();
+                    
+                    if (globalHeartbeats && globalHeartbeats[branch] && globalHeartbeats[branch][pc] && globalHeartbeats[branch][pc].LastSync) {
+                        let d = new Date(globalHeartbeats[branch][pc].LastSync.replace(' ', 'T'));
+                        if (!isNaN(d.getTime())) pcLatestSync = d;
+                    }
+                    
                     const games = globalSnapshot[branch][pc].Games || {};
+                    for (let gameName in games) {
+                        let gInfo = games[gameName];
+                        if (gInfo && gInfo.LastSync) {
+                            let d = new Date(gInfo.LastSync.replace(' ', 'T'));
+                            if (!isNaN(d.getTime()) && (!pcLatestSync || d > pcLatestSync)) {
+                                pcLatestSync = d;
+                            }
+                        }
+                    }
+                    
+                    let isPcOnline = false;
+                    if (pcLatestSync) {
+                        let ageSeconds = (now - pcLatestSync) / 1000;
+                        if (ageSeconds < 900) isPcOnline = true; // 15 mins threshold
+                    }
                     
                     const sysInfo = games["SYSTEM_UPDATE"] || {};
                     if (document.getElementById('diagModal').style.display === 'flex') {
@@ -2636,8 +2660,9 @@ function renderUI() {
                     for (let gameName in games) {
                         const info = games[gameName];
                         const cleanGame = gameName.replace(/_/g, ".").replace(/Â/g, "");
-                        const isWarn = info.Status.includes("Warning") || info.Status.includes("Pending");
-                        const isCrit = info.Status.includes("Critical") || info.Status.includes("Failed");
+                        const statusStr = info.Status || "Unknown";
+                        const isWarn = statusStr.includes("Warning") || statusStr.includes("Pending");
+                        const isCrit = statusStr.includes("Critical") || statusStr.includes("Failed");
                         const color = isCrit ? "#ef4444" : (isWarn ? "#f59e0b" : "#10b981");
 
                         if (cleanGame.includes("DISK:")) {
@@ -2649,7 +2674,7 @@ function renderUI() {
                                     <span style='font-size: 9px; font-weight: 700; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; padding-right:15px;'>${pc}</span>
                                     <div style='display:flex; justify-content:space-between; align-items:baseline;'>
                                         <span style='font-size: 10px; font-weight: 800; color: #cbd5e1;'>${driveLetter}</span>
-                                        <span style='font-size: 11px; font-weight: 800; color: ${color};'>${info.UpdateInfo || info.Status}</span>
+                                        <span style='font-size: 11px; font-weight: 800; color: ${color};'>${info.UpdateInfo || statusStr}</span>
                                     </div>
                                 </div>`;
                             storageCount++;
@@ -2683,7 +2708,7 @@ function renderUI() {
                             isOnlineGame = true;
                         } 
                         // Fallback: System tasks that must always be shown
-                        else if (["universal_check", "system_update", "system_restart", "system_rename", "remote access"].includes(gameName.toLowerCase())) {
+                        else if (["universal_check", "system_update", "system_restart", "system_rename", "remote access", "system_hardware", "system_ping"].includes(gameName.toLowerCase())) {
                             isOnlineGame = true;
                         }
                         // Fallback: Explicitly known clients that use custom launch commands (e.g., battlenet://)
@@ -2710,6 +2735,12 @@ function renderUI() {
                         
                         let isNeedsUpdate = upperStat.includes("NEW VERSION") || upperStat.includes("PENDING") || upperStat.includes("ERROR") || upperStat.includes("FAILED") || upperStat.includes("FORCE UPDATE") || upperStat.includes("DOWNLOADING");
                         let isActiveGame = upperStat.includes("UPDATING / RUNNING") || upperStat.includes("RUNNING");
+
+if (!isPcOnline && isActiveGame) {
+    isActiveGame = false;
+    info.Status = "Offline (Closed)";
+    if (info.UpdateInfo) info.UpdateInfo = "PC is Offline";
+}
                         countAllStats++;
                         if (isNeedsUpdate) countNeedsUpdateStats++;
                         if (isActiveGame) countActiveStats++;
@@ -2843,7 +2874,7 @@ function renderUI() {
             if (!window.deletePcNode) {
                 window.deletePcNode = function(branch, pc) {
                     if (confirm(`Sigurado ka bang buburahin ang lahat ng records ng ${pc} sa ${branch}?\n\n(Pindutin ang OK kung lumang pangalan na ito at wala na sa shop)`)) {
-                        firebase.database().ref(`Branches/${branch}/${pc}`).remove().then(() => {
+                        firebase.database().ref(`Branches/${branch}/${pc}/Games`).remove().then(() => {
                             showToast(`Burado na ang ${pc}!`, 'success');
                             window.setPcFilter("ALL");
                         }).catch(e => {
@@ -3445,8 +3476,8 @@ function isRestricted(branch) {
                 };
                 var canCancel = r.status === 'confirmed' || r.status === 'pending';
                 var actionBtns = '';
-                if (r.paymentProofUrl) {
-                    actionBtns += '<button onclick="viewReceipt(\'' + r.paymentProofUrl + '\')" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">🧾 Receipt</button>';
+                if (r.hasPaymentProof || r.paymentProofUrl) {
+                    actionBtns += `<button onclick="viewReceipt('${r._branch}', '${r._rid}', '${r.paymentProofUrl||''}')" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">🧾 Receipt</button>`;
                 }
                 if (r.status === 'pending') {
                     actionBtns += `<button onclick="approveReservation('${r._branch}', '${r._rid}', '${r.pcName||''}', '${r.customerEmail||''}', '${r.customerName||'Customer'}', '${r.date||''}', '${r.timeStart||''}', '${r.duration||''}', this)" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:4px;display:block;width:100%;">✅ Confirm</button>`;
@@ -3583,14 +3614,20 @@ function isRestricted(branch) {
                         layoutHtml += rowHtml;
                     });
                 } else {
-                    var maxPc = 0;
+                    var existingNums = [];
                     Object.keys(branchData).forEach(function(k) {
                         if (k === 'FloorMapConfig') return;
+                        var upperName = k.toUpperCase();
+                        if (upperName.includes('SERVER') || upperName.includes('ADMIN') || upperName.includes('PANDO') || upperName.includes('CCBOOT') || upperName.includes('MASTER') || upperName.includes('CASHIER')) {
+                            return; 
+                        }
                         var num = parseInt(k.replace(/[^0-9]/g, ''), 10);
-                        if (!isNaN(num) && num > maxPc) maxPc = num;
+                        if (!isNaN(num) && !existingNums.includes(num)) existingNums.push(num);
                     });
+                    existingNums.sort(function(a, b) { return a - b; });
                     
-                    if (maxPc === 0) maxPc = 40;
+                    if (existingNums.length === 0) existingNums = [1,2,3,4,5,6,7,8,9,10];
+
                     layoutHtml += '<div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size:12px; color:#94a3b8; text-align:center; margin-bottom: 15px;">No Custom Layout Set.<br>Using Auto-Generated Grid.</div>';
                     var cols = 10;
                     var html = '';
@@ -3653,22 +3690,27 @@ function isRestricted(branch) {
                         
                         if (globalHeartbeats && globalHeartbeats[targetBranch] && globalHeartbeats[targetBranch][matchedPcKey] && globalHeartbeats[targetBranch][matchedPcKey].LastSync) {
                             var syncStr = globalHeartbeats[targetBranch][matchedPcKey].LastSync.replace(' ', 'T');
-                            latestSyncDate = new Date(syncStr);
-                        } else {
-                            Object.values(games).forEach(function(g) {
-                                if (g && g.LastSync) {
-                                    // LastSync is "2026-05-23 20:20:00" format in PS, convert to parsable format
-                                    var syncStr = g.LastSync.replace(' ', 'T');
-                                    var d = new Date(syncStr);
+                            var d = new Date(syncStr);
+                            if (!isNaN(d.getTime())) {
+                                latestSyncDate = d;
+                            }
+                        }
+                        
+                        Object.values(games).forEach(function(g) {
+                            if (g && g.LastSync) {
+                                // LastSync is "2026-05-23 20:20:00" format in PS, convert to parsable format
+                                var syncStr = g.LastSync.replace(' ', 'T');
+                                var d = new Date(syncStr);
+                                if (!isNaN(d.getTime())) {
                                     if (!latestSyncDate || d > latestSyncDate) latestSyncDate = d;
                                 }
-                            });
-                        }
+                            }
+                        });
 
                         if (latestSyncDate) {
                             var ageSeconds = (now - latestSyncDate) / 1000;
-                            // Online = may nag-sync within the last 3 minutes (180 seconds)
-                            if (ageSeconds < 180 && ageSeconds > -180) {
+                            // Online = may nag-sync within the last 15 minutes (900 seconds)
+                            if (ageSeconds < 900 && ageSeconds > -900) {
                                 status = 'iu';
                             }
                         }
