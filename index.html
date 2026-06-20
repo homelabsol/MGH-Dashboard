@@ -2660,6 +2660,8 @@ function renderUI() {
                     for (let gameName in games) {
                         const info = games[gameName];
                         const cleanGame = gameName.replace(/_/g, ".").replace(/Â/g, "");
+                let safeBranch = branch.replace(/'/g, "\\'");
+                let safeGame = gameName.replace(/'/g, "\\'");
                         const statusStr = info.Status || "Unknown";
                         const isWarn = statusStr.includes("Warning") || statusStr.includes("Pending");
                         const isCrit = statusStr.includes("Critical") || statusStr.includes("Failed");
@@ -2670,7 +2672,7 @@ function renderUI() {
                             const driveLetter = cleanGame.replace("DISK: ", "");
                             storageHtml += `
                                 <div style='background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid ${color}; padding: 8px 10px; border-radius: 6px; display:flex; flex-direction:column; gap:2px; position:relative; min-width: 120px;'>
-                                    <button onclick="if(confirm('Sigurado ka bang buburahin ang record ng ${driveLetter} drive na ito sa ${pc}?')) { firebase.database().ref('Branches/${branch}/${pc}/Games/${gameName}').remove(); }" style="position:absolute; top:4px; right:4px; background:none; border:none; cursor:pointer; color:#ef4444; font-size:12px; padding:0;" title="Burahin itong lumang disk">🗑️</button>
+                                    <button onclick="if(confirm('Sigurado ka bang buburahin ang record ng ${driveLetter} drive na ito sa ${pc}?')) { firebase.database().ref('Branches/${safeBranch}/${pc}/Games/${safeGame}').remove(); }" style="position:absolute; top:4px; right:4px; background:none; border:none; cursor:pointer; color:#ef4444; font-size:12px; padding:0;" title="Burahin itong lumang disk">🗑️</button>
                                     <span style='font-size: 9px; font-weight: 700; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; padding-right:15px;'>${pc}</span>
                                     <div style='display:flex; justify-content:space-between; align-items:baseline;'>
                                         <span style='font-size: 10px; font-weight: 800; color: #cbd5e1;'>${driveLetter}</span>
@@ -2769,17 +2771,17 @@ if (!isPcOnline && isActiveGame) {
                         let isError = (info.UpdateInfo && info.UpdateInfo.includes("ERROR")) || (info.Status && info.Status.includes("Failed"));
                         
                         if (isError) {
-                            actionBtn = `<button class='btn-update' style='background:#ef4444; color:white;' onclick="if(confirm('I-reset at burahin ang error na ito para sa ${cleanGame}?')) { firebase.database().ref('Branches/${branch}/${pc}/Games/${gameName}').remove(); }">🗑️ Reset Error</button>`;
+                            actionBtn = `<button class='btn-update' style='background:#ef4444; color:white;' onclick="if(confirm('I-reset at burahin ang error na ito para sa ${cleanGame}?')) { firebase.database().ref('Branches/${safeBranch}/${pc}/Games/${safeGame}').remove(); }">🗑️ Reset Error</button>`;
                         } else if (isUpdateReq) {
                             if (isPcDownloading) {
                                 actionBtn = `<button class='btn-update' style='background:#94a3b8; color:white; cursor:not-allowed; opacity: 0.7;' title="May nag-u-update pang ibang laro sa PC na ito. Isa-isa lang.">⏳ Waiting...</button>`;
                             } else {
-                                actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${branch}', '${pc}', '${gameName}', 'FORCE_UPDATE', true)">⚡ Force Update</button>`;
+                                actionBtn = `<button class='btn-update btn-active' onclick="if(confirm('Magfo-Force Update sa ${pc}. Ituloy?')) sendFirebaseCommand('${safeBranch}', '${pc}', '${safeGame}', 'FORCE_UPDATE', true)">⚡ Force Update</button>`;
                             }
                         } else if (isBusy) {
                             actionBtn = `<div style="display:flex; align-items:center; justify-content:flex-end; gap:4px;">
                                             <button class='btn-update btn-busy' disabled>⏳ Busy...</button>
-                                            <button onclick="if(confirm('I-reset ang stuck update na ito para sa ${cleanGame}?')) { firebase.database().ref('Branches/${branch}/${pc}/Games/${gameName}').update({Status: 'Reset', UpdateInfo: 'Cancelled by Admin'}); }" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px;padding:2px;" title="Reset Stuck Update">✖️</button>
+                                            <button onclick="if(confirm('I-reset ang stuck update na ito para sa ${cleanGame}?')) { firebase.database().ref('Branches/${safeBranch}/${pc}/Games/${safeGame}').update({Status: 'Reset', UpdateInfo: 'Cancelled by Admin'}); }" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:16px;padding:2px;" title="Reset Stuck Update">✖️</button>
                                          </div>`;
                         }
 
@@ -2824,7 +2826,7 @@ if (!isPcOnline && isActiveGame) {
                                 <td><span class='branch-tag'>${branch}</span></td>
                                 <td>
                                     <span class='pc-name'>${pc}</span>
-                                    <button onclick="deletePcNode('${branch}', '${pc}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;margin-left:8px;padding:0;" title="Burahin itong PC na ito">🗑️</button>
+                                    <button onclick="deletePcNode('${safeBranch}', '${pc}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;margin-left:8px;padding:0;" title="Burahin itong PC na ito">🗑️</button>
                                 </td>
                                 <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="${cleanGame}">
                                     <span class='game-name'>${cleanGame}</span>
@@ -2875,7 +2877,8 @@ if (!isPcOnline && isActiveGame) {
                 window.deletePcNode = function(branch, pc) {
                     if (confirm(`Sigurado ka bang buburahin ang lahat ng records ng ${pc} sa ${branch}?\n\n(Pindutin ang OK kung lumang pangalan na ito at wala na sa shop)`)) {
                         firebase.database().ref(`Branches/${branch}/${pc}/Games`).remove().then(() => {
-                            showToast(`Burado na ang ${pc}!`, 'success');
+                            firebase.database().ref(`Heartbeats/${branch}/${pc}`).remove();
+                showToast(`Burado na ang ${pc}!`, 'success');
                             window.setPcFilter("ALL");
                         }).catch(e => {
                             showToast(`Error: ${e.message}`, 'error');
